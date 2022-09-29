@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func Test_Feed(t *testing.T) {
+func TestFeed(t *testing.T) {
 	req, err := http.NewRequest("GET", "http://localhost:8080/feed", nil)
 	if err != nil {
 		t.Fatal(err)
@@ -24,7 +24,7 @@ func Test_Feed(t *testing.T) {
 	}
 }
 
-func Test_SignIn(t *testing.T) {
+func TestSignIn(t *testing.T) {
 	req, err := http.NewRequest("GET", "http://localhost:8080/feed", nil)
 	if err != nil {
 		t.Fatal(err)
@@ -40,7 +40,7 @@ func Test_SignIn(t *testing.T) {
 	}
 }
 
-func Test_SignUp(t *testing.T) {
+func TestSignUp(t *testing.T) {
 	req, err := http.NewRequest("GET", "http://localhost:8080/feed", nil)
 	if err != nil {
 		t.Fatal(err)
