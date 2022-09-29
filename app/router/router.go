@@ -12,7 +12,7 @@ type Router struct {
 	/*здесь будут данные какие-то*/
 }
 
-func NewForumRouter(/*будут переданы данные какие то*/) *Router {
+func NewRouter(/*будут переданы данные какие то*/) *Router {
 	r := &Router {
 		Router: mux.NewRouter(),
 	}

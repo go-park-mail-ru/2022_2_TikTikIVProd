@@ -14,7 +14,7 @@ func main() {
 
 	// создание хранилищ данных (называется репозиториями): юзеры, посты...
 
-	h := router.NewForumRouter(/*сюда передадим данные какие то*/)
+	h := router.NewRouter(/*сюда передадим данные какие то*/)
 
 	s := server.NewServer(h)
 	if err := s.Start(); err != nil {
