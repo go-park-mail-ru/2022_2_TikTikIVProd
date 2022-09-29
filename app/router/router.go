@@ -1,11 +1,27 @@
-package main
+package router
 
 import (
 	"encoding/json"
-	"github.com/gorilla/mux"
-	"log"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
+
+type Router struct {
+	*mux.Router
+	/*здесь будут данные какие-то*/
+}
+
+func NewForumRouter(/*будут переданы данные какие то*/) *Router {
+	r := &Router {
+		Router: mux.NewRouter(),
+	}
+
+	r.HandleFunc("/feed", Feed)
+	r.HandleFunc("/signin", SignIn)
+	r.HandleFunc("/signup", SignUp)
+	return r
+}
 
 func SignIn(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -22,13 +38,3 @@ func Feed(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode("Feed")
 }
 
-func main() {
-	r := mux.NewRouter()
-
-	r.HandleFunc("/feed", Feed)
-	r.HandleFunc("/signin", SignIn)
-	r.HandleFunc("/signup", SignUp)
-
-	log.Println("start serving :8080")
-	http.ListenAndServe(":8080", r)
-}
