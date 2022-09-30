@@ -1,4 +1,4 @@
-module 2022_2_TikTikIVProd
+module github.com/go-park-mail-ru/2022_2_TikTikIVProd
 
 go 1.19
 

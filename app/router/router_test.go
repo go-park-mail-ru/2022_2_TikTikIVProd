@@ -1,4 +1,4 @@
-package main
+package router
 
 import (
 	"encoding/json"
@@ -15,7 +15,9 @@ func TestFeed(t *testing.T) {
 	}
 
 	res := httptest.NewRecorder()
-	Feed(res, req)
+	
+	r := NewRouter()
+	r.Feed(res, req)
 
 	exp, _ := json.Marshal("Feed") // прост потому что в хендлере тоже json от строки делает "Feed"
 	act := res.Body.Bytes()
@@ -31,7 +33,9 @@ func TestSignIn(t *testing.T) {
 	}
 
 	res := httptest.NewRecorder()
-	SignIn(res, req)
+
+	r := NewRouter()
+	r.SignIn(res, req)
 
 	exp, _ := json.Marshal("SignIn") // прост потому что в хендлере тоже json от строки делает "Feed"
 	act := res.Body.Bytes()
@@ -47,7 +51,9 @@ func TestSignUp(t *testing.T) {
 	}
 
 	res := httptest.NewRecorder()
-	SignUp(res, req)
+
+	r := NewRouter()
+	r.SignUp(res, req)
 
 	exp, _ := json.Marshal("SignUp") // прост потому что в хендлере тоже json от строки делает "Feed"
 	act := res.Body.Bytes()
