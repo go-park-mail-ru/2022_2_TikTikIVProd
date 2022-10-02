@@ -2,6 +2,7 @@ package usersRep
 
 import (
 	"errors"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UsersStore interface {
@@ -14,11 +15,12 @@ type UsersRep struct {
 }
 
 type User struct {
-	LastName  string `json:"last_name"`
-	NickName  string `json:"nick_name"`
-	Email     string `json:"email"`
-	Avatar    int    `json:"avatar"`
-	Password  string `json:"password"`
+	Id       int    `json:"id"`
+	LastName string `json:"last_name"`
+	NickName string `json:"nick_name"`
+	Email    string `json:"email"`
+	Avatar   int    `json:"avatar"`
+	Password string `json:"password"`
 }
 
 func NewUsersRep(us UsersStore) *UsersRep {
@@ -27,7 +29,7 @@ func NewUsersRep(us UsersStore) *UsersRep {
 	}
 }
 
-func (ur *UsersRep) SelectUser(nickname string) (*User, error) {
+func (ur *UsersRep) SelectUserByNickName(nickname string) (*User, error) {
 	user, err := ur.usersStore.SelectUser(nickname)
 	if err != nil {
 		return nil, errors.New("can't find user with nickname " + nickname)
@@ -36,12 +38,41 @@ func (ur *UsersRep) SelectUser(nickname string) (*User, error) {
 	return user, nil
 }
 
-func (ur *UsersRep) CreateUser(u User) (*User, error) {
-	if _, err := ur.usersStore.SelectUser(u.NickName); err != nil {
-		return nil, errors.New("user with nickname " + u.NickName + "already exists.")
+func (ur *UsersRep) SelectUserByEmail(email string) (*User, error) {
+	user, err := ur.usersStore.SelectUser(email)
+	if err != nil {
+		return nil, errors.New("can't find user with email " + email)
 	}
 
-	newUser, err := ur.usersStore.CreateUser(u)
+	return user, nil
+}
+
+func (ur *UsersRep) SignIn(user User) (*User, error) {
+	u, err := ur.SelectUserByEmail(user.Email)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(user.Password)); err != nil {
+		return nil, errors.New("incorrect password")
+	}
+
+	return u, nil
+}
+
+func (ur *UsersRep) CreateUser(user User) (*User, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), 8)
+	if err != nil {
+		return nil, errors.New("hash error")
+	}
+
+	user.Password = string(hashedPassword)
+	
+	if _, err := ur.usersStore.SelectUser(user.NickName); err != nil {
+		return nil, errors.New("user with nickname " + user.NickName + "already exists.")
+	}
+
+	newUser, err := ur.usersStore.CreateUser(user)
 	if err != nil {
 		return nil, errors.New("create user error")
 	}

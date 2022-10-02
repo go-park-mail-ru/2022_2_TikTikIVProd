@@ -15,8 +15,21 @@ func NewDataBaseUsers(db *sql.DB) *DataBaseUsers {
 	}
 }
 
-func (dbUsers *DataBaseUsers) SelectUser(name string) (*usersRrep.User, error) {
+func (dbUsers *DataBaseUsers) SelectUserByNickName(name string) (*usersRrep.User, error) {
 	row, err := dbUsers.db.Query("SELECT * FROM users WHERE nickname=" + name)
+	if err != nil {
+		return nil, err
+  	}
+	
+	user := usersRrep.User{}
+
+	//row.Scan(&user.Nickname, user.Fullname, user.About, user.Email) todo
+
+	return &user, nil
+}
+
+func (dbUsers *DataBaseUsers) SelectUserByEmail(email string) (*usersRrep.User, error) {
+	row, err := dbUsers.db.Query("SELECT * FROM users WHERE email=" + email)
 	if err != nil {
 		return nil, err
   	}

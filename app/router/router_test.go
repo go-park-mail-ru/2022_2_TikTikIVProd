@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	usersRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository"
 	"github.com/gorilla/mux"
 )
 
@@ -89,3 +90,29 @@ func TestSignUp(t *testing.T) {
 // 	}
 // }
 
+// func TestRouter_SignUp(t *testing.T) {
+// 	type fields struct {
+// 		Router *mux.Router
+// 		ur     *usersRep.UsersRep
+// 	}
+// 	type args struct {
+// 		w http.ResponseWriter
+// 		r *http.Request
+// 	}
+// 	tests := []struct {
+// 		name   string
+// 		fields fields
+// 		args   args
+// 	}{
+// 		// TODO: Add test cases.
+// 	}
+// 	for _, tt := range tests {
+// 		t.Run(tt.name, func(t *testing.T) {
+// 			router := &Router{
+// 				Router: tt.fields.Router,
+// 				ur:     tt.fields.ur,
+// 			}
+// 			router.SignUp(tt.args.w, tt.args.r)
+// 		})
+// 	}
+// }
