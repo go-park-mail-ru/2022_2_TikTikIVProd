@@ -5,6 +5,8 @@ import (
 
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/router"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/server"
+	usersStore "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/store"
+	usersRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository"
 )
 
 
@@ -12,11 +14,15 @@ import (
 func main() {
 	// инициализаци бд
 
+	db, err := newdb() //TODO
+
 	// создание хранилищ данных (называется репозиториями): юзеры, посты...
+	dbUsers := usersStore.NewDataBaseUsers(db)
+	userRep := usersRep.NewUsersRep(dbUsers)
 
-	h := router.NewRouter(/*сюда передадим данные какие то*/)
+	r := router.NewRouter(userRep)
 
-	s := server.NewServer(h)
+	s := server.NewServer(r)
 	if err := s.Start(); err != nil {
 		log.Fatal(err)
 	}

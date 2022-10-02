@@ -6,6 +6,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/gorilla/mux"
 )
 
 func TestFeed(t *testing.T) {
@@ -15,7 +17,7 @@ func TestFeed(t *testing.T) {
 	}
 
 	res := httptest.NewRecorder()
-	
+
 	r := NewRouter()
 	r.Feed(res, req)
 
@@ -61,3 +63,29 @@ func TestSignUp(t *testing.T) {
 		t.Fatalf("Expected %s got %s", string(exp), string(act))
 	}
 }
+
+// func TestRouter_Feed(t *testing.T) {
+// 	type fields struct {
+// 		Router *mux.Router
+// 	}
+// 	type args struct {
+// 		w http.ResponseWriter
+// 		r *http.Request
+// 	}
+// 	tests := []struct {
+// 		name   string
+// 		fields fields
+// 		args   args
+// 	}{
+// 		// TODO: Add test cases.
+// 	}
+// 	for _, tt := range tests {
+// 		t.Run(tt.name, func(t *testing.T) {
+// 			router := &Router{
+// 				Router: tt.fields.Router,
+// 			}
+// 			router.Feed(tt.args.w, tt.args.r)
+// 		})
+// 	}
+// }
+
