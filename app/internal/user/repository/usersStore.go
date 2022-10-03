@@ -2,7 +2,7 @@ package usersStore
 
 import (
 	"database/sql"
-	usersRrep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository"
+	usersRrep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/usecase"
 )
 
 type DataBaseUsers struct {
@@ -10,7 +10,7 @@ type DataBaseUsers struct {
 }
 
 func NewDataBaseUsers(db *sql.DB) *DataBaseUsers {
-	return &DataBaseUsers {
+	return &DataBaseUsers{
 		db: db,
 	}
 }
@@ -19,8 +19,8 @@ func (dbUsers *DataBaseUsers) SelectUser(name string) (*usersRrep.User, error) {
 	row, err := dbUsers.db.Query("SELECT * FROM users WHERE nickname=" + name)
 	if err != nil {
 		return nil, err
-  	}
-	
+	}
+
 	user := usersRrep.User{}
 
 	//row.Scan(&user.Nickname, user.Fullname, user.About, user.Email) todo
@@ -31,4 +31,3 @@ func (dbUsers *DataBaseUsers) SelectUser(name string) (*usersRrep.User, error) {
 func (dbUsers *DataBaseUsers) CreateUser(u usersRrep.User) (*usersRrep.User, error) {
 	return nil, nil
 }
-

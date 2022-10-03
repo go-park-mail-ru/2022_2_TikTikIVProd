@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	usersRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/usecase"
 	"github.com/gorilla/mux"
-	usersRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository"
 )
 
 type Router struct {
@@ -14,9 +14,9 @@ type Router struct {
 }
 
 func NewRouter(ur *usersRep.UsersRep) *Router {
-	r := &Router {
+	r := &Router{
 		Router: mux.NewRouter(),
-		ur: ur,
+		ur:     ur,
 	}
 
 	r.HandleFunc("/feed", r.Feed)
@@ -30,13 +30,7 @@ func (router *Router) SignUp(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode("SignUp")
 }
 
-func (router *Router) Feed(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode("Feed")
-}
-
 func (router *Router) SignIn(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode("SignIn")
 }
-
