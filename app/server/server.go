@@ -1,9 +1,9 @@
 package server
 
 import (
+	"log"
 	"net/http"
 	"time"
-	"log"
 )
 
 type Server struct {
@@ -14,7 +14,7 @@ type Server struct {
 func NewServer(r http.Handler) *Server {
 	return &Server{
 		http.Server{
-			Addr:              ":8080",
+			Addr:              ":13080",
 			Handler:           r,
 			ReadTimeout:       10 * time.Second,
 			ReadHeaderTimeout: 10 * time.Second,
@@ -24,7 +24,6 @@ func NewServer(r http.Handler) *Server {
 }
 
 func (s *Server) Start() error {
-	log.Println("start serving :8080")
+	log.Println("start serving :13080")
 	return s.ListenAndServe()
 }
-

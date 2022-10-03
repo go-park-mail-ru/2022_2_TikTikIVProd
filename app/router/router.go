@@ -28,7 +28,7 @@ type Router struct {
 func NewRouter(ur *usersRep.UsersRep) *UserRouter {
 	r := &UserRouter {
 		Router: mux.NewRouter(),
-		ur: ur,
+		ur:     ur,
 	}
 
 	r.HandleFunc("/feed", r.Feed)
