@@ -11,25 +11,25 @@ type RepositoryI interface {
 	SelectAllPosts() (*[]postsModel.Post, error)
 }
 
-type DataBasePosts struct {
+type dataBasePosts struct {
 	db *gorm.DB
 }
 
 func NewDataBasePosts(db *gorm.DB) RepositoryI {
-	return &DataBasePosts{
+	return &dataBasePosts{
 		db: db,
 	}
 }
 
-func (dbPosts *DataBasePosts) SelectPost(id int) (*postsModel.Post, error) {
+func (dbPosts *dataBasePosts) SelectPost(id int) (*postsModel.Post, error) {
 	return &postsModel.Post{}, nil
 }
 
-func (dbPosts *DataBasePosts) CreatePost(u postsModel.Post) (*postsModel.Post, error) {
+func (dbPosts *dataBasePosts) CreatePost(u postsModel.Post) (*postsModel.Post, error) {
 	return &postsModel.Post{}, nil
 }
 
-func (dbPosts *DataBasePosts) SelectAllPosts() (*[]postsModel.Post, error) {
+func (dbPosts *dataBasePosts) SelectAllPosts() (*[]postsModel.Post, error) {
 	var posts []postsModel.Post
 	dbPosts.db.Table("user_posts").Find(&posts) //TODO оттрекать ошибки
 	return &posts, nil

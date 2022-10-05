@@ -12,26 +12,26 @@ type UseCaseI interface {
 	SelectAllPosts() (*[]postsModel.Post, error)
 }
 
-type PostsUsecase struct {
+type postsUsecase struct {
 	postsRep postsRepository.RepositoryI
 	imageRep imgUsecase.ImageReposiroty
 }
 
 func NewPostsUsecase(ps postsRepository.RepositoryI, ir imgUsecase.ImageReposiroty) UseCaseI {
-	return &PostsUsecase{
+	return &postsUsecase{
 		postsRep: ps,
 		imageRep: ir,
 	}
 }
 
-func (pr *PostsUsecase) SelectPost(id int) (*postsModel.Post, error) {
+func (pr *postsUsecase) SelectPost(id int) (*postsModel.Post, error) {
 	return &postsModel.Post{}, nil
 }
 
-func (pr *PostsUsecase) CreatePost(u *postsModel.Post) (*postsModel.Post, error) {
+func (pr *postsUsecase) CreatePost(u *postsModel.Post) (*postsModel.Post, error) {
 	return &postsModel.Post{}, nil
 }
-func (pr *PostsUsecase) SelectAllPosts() (*[]postsModel.Post, error) {
+func (pr *postsUsecase) SelectAllPosts() (*[]postsModel.Post, error) {
 	res, err := pr.postsRep.SelectAllPosts() //TODO ошибки
 	return res, err
 }
