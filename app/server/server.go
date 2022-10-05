@@ -1,9 +1,9 @@
 package server
 
 import (
+	"log"
 	"net/http"
 	"time"
-	"log"
 )
 
 type Server struct {
@@ -24,7 +24,6 @@ func NewServer(r http.Handler) *Server {
 }
 
 func (s *Server) Start() error {
-	log.Println("start serving :8080")
+	log.Println("start serving :13080")
 	return s.ListenAndServe()
 }
-
