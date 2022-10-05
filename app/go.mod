@@ -1,6 +1,6 @@
 module github.com/go-park-mail-ru/2022_2_TikTikIVProd
 
-go 1.19
+go 1.16
 
 require (
 	github.com/google/uuid v1.3.0
