@@ -191,6 +191,7 @@ func (del *delivery) Logout(w http.ResponseWriter, r *http.Request) {
 // @Success  200 {object} model.User "success auth"
 // @Failure 405 {object} pkg.Error "invalid http method"
 // @Failure 400 {object} pkg.Error "bad request"
+// @Failure 500 {object} pkg.Error "internal server error"
 // @Failure 401 {object} pkg.Error "no cookie"
 // @Router   /auth [get]
 func (del *delivery) Auth(w http.ResponseWriter, r *http.Request) {

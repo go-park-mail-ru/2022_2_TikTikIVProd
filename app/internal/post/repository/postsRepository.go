@@ -56,7 +56,7 @@ func (dbPosts *dataBasePosts) SelectAllPosts() (*[]postsModel.Post, error) {
 		return nil, tx.Error
 	}
 
-	for i, _ := range posts {
+	for i := range posts {
 		linkRows, err := dbPosts.db.Table("images").Select("img_link").Joins("JOIN user_posts_images upi ON upi.img_id = images.id AND upi.user_post_id = ?", posts[i].ID).Rows()
 
 		if err != nil {
