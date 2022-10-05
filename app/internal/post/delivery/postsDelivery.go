@@ -7,14 +7,6 @@ import (
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg"
 )
 
-//func wrapJSON(name string, item interface{}) ([]byte, error) {
-//	wrapped := map[string]interface{}{
-//		name: item,
-//	}
-//	converted, err := json.Marshal(wrapped)
-//	return converted, err
-//}
-
 type DeliveryI interface {
 	Feed(w http.ResponseWriter, r *http.Request)
 }
@@ -24,9 +16,19 @@ type delivery struct {
 }
 
 func (delivery *delivery) Feed(w http.ResponseWriter, r *http.Request) {
-	posts, _ := delivery.pUsecase.SelectAllPosts() //TODO ошибки
+	if r.Method != http.MethodGet {
+		pkg.ErrorResponse(w, http.StatusMethodNotAllowed, "invalid http method")
+		return
+	}
 
-	err := pkg.JSONresponse(w, http.StatusOK, posts)
+	posts, err := delivery.pUsecase.SelectAllPosts()
+
+	if err != nil {
+		pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	err = pkg.JSONresponse(w, http.StatusOK, posts)
 	if err != nil {
 		pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error())
 	}

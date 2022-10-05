@@ -1,7 +1,7 @@
 package imagesRepository
 
 import (
-	imagesUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/usecase"
+	imagesModel "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/model"
 	"gorm.io/gorm"
 )
 
@@ -15,6 +15,7 @@ func NewDataBaseImages(db *gorm.DB) *DataBaseImages {
 	}
 }
 
-func (dbImages *DataBaseImages) SelectImagesInPost(postID int) (*[]imagesUsecase.Image, error) {
-	return &[]imagesUsecase.Image{}, nil
+func (dbImages *DataBaseImages) SelectImagesInPost(postID int) (*[]imagesModel.Image, error) {
+	var images []imagesModel.Image
+	return &images, nil
 }

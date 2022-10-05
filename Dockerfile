@@ -3,8 +3,6 @@ FROM golang:1.16-alpine
 WORKDIR /
 
 COPY app ./app
-COPY app ./app
-
 
 WORKDIR /app
 

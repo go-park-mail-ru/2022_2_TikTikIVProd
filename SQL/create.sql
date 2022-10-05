@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS cookies (
 	value varchar(64) PRIMARY KEY,
 	user_id INT REFERENCES users(id),
-	expires DATETIME
+	expires DATE
 );
 
 
