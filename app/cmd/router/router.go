@@ -19,7 +19,7 @@ func NewRouter(usersD usersDelivery.DeliveryI) *Router {
 
 	//r.HandleFunc("/feed", r.Feed)
 	r.HandleFunc("/signin", usersD.SignIn)
-	//r.HandleFunc("/auth", usersD.Auth)
+	r.HandleFunc("/auth", usersD.Auth)
 	r.HandleFunc("/signup", usersD.SignUp)
 	return r
 }

@@ -79,3 +79,14 @@ func (dbUsers *dataBase) SelectCookie(value string) (*model.Cookie, error) {
 	return &cookie, nil
 }
 
+func (dbUsers *dataBase) DeleteCookie(value string) (error) {
+	err := dbUsers.db.Table("cookies").Delete(&model.Cookie {
+											SessionToken: value,
+										}).Error
+	if err != nil {
+		return err
+	}
+	
+	return nil
+}
+
