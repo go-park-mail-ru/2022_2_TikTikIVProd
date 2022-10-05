@@ -66,8 +66,8 @@ func (dbUsers *dataBase) SelectUserByEmail(email string) (*model.User, error) {
 func (dbUsers *dataBase) CreateUser(u model.User) (*model.User, error) {
 	user := model.User{}
 
-	row := dbUsers.db.Table("cookies").Select("first_name", "last_name", "nick_name",
-		"avatar_img_id", "email", "passhash").Create(&user).Clauses(clause.Returning{}).Row()
+	row := dbUsers.db.Table("users").Select("first_name", "last_name", "nick_name",
+		"email", "passhash").Create(&user).Clauses(clause.Returning{}).Row()
 
 	// row := dbUsers.db.Exec("INSERT INTO users (first_name, last_name, nick_name, avatar_img_id, email, passhash) VALUES (?, ?, ?, ?, ?, ?) RETURNING *",
 	// 		u.FirstName, u.LastName, u.NickName, u.Avatar, u.Email, u.Password).Row()
