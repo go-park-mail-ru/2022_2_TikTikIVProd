@@ -28,6 +28,8 @@ func (delivery *delivery) Feed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	err = pkg.JSONresponse(w, http.StatusOK, posts)
 	if err != nil {
 		pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error())

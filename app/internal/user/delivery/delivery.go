@@ -68,6 +68,8 @@ func (del *delivery) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	http.SetCookie(w, &http.Cookie{
 		Name:    "session_token",
 		Value:   createdCookie.SessionToken,
@@ -125,6 +127,8 @@ func (del *delivery) SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	http.SetCookie(w, &http.Cookie{
 		Name:    "session_token",
 		Value:   createdCookie.SessionToken,
@@ -173,6 +177,8 @@ func (del *delivery) Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	http.SetCookie(w, &http.Cookie{
 		Name:    "session_token",
 		Value:   "",
@@ -220,6 +226,8 @@ func (del *delivery) Auth(w http.ResponseWriter, r *http.Request) {
 		pkg.ErrorResponse(w, http.StatusUnauthorized, err.Error())
 		return
 	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	err = pkg.JSONresponse(w, http.StatusOK, pkg.Response {
 												Body: gotUser,
