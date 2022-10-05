@@ -2,7 +2,6 @@ package postsRepository
 
 import (
 	"database/sql"
-	"fmt"
 
 	postsModel "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/model"
 	"gorm.io/gorm"
