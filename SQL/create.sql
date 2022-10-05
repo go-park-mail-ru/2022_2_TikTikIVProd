@@ -9,10 +9,15 @@ CREATE TABLE IF NOT EXISTS users (
 	first_name VARCHAR(32) NOT NULL,
 	last_name VARCHAR(32) NOT NULL,
 	nick_name VARCHAR(10) NOT NULL,
-	mobile VARCHAR(16) NOT NULL,
 	avatar_img_id INT REFERENCES images(id),
 	email VARCHAR(50) NOT NULL,
 	passhash VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS cookies (
+	value varchar(64) PRIMARY KEY,
+	user_id INT REFERENCES users(id),
+	expires DATETIME,
 );
 
 
