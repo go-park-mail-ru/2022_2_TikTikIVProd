@@ -60,8 +60,6 @@ func (dbPosts *dataBasePosts) SelectAllPosts() (*[]postsModel.Post, error) {
 	for i, _ := range posts {
 		linkRows, err := dbPosts.db.Table("images").Select("img_link").Joins("JOIN user_posts_images upi ON upi.img_id = images.id AND upi.user_post_id = ?", posts[i].ID).Rows()
 
-		fmt.Printf("link: %v, err%v", linkRows, err)
-
 		if err != nil {
 			return nil, err
 		}
@@ -74,6 +72,5 @@ func (dbPosts *dataBasePosts) SelectAllPosts() (*[]postsModel.Post, error) {
 		posts[i].ImageLinks = links
 	}
 
-	fmt.Printf("posts: %v", posts)
 	return &posts, nil
 }

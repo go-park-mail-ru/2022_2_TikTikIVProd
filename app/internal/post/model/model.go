@@ -8,7 +8,7 @@ type Post struct {
 	Message    string    	`json:"message"`
 	CreateDate time.Time 	`json:"create_date"`
 	ImageLinks 	[]string  	`json:"image_links" gorm:"-"`
-	UserFirstName  string	`json:"user_first_name"`
-	UserLastName   string	`json:"user_last_name"`
+	FirstName  string	`json:"user_first_name"`
+	LastName   string	`json:"user_last_name"`
 }
 
