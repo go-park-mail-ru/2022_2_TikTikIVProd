@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/model"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository"
@@ -15,6 +16,18 @@ func New(db *gorm.DB) repository.RepositoryI {
 	return &dataBase{
 		db: db,
 	}
+}
+
+func (dbUsers *dataBase) SelectUserById(id int) (*model.User, error) {
+	user := model.User{}
+
+	row := dbUsers.db.Table("users").Where("id = ?", id).Row()
+	err := row.Scan(&user.Id, &user.FirstName, &user.LastName, &user.NickName, &user.Avatar, &user.Email, &user.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }
 
 func (dbUsers *dataBase) SelectUserByNickName(nickname string) (*model.User, error) {
@@ -44,8 +57,11 @@ func (dbUsers *dataBase) SelectUserByEmail(email string) (*model.User, error) {
 func (dbUsers *dataBase) CreateUser(u model.User) (*model.User, error) {
 	user := model.User{}
 
-	row := dbUsers.db.Exec("INSERT INTO users (first_name, last_name, nick_name, avatar_img_id, email, passhash) VALUES (?, ?, ?, ?, ?, ?) RETURNING *",
-			u.FirstName, u.LastName, u.NickName, u.Avatar, u.Email, u.Password).Row()
+	row := dbUsers.db.Table("cookies").Select("first_name", "last_name", "nick_name",
+		"avatar_img_id", "email", "passhash").Create(&user).Clauses(clause.Returning{}).Row()
+
+	// row := dbUsers.db.Exec("INSERT INTO users (first_name, last_name, nick_name, avatar_img_id, email, passhash) VALUES (?, ?, ?, ?, ?, ?) RETURNING *",
+	// 		u.FirstName, u.LastName, u.NickName, u.Avatar, u.Email, u.Password).Row()
 	err := row.Scan(&user.Id, &user.FirstName, &user.LastName, &user.NickName, &user.Avatar, &user.Email, &user.Password)
 	if err != nil {
 		return nil, err
@@ -57,8 +73,10 @@ func (dbUsers *dataBase) CreateUser(u model.User) (*model.User, error) {
 func (dbUsers *dataBase) CreateCookie(c model.Cookie) (*model.Cookie, error) {
 	cookie := model.Cookie{}
 
-	row := dbUsers.db.Exec("INSERT INTO cookies (value, user_id, expires) VALUES (?, ?, ?) RETURNING *",
-				   c.SessionToken, c.UserId, c.Expires).Row()
+	row := dbUsers.db.Table("cookies").Select("value", "user_id", "expires").Create(&cookie).Clauses(clause.Returning{}).Row()
+
+	// row := dbUsers.db.Exec("INSERT INTO cookies (value, user_id, expires) VALUES (?, ?, ?) RETURNING *",
+	// 			   c.SessionToken, c.UserId, c.Expires).Row()
 	err := row.Scan(&cookie.SessionToken, &cookie.UserId, &cookie.Expires)
 	if err != nil {
 		return nil, err

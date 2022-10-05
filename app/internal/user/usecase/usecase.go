@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"errors"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -14,6 +15,7 @@ import (
 type UseCaseI interface {
 	SelectUserByNickName(nickname string) (*model.User, error)
 	SelectUserByEmail(email string) (*model.User, error)
+	SelectUserById(id int) (*model.User, error)
 	SignIn(user model.UserSignIn) (*model.User, *model.Cookie, error)
 	SignUp(user model.User) (*model.User, *model.Cookie, error)
 	CreateUser(user model.User) (*model.User, error)
@@ -62,6 +64,15 @@ func (uc *useCase) DeleteCookie(value string) (error) {
 	}
 
 	return nil
+}
+
+func (uc *useCase) SelectUserById(id int) (*model.User, error) {
+	user, err := uc.repository.SelectUserById(id)
+	if err != nil {
+		return nil, errors.New("can't find user with id " + strconv.Itoa(id))
+	}
+
+	return user, nil
 }
 
 func (uc *useCase) SelectUserByNickName(nickname string) (*model.User, error) {

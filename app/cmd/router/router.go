@@ -20,10 +20,10 @@ func NewRouter(usersD usersDelivery.DeliveryI, pd* postsDelivery.Delivery) *Rout
 		pd: pd,
 	}
 
-	//r.HandleFunc("/feed", r.Feed)
 	r.HandleFunc("/signin", usersD.SignIn)
-	r.HandleFunc("/auth", usersD.Auth)
 	r.HandleFunc("/signup", usersD.SignUp)
+	r.HandleFunc("/auth", usersD.Auth)
+	r.HandleFunc("/logout", usersD.Logout)
 	r.HandleFunc("/feed", pd.Feed)
 	return r
 }

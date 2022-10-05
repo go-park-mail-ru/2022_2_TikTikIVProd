@@ -22,7 +22,6 @@ import (
 // @host localhost:8080
 
 func main() {
-	// инициализаци бд
 	db, err := gorm.Open(postgres.New(postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}),
 		&gorm.Config{})
 
@@ -34,13 +33,13 @@ func main() {
 	dbPosts := postsRep.NewDataBasePosts(db)
 	dbImages := imagesRepository.NewDataBaseImages(db)
 	postsUsecase := postsUsecase.NewPostsUsecase(dbPosts, dbImages)
-	postsDelive := postsDelivery.NewDelivery(postsUsecase)
+	postsDeliver := postsDelivery.NewDelivery(postsUsecase)
 
 	usersDB := usersPg.New(db)
 	usersUC := usersUseCase.New(usersDB)
-	usersDelive := usersDelivery.New(usersUC)
+	usersDeliver := usersDelivery.New(usersUC)
 
-	r := router.NewRouter(usersDelive, postsDelive)
+	r := router.NewRouter(usersDeliver, postsDeliver)
 
 	s := server.NewServer(r)
 	if err := s.Start(); err != nil {

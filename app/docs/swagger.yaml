@@ -61,6 +61,31 @@ paths:
       summary: Auth
       tags:
       - users
+  /logout:
+    get:
+      consumes:
+      - application/json
+      description: user logout
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success logout
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/pkg.Error'
+      summary: Logout
+      tags:
+      - users
   /signin:
     post:
       consumes:

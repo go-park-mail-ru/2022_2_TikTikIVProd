@@ -3,11 +3,11 @@ package delivery
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/model"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/usecase"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg"
-	"time"
 )
 
 type DeliveryI interface {
@@ -15,6 +15,7 @@ type DeliveryI interface {
 	SignIn(w http.ResponseWriter, r *http.Request)
 	Auth(w http.ResponseWriter, r *http.Request)
 	Feed(w http.ResponseWriter, r *http.Request)
+	Logout(w http.ResponseWriter, r *http.Request)
 }
 
 type delivery struct {
@@ -143,18 +144,15 @@ func (del *delivery) SignIn(w http.ResponseWriter, r *http.Request) {
 
 // Logout godoc
 // @Summary      Logout
-// @Description  user log out
+// @Description  user logout
 // @Tags     users
 // @Accept	 application/json
 // @Produce  application/json
-// @Param    user body model.UserSignIn true "user info"
-// @Success  200 {object} model.User "success sign in"
+// @Success  200 "success logout"
 // @Failure 405 {object} pkg.Error "invalid http method"
 // @Failure 400 {object} pkg.Error "bad request"
-// @Failure 404 {object} pkg.Error "user doesn't exist"
-// @Failure 401 {object} pkg.Error "invalid password"
-// @Failure 500 {object} pkg.Error "internal server error"
-// @Router   /signin [post]
+// @Failure 401 {object} pkg.Error "no cookie"
+// @Router   /logout [get]
 func (del *delivery) Logout(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		pkg.ErrorResponse(w, http.StatusMethodNotAllowed, "invalid http method")
@@ -171,12 +169,6 @@ func (del *delivery) Logout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = del.uc.DeleteCookie(cookie.Value)
-	if err != nil {
-		pkg.ErrorResponse(w, http.StatusUnauthorized, err.Error())
-		return
-	}
-
-	_, err = del.uc.SelectCookie(cookie.Value)
 	if err != nil {
 		pkg.ErrorResponse(w, http.StatusUnauthorized, err.Error())
 		return
@@ -217,13 +209,25 @@ func (del *delivery) Auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = del.uc.SelectCookie(cookie.Value)
+	gotCookie, err := del.uc.SelectCookie(cookie.Value)
 	if err != nil {
 		pkg.ErrorResponse(w, http.StatusUnauthorized, err.Error())
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	gotUser, err := del.uc.SelectUserById(gotCookie.UserId)
+	if err != nil {
+		pkg.ErrorResponse(w, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	err = pkg.JSONresponse(w, http.StatusOK, pkg.Response {
+												Body: gotUser,
+											})
+	if err != nil {
+		pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error())
+		return
+	}
 }
 
 func (del *delivery) Feed(w http.ResponseWriter, r *http.Request) {
