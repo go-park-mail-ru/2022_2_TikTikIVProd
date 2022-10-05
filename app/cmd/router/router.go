@@ -10,10 +10,10 @@ import (
 type Router struct {
 	*mux.Router
 	usersD usersDelivery.DeliveryI
-	pd *postsDelivery.Delivery
+	pd postsDelivery.DeliveryI
 }
 
-func NewRouter(usersD usersDelivery.DeliveryI, pd* postsDelivery.Delivery) *Router {
+func NewRouter(usersD usersDelivery.DeliveryI, pd postsDelivery.DeliveryI) *Router {
 	r := &Router {
 		Router: mux.NewRouter(),
 		usersD: usersD,

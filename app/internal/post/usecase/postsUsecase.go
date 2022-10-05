@@ -2,43 +2,36 @@ package postsRep
 
 import (
 	imgUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/usecase"
-	"time"
+	postsRepository "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/repository"
+	postsModel "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/model"
 )
 
-type PostsRepository interface {
-	SelectPost(id int) (*Post, error)
-	SelectAllPosts() (*[]Post, error)
-	CreatePost(u Post) (*Post, error)
+type UseCaseI interface {
+	SelectPost(id int) (*postsModel.Post, error)
+	CreatePost(u *postsModel.Post) (*postsModel.Post, error)
+	SelectAllPosts() (*[]postsModel.Post, error)
 }
 
 type PostsUsecase struct {
-	postsRep PostsRepository
+	postsRep postsRepository.RepositoryI
 	imageRep imgUsecase.ImageReposiroty
 }
 
-type Post struct {
-	ID         int       `json:"id"`
-	UserID     int       `json:"user_id"`
-	Message    string    `json:"message"`
-	CreateDate time.Time `json:"create_date"`
-	ImageLinks []string  `json:"image_links" gorm:"-"`
-}
-
-func NewPostsUsecase(ps PostsRepository, ir imgUsecase.ImageReposiroty) *PostsUsecase {
+func NewPostsUsecase(ps postsRepository.RepositoryI, ir imgUsecase.ImageReposiroty) UseCaseI {
 	return &PostsUsecase{
 		postsRep: ps,
 		imageRep: ir,
 	}
 }
 
-func (pr *PostsUsecase) SelectPost(id int) (*Post, error) {
-	return &Post{}, nil
+func (pr *PostsUsecase) SelectPost(id int) (*postsModel.Post, error) {
+	return &postsModel.Post{}, nil
 }
 
-func (pr *PostsUsecase) CreatePost(u *Post) (*Post, error) {
-	return &Post{}, nil
+func (pr *PostsUsecase) CreatePost(u *postsModel.Post) (*postsModel.Post, error) {
+	return &postsModel.Post{}, nil
 }
-func (pr *PostsUsecase) SelectAllPosts() (*[]Post, error) {
+func (pr *PostsUsecase) SelectAllPosts() (*[]postsModel.Post, error) {
 	res, err := pr.postsRep.SelectAllPosts() //TODO ошибки
 	return res, err
 }

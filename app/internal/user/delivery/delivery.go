@@ -14,7 +14,6 @@ type DeliveryI interface {
 	SignUp(w http.ResponseWriter, r *http.Request)
 	SignIn(w http.ResponseWriter, r *http.Request)
 	Auth(w http.ResponseWriter, r *http.Request)
-	Feed(w http.ResponseWriter, r *http.Request)
 	Logout(w http.ResponseWriter, r *http.Request)
 }
 
@@ -228,10 +227,5 @@ func (del *delivery) Auth(w http.ResponseWriter, r *http.Request) {
 		pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-}
-
-func (del *delivery) Feed(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode("Feed")
 }
 
