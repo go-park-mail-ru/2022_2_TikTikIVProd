@@ -53,7 +53,7 @@ func (dbUsers *dataBase) SelectUserByNickName(nickname string) (*model.User, err
 
 func (dbUsers *dataBase) SelectUserByEmail(email string) (*model.User, error) {
 	user := model.User{}
-
+	//row := dbUsers.db.Table("users").Select("").Where("email = ?", email).Joins("JOIN images ON users.avatar_img_id=images.id").Row()
 	row := dbUsers.db.Table("users").Where("email = ?", email).Row()
 	err := row.Scan(&user.Id, &user.FirstName, &user.LastName, &user.NickName, &user.Avatar, &user.Email, &user.Password)
 	if err != nil {

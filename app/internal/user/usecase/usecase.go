@@ -125,17 +125,21 @@ func (uc *useCase) SignUp(user model.User) (*model.User, *model.Cookie, error) {
 	return createdUser, cookie, nil
 }
 
-func (uc *useCase) CreateUser(user model.User) (*model.User, error) {
+func (uc *useCase) CreateUser(user model.User) (*model.User, error) {	
+	if _, err := uc.repository.SelectUserByNickName(user.NickName); err == nil {
+		return nil, errors.New("nickname " + user.NickName + "already in use.")
+	}
+
+	if _, err := uc.repository.SelectUserByEmail(user.Email); err == nil {
+		return nil, errors.New("user with email " + user.Email + "already exists.")
+	}
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), 8)
 	if err != nil {
 		return nil, errors.New("hash error")
 	}
 
 	user.Password = string(hashedPassword)
-	
-	if _, err := uc.repository.SelectUserByNickName(user.NickName); err != nil {
-		return nil, errors.New("user with nickname " + user.NickName + "already exists.")
-	}
 
 	newUser, err := uc.repository.CreateUser(user)
 	if err != nil {

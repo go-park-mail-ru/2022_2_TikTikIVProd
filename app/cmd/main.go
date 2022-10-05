@@ -22,7 +22,6 @@ import (
 // @host localhost:8080
 
 func main() {
-	// инициализаци бд
 	db, err := gorm.Open(postgres.New(postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}),
 		&gorm.Config{})
 
