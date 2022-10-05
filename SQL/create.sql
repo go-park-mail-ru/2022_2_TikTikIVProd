@@ -3,7 +3,6 @@ CREATE TABLE IF NOT EXISTS images (
 	img_link TEXT NOT NULL
 );
 
-
 CREATE TABLE IF NOT EXISTS users (
 	id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 	first_name VARCHAR(32) NOT NULL,
@@ -17,7 +16,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS cookies (
 	value varchar(64) PRIMARY KEY,
 	user_id INT REFERENCES users(id),
-	expires DATETIME,
+	expires DATETIME
 );
 
 

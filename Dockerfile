@@ -9,6 +9,8 @@ WORKDIR /app/
 
 RUN go mod download
 
+WORKDIR /app/cmd
+
 RUN go build -o /go_server
 
 EXPOSE 8080

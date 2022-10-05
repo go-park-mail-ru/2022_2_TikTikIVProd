@@ -25,6 +25,6 @@ func (dbPosts *DataBasePosts) CreatePost(u postsUsecase.Post) (*postsUsecase.Pos
 
 func (dbPosts *DataBasePosts) SelectAllPosts() (*[]postsUsecase.Post, error) {
 	var posts []postsUsecase.Post
-	dbPosts.db.Take(&posts)
-	return nil, nil
+	dbPosts.db.Table("user_posts").Find(&posts) //TODO оттрекать ошибки
+	return &posts, nil
 }

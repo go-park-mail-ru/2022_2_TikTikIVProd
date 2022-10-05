@@ -13,7 +13,7 @@ type PostsRepository interface {
 
 type PostsUsecase struct {
 	postsRep PostsRepository
-	imageRep ImageRepository
+	imageRep imgUsecase.ImageReposiroty
 }
 
 type Post struct {
@@ -39,5 +39,6 @@ func (pr *PostsUsecase) CreatePost(u *Post) (*Post, error) {
 	return &Post{}, nil
 }
 func (pr *PostsUsecase) SelectAllPosts() (*[]Post, error) {
-	return nil, nil
+	res, err := pr.postsRep.SelectAllPosts() //TODO ошибки
+	return res, err
 }
