@@ -14,7 +14,8 @@ import (
 type UseCaseI interface {
 	SelectUserByNickName(nickname string) (*model.User, error)
 	SelectUserByEmail(email string) (*model.User, error)
-	SignIn(user model.User) (*model.User, error)
+	SignIn(user model.UserSignIn) (*model.User, *model.Cookie, error)
+	SignUp(user model.User) (*model.User, *model.Cookie, error)
 	CreateUser(user model.User) (*model.User, error)
 	CreateCookie(userId int) (*model.Cookie, error)
 	SelectCookie(value string) (*model.Cookie, error)
@@ -71,17 +72,36 @@ func (uc *useCase) SelectUserByEmail(email string) (*model.User, error) {
 	return user, nil
 }
 
-func (uc *useCase) SignIn(user model.User) (*model.User, error) {
+func (uc *useCase) SignIn(user model.UserSignIn) (*model.User, *model.Cookie, error) {
 	u, err := uc.SelectUserByEmail(user.Email)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(user.Password)); err != nil {
-		return nil, errors.New("incorrect password")
+		return nil, nil, errors.New("incorrect password")
 	}
 
-	return u, nil
+	cookie, err := uc.CreateCookie(u.Id)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return u, cookie, nil
+}
+
+func (uc *useCase) SignUp(user model.User) (*model.User, *model.Cookie, error) {
+	createdUser, err := uc.CreateUser(user)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	cookie, err := uc.CreateCookie(createdUser.Id)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return createdUser, cookie, nil
 }
 
 func (uc *useCase) CreateUser(user model.User) (*model.User, error) {

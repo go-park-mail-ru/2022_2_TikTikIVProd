@@ -6,15 +6,8 @@ import (
 
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/model"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/usecase"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg"
 )
-
-type Response struct {
-	Body interface{} `json:"body"`
-}
-
-// type MessageError struct {
-// 	Message string `json:"error"`
-// }
 
 type DeliveryI interface {
 	SignUp(w http.ResponseWriter, r *http.Request)
@@ -32,18 +25,23 @@ func New(uc usecase.UseCaseI) DeliveryI {
 	}
 }
 
-// SignIn godoc
+// SignUp godoc
 // @Summary      SignUp
 // @Description  user sign up
-// @Tags     auth
+// @Tags     users
 // @Accept	 application/json
 // @Produce  application/json
 // @Param    user body model.User true "user info"
-// @Success  200 {object} Response
-// @Router   /signin [post]
+// @Success  201 {object} model.User "user created"
+// @Failure 405 {object} pkg.Error "invalid http method"
+// @Failure 400 {object} pkg.Error "bad request"
+// @Failure 409 {object} pkg.Error "nickname already in use"
+// @Failure 409 {object} pkg.Error "user with this email already exists"
+// @Failure 500 {object} pkg.Error "internal server error"
+// @Router   /signup [post]
 func (del *delivery) SignUp(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "incorrect http method", http.StatusMethodNotAllowed)
+		pkg.ErrorResponse(w, http.StatusMethodNotAllowed, "invalid http method")
 		return
 	}
 
@@ -52,29 +50,21 @@ func (del *delivery) SignUp(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		http.Error(w, "bad request", http.StatusBadRequest)
+		pkg.ErrorResponse(w, http.StatusBadRequest, "bad request")
 		return
 	}
 
-	createdUser, err := del.uc.CreateUser(user)
+	createdUser, createdCookie, err := del.uc.SignUp(user)
 	if err.Error() == "nickname " + user.NickName + "already in use." {
-		http.Error(w, err.Error(), http.StatusConflict)
+		pkg.ErrorResponse(w, http.StatusConflict, err.Error())
 		return
 	} else if err.Error() == "user with email " + user.Email + "already exists." {
-		http.Error(w, err.Error(), http.StatusConflict)
+		pkg.ErrorResponse(w, http.StatusConflict, err.Error())
 		return
 	} else if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-
-	createdCookie, err := del.uc.CreateCookie(createdUser.Id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusCreated)
 
 	http.SetCookie(w, &http.Cookie{
 		Name:    "session_token",
@@ -83,59 +73,55 @@ func (del *delivery) SignUp(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	})
 
-	err = json.NewEncoder(w).Encode(Response {
-										Body: createdUser,
-									})
+	err = pkg.JSONresponse(w, http.StatusCreated, pkg.Response {
+												Body: createdUser,
+											})
 	if err != nil {
-		http.Error(w, "encode error", http.StatusInternalServerError)
+		pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 }
-
 
 // SignIn godoc
 // @Summary      SignIn
 // @Description  user sign in
-// @Tags     auth
+// @Tags     users
 // @Accept	 application/json
 // @Produce  application/json
-// @Param    user body model.User true "user info"
-// @Success  200 {object} model.User
+// @Param    user body model.UserSignIn true "user info"
+// @Success  200 {object} model.User "success sign in"
+// @Failure 405 {object} pkg.Error "invalid http method"
+// @Failure 400 {object} pkg.Error "bad request"
+// @Failure 404 {object} pkg.Error "user doesn't exist"
+// @Failure 401 {object} pkg.Error "invalid password"
+// @Failure 500 {object} pkg.Error "internal server error"
 // @Router   /signin [post]
 func (del *delivery) SignIn(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "incorrect http method", http.StatusMethodNotAllowed)
+		pkg.ErrorResponse(w, http.StatusMethodNotAllowed, "invalid http method")
 		return
 	}
 	
-	user := model.User{}
+	user := model.UserSignIn{}
 
 	defer r.Body.Close()
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		http.Error(w, "bad request", http.StatusBadRequest)
+		pkg.ErrorResponse(w, http.StatusBadRequest, "bad request")
 		return
 	}
 
-	gotUser, err := del.uc.SignIn(user)
+	gotUser, createdCookie, err := del.uc.SignIn(user)
 	if err.Error() == "can't find user with email " + user.Email {
-		http.Error(w, err.Error(), http.StatusConflict)
+		pkg.ErrorResponse(w, http.StatusNotFound, err.Error())
 		return
-	} else if err.Error() == "incorrect password" {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+	} else if err.Error() == "invalid password" {
+		pkg.ErrorResponse(w, http.StatusUnauthorized, err.Error())
 		return
 	} else if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-
-	createdCookie, err := del.uc.CreateCookie(gotUser.Id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
 
 	http.SetCookie(w, &http.Cookie{
 		Name:    "session_token",
@@ -143,26 +129,45 @@ func (del *delivery) SignIn(w http.ResponseWriter, r *http.Request) {
 		Expires: createdCookie.Expires,
 		HttpOnly: true,
 	})
+
+	err = pkg.JSONresponse(w, http.StatusOK, pkg.Response {
+												Body: gotUser,
+											 })
+	if err != nil {
+		pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error())
+		return
+	}
 }
 
+// Auth godoc
+// @Summary      Auth
+// @Description  check user auth
+// @Tags     users
+// @Accept	 application/json
+// @Produce  application/json
+// @Success  200 {object} model.User "success auth"
+// @Failure 405 {object} pkg.Error "invalid http method"
+// @Failure 400 {object} pkg.Error "bad request"
+// @Failure 401 {object} pkg.Error "no cookie"
+// @Router   /auth [get]
 func (del *delivery) Auth(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "incorrect http method", http.StatusMethodNotAllowed)
+		pkg.ErrorResponse(w, http.StatusMethodNotAllowed, "invalid http method")
 		return
 	}
 
 	cookie, err := r.Cookie("session_token")
 	if err == http.ErrNoCookie {
-		w.WriteHeader(http.StatusUnauthorized)
+		pkg.ErrorResponse(w, http.StatusUnauthorized, err.Error())
 		return
 	} else if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		pkg.ErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	_, err = del.uc.SelectCookie(cookie.Value)
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
+		pkg.ErrorResponse(w, http.StatusUnauthorized, err.Error())
 		return
 	}
 

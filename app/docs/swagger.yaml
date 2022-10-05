@@ -1,8 +1,4 @@
 definitions:
-  delivery.Response:
-    properties:
-      body: {}
-    type: object
   model.User:
     properties:
       avatar:
@@ -20,12 +16,51 @@ definitions:
       password:
         type: string
     type: object
+  model.UserSignIn:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  pkg.Error:
+    properties:
+      error:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact: {}
   title: WS Swagger API
   version: "1.0"
 paths:
+  /auth:
+    get:
+      consumes:
+      - application/json
+      description: check user auth
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success auth
+          schema:
+            $ref: '#/definitions/model.User'
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/pkg.Error'
+      summary: Auth
+      tags:
+      - users
   /signin:
     post:
       consumes:
@@ -37,15 +72,73 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/model.User'
+          $ref: '#/definitions/model.UserSignIn'
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: success sign in
           schema:
             $ref: '#/definitions/model.User'
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "401":
+          description: invalid password
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "404":
+          description: user doesn't exist
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/pkg.Error'
       summary: SignIn
       tags:
-      - auth
+      - users
+  /signup:
+    post:
+      consumes:
+      - application/json
+      description: user sign up
+      parameters:
+      - description: user info
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/model.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: user created
+          schema:
+            $ref: '#/definitions/model.User'
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "409":
+          description: user with this email already exists
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/pkg.Error'
+      summary: SignUp
+      tags:
+      - users
 swagger: "2.0"
