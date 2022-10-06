@@ -28,7 +28,7 @@ definitions:
       error:
         type: string
     type: object
-host: localhost:8080
+host: 89.208.197.127:8080
 info:
   contact: {}
   title: WS Swagger API
@@ -56,6 +56,10 @@ paths:
             $ref: '#/definitions/pkg.Error'
         "405":
           description: invalid http method
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "500":
+          description: internal server error
           schema:
             $ref: '#/definitions/pkg.Error'
       summary: Auth

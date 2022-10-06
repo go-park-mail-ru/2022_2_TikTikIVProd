@@ -53,6 +53,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/pkg.Error"
                         }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.Error"
+                        }
                     }
                 }
             }
@@ -270,7 +276,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "89.208.197.127:8080",
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "WS Swagger API",

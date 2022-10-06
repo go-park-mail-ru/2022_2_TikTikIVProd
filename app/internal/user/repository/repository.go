@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"fmt"
+
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
@@ -54,9 +56,11 @@ func (dbUsers *dataBase) SelectUserByNickName(nickname string) (*model.User, err
 func (dbUsers *dataBase) SelectUserByEmail(email string) (*model.User, error) {
 	user := model.User{}
 	//row := dbUsers.db.Table("users").Select("").Where("email = ?", email).Joins("JOIN images ON users.avatar_img_id=images.id").Row()
-	row := dbUsers.db.Table("users").Where("email = ?", email).Row()
+	row := dbUsers.db.Table("users").Select("id, first_name, last_name," +
+		"nick_name, COALESCE(avatar_img_id, 0), email, passhash").Where("email = ?", email).Row()
 	err := row.Scan(&user.Id, &user.FirstName, &user.LastName, &user.NickName, &user.Avatar, &user.Email, &user.Password)
 	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 
@@ -66,14 +70,11 @@ func (dbUsers *dataBase) SelectUserByEmail(email string) (*model.User, error) {
 func (dbUsers *dataBase) CreateUser(u model.User) (*model.User, error) {
 	user := model.User{}
 
-	row := dbUsers.db.Table("users").Select("first_name", "last_name", "nick_name",
-		"email", "passhash").Create(&user).Clauses(clause.Returning{}).Row()
-
-	// row := dbUsers.db.Exec("INSERT INTO users (first_name, last_name, nick_name, avatar_img_id, email, passhash) VALUES (?, ?, ?, ?, ?, ?) RETURNING *",
-	// 		u.FirstName, u.LastName, u.NickName, u.Avatar, u.Email, u.Password).Row()
-	err := row.Scan(&user.Id, &user.FirstName, &user.LastName, &user.NickName, &user.Avatar, &user.Email, &user.Password)
-	if err != nil {
-		return nil, err
+	tx := dbUsers.db.Table("users").Exec("INSERT INTO users (first_name, last_name, nick_name, email, passhash) VALUES (?, ?, ?, ?, ?) RETURNING *",
+			u.FirstName, u.LastName, u.NickName, u.Email, u.Password).Scan(&user)
+	if tx.Error != nil {
+		fmt.Println(tx.Error)
+		return nil, tx.Error
 	}
 
 	return &user, nil
@@ -82,10 +83,7 @@ func (dbUsers *dataBase) CreateUser(u model.User) (*model.User, error) {
 func (dbUsers *dataBase) CreateCookie(c model.Cookie) (*model.Cookie, error) {
 	cookie := model.Cookie{}
 
-	row := dbUsers.db.Table("cookies").Select("value", "user_id", "expires").Create(&cookie).Clauses(clause.Returning{}).Row()
-
-	// row := dbUsers.db.Exec("INSERT INTO cookies (value, user_id, expires) VALUES (?, ?, ?) RETURNING *",
-	// 			   c.SessionToken, c.UserId, c.Expires).Row()
+	row := dbUsers.db.Table("cookies").Create(&c).Clauses(clause.Returning{}).Row()
 	err := row.Scan(&cookie.SessionToken, &cookie.UserId, &cookie.Expires)
 	if err != nil {
 		return nil, err
