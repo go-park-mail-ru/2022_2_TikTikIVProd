@@ -13,7 +13,7 @@ import (
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/cmd/router"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/cmd/server"
 	usersDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/delivery"
-	usersRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository"
+	usersPg "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository/postgres"
 	usersUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/usecase"
 )
 
@@ -34,7 +34,7 @@ func main() {
 	postsUsecase := postsUsecase.NewPostsUsecase(dbPosts, dbImages)
 	postsDeliver := postsDelivery.NewDelivery(postsUsecase)
 
-	usersDB := usersRep.New(db)
+	usersDB := usersPg.New(db)
 	usersUC := usersUseCase.New(usersDB)
 	usersDeliver := usersDelivery.New(usersUC)
 

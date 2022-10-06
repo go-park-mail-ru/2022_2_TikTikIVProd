@@ -12,6 +12,8 @@ import (
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository"
 )
 
+//go:generate mockgen -source=usecase.go -destination=mocks/mock.go
+
 type UseCaseI interface {
 	SelectUserByNickName(nickname string) (*model.User, error)
 	SelectUserByEmail(email string) (*model.User, error)
