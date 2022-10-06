@@ -3,7 +3,6 @@ module github.com/go-park-mail-ru/2022_2_TikTikIVProd
 go 1.16
 
 require (
-	github.com/golang/mock v1.6.0 // indirect
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0
 	github.com/swaggo/swag v1.8.6
