@@ -70,6 +70,7 @@ func (del *delivery) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
 
 	http.SetCookie(w, &http.Cookie{
 		Name:    "session_token",
@@ -130,6 +131,7 @@ func (del *delivery) SignIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
 
 	http.SetCookie(w, &http.Cookie{
 		Name:    "session_token",
@@ -180,6 +182,7 @@ func (del *delivery) Logout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
 
 	http.SetCookie(w, &http.Cookie{
 		Name:    "session_token",
@@ -230,6 +233,7 @@ func (del *delivery) Auth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
 
 	err = pkg.JSONresponse(w, http.StatusOK, pkg.Response {
 												Body: gotUser,
