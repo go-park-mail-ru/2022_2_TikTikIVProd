@@ -19,7 +19,7 @@ type TestCase struct {
 func TestDelivery_signUp(t *testing.T) {
 	cases := []TestCase{
 		{
-			User:       `{"first_name":"Nastya", "last_name":"Kuznetsova", "nick_name":"kuzkus", "email":"aaa@gmail.com", "password":"password1"}`,
+			User:   `{"first_name":"Nastya", "last_name":"Kuznetsova", "nick_name":"kuzkus", "email":"aaa@gmail.com", "password":"password1"}`,
 			Method: "POST",
 			StatusCode: http.StatusCreated,
 		},
@@ -27,6 +27,11 @@ func TestDelivery_signUp(t *testing.T) {
 			User:       `{""}`,
 			Method: "POST",
 			StatusCode: http.StatusBadRequest,
+		},
+		{
+			User:       `{""}`,
+			Method: "GET",
+			StatusCode: http.StatusMethodNotAllowed,
 		},
 	}
 	for caseNum, item := range cases {
@@ -43,14 +48,77 @@ func TestDelivery_signUp(t *testing.T) {
 			t.Errorf("[%d] wrong StatusCode: got %d, expected %d",
 				caseNum, w.Code, item.StatusCode)
 		}
-
-		// resp := w.Result()
-		// body, _ := ioutil.ReadAll(resp.Body)
-
-		// bodyStr := string(body)
-		// if bodyStr != item.Response {
-		// 	t.Errorf("[%d] wrong Response: got %+v, expected %+v",
-		// 		caseNum, bodyStr, item.Response)
-		// }
 	}
 }
+
+func TestDelivery_signInFailure(t *testing.T) {
+	cases := []TestCase{
+		{
+			User:       `{""}`,
+			Method: "POST",
+			StatusCode: http.StatusBadRequest,
+		},
+		{
+			User:       `{""}`,
+			Method: "GET",
+			StatusCode: http.StatusMethodNotAllowed,
+		},
+		{
+			User:       `{"email":"aaa@gmail.com", "password":"password1"}`,
+			Method: "POST",
+			StatusCode: http.StatusNotFound,
+		},
+	}
+	for caseNum, item := range cases {
+		url := "http://89.208.197.127:8080/signin"
+		req := httptest.NewRequest(item.Method, url, strings.NewReader(item.User))
+		w := httptest.NewRecorder()
+
+		usersLocalStorage := localstorage.New()
+		usersUC := usecase.New(usersLocalStorage)
+		usersDeliver := New(usersUC)
+		usersDeliver.SignIn(w, req)
+
+		if w.Code != item.StatusCode {
+			t.Errorf("[%d] wrong StatusCode: got %d, expected %d",
+				caseNum, w.Code, item.StatusCode)
+		}
+	}
+}
+
+func TestDelivery_LogoutFailure(t *testing.T) {
+	cases := []TestCase{
+		{
+			User:       `{""}`,
+			Method: "POST",
+			StatusCode: http.StatusBadRequest,
+		},
+		{
+			User:       `{""}`,
+			Method: "GET",
+			StatusCode: http.StatusMethodNotAllowed,
+		},
+		{
+			User:       `{"email":"aaa@gmail.com", "password":"password1"}`,
+			Method: "POST",
+			StatusCode: http.StatusNotFound,
+		},
+	}
+	for caseNum, item := range cases {
+		url := "http://89.208.197.127:8080/signin"
+		req := httptest.NewRequest(item.Method, url, strings.NewReader(item.User))
+		w := httptest.NewRecorder()
+
+		usersLocalStorage := localstorage.New()
+		usersUC := usecase.New(usersLocalStorage)
+		usersDeliver := New(usersUC)
+		usersDeliver.SignIn(w, req)
+
+		if w.Code != item.StatusCode {
+			t.Errorf("[%d] wrong StatusCode: got %d, expected %d",
+				caseNum, w.Code, item.StatusCode)
+		}
+	}
+}
+
+

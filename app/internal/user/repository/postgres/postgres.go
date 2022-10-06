@@ -1,6 +1,8 @@
 package postgres
 
 import (
+	"fmt"
+
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
@@ -57,11 +59,14 @@ func (dbUsers *dataBase) SelectUserByEmail(email string) (*model.User, error) {
 func (dbUsers *dataBase) CreateUser(u model.User) (*model.User, error) {
 	user := model.User{}
 
-	tx := dbUsers.db.Table("users").Exec("INSERT INTO users (first_name, last_name, nick_name, email, passhash) VALUES (?, ?, ?, ?, ?) RETURNING *",
+	fmt.Println(u)
+	tx := dbUsers.db.Table("users").Raw("INSERT INTO users (first_name, last_name, nick_name, email, passhash) VALUES (?, ?, ?, ?, ?) RETURNING *",
 			u.FirstName, u.LastName, u.NickName, u.Email, u.Password).Scan(&user)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
+
+	fmt.Println(user)
 
 	return &user, nil
 }

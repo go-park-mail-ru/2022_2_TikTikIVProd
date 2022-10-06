@@ -22,7 +22,7 @@ import (
 // @host 89.208.197.127:8080
 
 func main() {
-	db, err := gorm.Open(postgres.New(postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}),
+	db, err := gorm.Open(postgres.New(postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}),
 		&gorm.Config{})
 
 	if err != nil {

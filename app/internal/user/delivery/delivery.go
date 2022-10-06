@@ -70,11 +70,6 @@ func (del *delivery) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Headers", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-	w.Header().Set("Content-Type", "application/json")
-
 	http.SetCookie(w, &http.Cookie{
 		Name:    "session_token",
 		Value:   createdCookie.SessionToken,
@@ -82,9 +77,7 @@ func (del *delivery) SignUp(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	})
 
-	err = pkg.JSONresponse(w, http.StatusCreated, pkg.Response {
-												Body: createdUser,
-											})
+	err = pkg.JSONresponse(w, http.StatusCreated, createdUser)
 	if err != nil {
 		pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
@@ -141,9 +134,7 @@ func (del *delivery) SignIn(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	})
 
-	err = pkg.JSONresponse(w, http.StatusOK, pkg.Response {
-												Body: gotUser,
-											 })
+	err = pkg.JSONresponse(w, http.StatusOK, gotUser)
 	if err != nil {
 		pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
@@ -232,9 +223,7 @@ func (del *delivery) Auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = pkg.JSONresponse(w, http.StatusOK, pkg.Response {
-												Body: gotUser,
-											})
+	err = pkg.JSONresponse(w, http.StatusOK, gotUser)
 	if err != nil {
 		pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
