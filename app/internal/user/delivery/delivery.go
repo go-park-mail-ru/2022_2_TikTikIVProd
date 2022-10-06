@@ -2,7 +2,6 @@ package delivery
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -43,7 +42,7 @@ func New(uc usecase.UseCaseI) DeliveryI {
 // @Failure 500 {object} pkg.Error "internal server error"
 // @Router   /signup [post]
 func (del *delivery) SignUp(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.Header)
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
 	if r.Method != http.MethodPost {
 		pkg.ErrorResponse(w, http.StatusMethodNotAllowed, "invalid http method")
 		return
@@ -107,7 +106,7 @@ func (del *delivery) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} pkg.Error "internal server error"
 // @Router   /signin [post]
 func (del *delivery) SignIn(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.Header)
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
 	if r.Method != http.MethodPost {
 		pkg.ErrorResponse(w, http.StatusMethodNotAllowed, "invalid http method")
 		return
@@ -134,11 +133,6 @@ func (del *delivery) SignIn(w http.ResponseWriter, r *http.Request) {
 		pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Headers", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-	w.Header().Set("Content-Type", "application/json")
 
 	http.SetCookie(w, &http.Cookie{
 		Name:    "session_token",
@@ -168,7 +162,7 @@ func (del *delivery) SignIn(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} pkg.Error "no cookie"
 // @Router   /logout [get]
 func (del *delivery) Logout(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.Header)
+	w.Header().Set("Access-Control-Allow-Methods", "GET")
 	if r.Method != http.MethodGet {
 		pkg.ErrorResponse(w, http.StatusMethodNotAllowed, "invalid http method")
 		return
@@ -188,11 +182,6 @@ func (del *delivery) Logout(w http.ResponseWriter, r *http.Request) {
 		pkg.ErrorResponse(w, http.StatusUnauthorized, err.Error())
 		return
 	}
-
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Headers", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-	w.Header().Set("Content-Type", "application/json")
 
 	http.SetCookie(w, &http.Cookie{
 		Name:    "session_token",
@@ -216,7 +205,7 @@ func (del *delivery) Logout(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} pkg.Error "no cookie"
 // @Router   /auth [get]
 func (del *delivery) Auth(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.Header)
+	w.Header().Set("Access-Control-Allow-Methods", "GET")
 	if r.Method != http.MethodGet {
 		pkg.ErrorResponse(w, http.StatusMethodNotAllowed, "invalid http method")
 		return
@@ -242,11 +231,6 @@ func (del *delivery) Auth(w http.ResponseWriter, r *http.Request) {
 		pkg.ErrorResponse(w, http.StatusUnauthorized, err.Error())
 		return
 	}
-
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Headers", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-	w.Header().Set("Content-Type", "application/json")
 
 	err = pkg.JSONresponse(w, http.StatusOK, pkg.Response {
 												Body: gotUser,

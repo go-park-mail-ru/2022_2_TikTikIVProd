@@ -17,6 +17,7 @@ type delivery struct {
 }
 
 func (delivery *delivery) Feed(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Methods", "GET")
 	fmt.Println(r.Header)
 	if r.Method != http.MethodGet {
 		pkg.ErrorResponse(w, http.StatusMethodNotAllowed, "invalid http method")
@@ -29,11 +30,6 @@ func (delivery *delivery) Feed(w http.ResponseWriter, r *http.Request) {
 		pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Headers", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-	w.Header().Set("Content-Type", "application/json")
 
 	err = pkg.JSONresponse(w, http.StatusOK, posts)
 	if err != nil {
