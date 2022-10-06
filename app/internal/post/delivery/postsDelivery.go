@@ -15,6 +15,16 @@ type delivery struct {
 	pUsecase postsUsecase.UseCaseI
 }
 
+// Feed godoc
+// @Summary      Feed
+// @Description  Feed
+// @Tags     	 posts
+// @Accept	 application/json
+// @Produce  application/json
+// @Success  200 {object} []model.Post "success get feed"
+// @Failure 405 {object} pkg.Error "invalid http method"
+// @Failure 500 {object} pkg.Error "internal server error"
+// @Router   /feed [get]
 func (delivery *delivery) Feed(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Methods", "GET")
 	if r.Method != http.MethodGet {
