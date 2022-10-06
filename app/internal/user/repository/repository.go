@@ -1,8 +1,6 @@
 package repository
 
 import (
-	"fmt"
-
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
@@ -55,12 +53,10 @@ func (dbUsers *dataBase) SelectUserByNickName(nickname string) (*model.User, err
 
 func (dbUsers *dataBase) SelectUserByEmail(email string) (*model.User, error) {
 	user := model.User{}
-	//row := dbUsers.db.Table("users").Select("").Where("email = ?", email).Joins("JOIN images ON users.avatar_img_id=images.id").Row()
 	row := dbUsers.db.Table("users").Select("id, first_name, last_name," +
 		"nick_name, COALESCE(avatar_img_id, 0), email, passhash").Where("email = ?", email).Row()
 	err := row.Scan(&user.Id, &user.FirstName, &user.LastName, &user.NickName, &user.Avatar, &user.Email, &user.Password)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
@@ -73,7 +69,6 @@ func (dbUsers *dataBase) CreateUser(u model.User) (*model.User, error) {
 	tx := dbUsers.db.Table("users").Exec("INSERT INTO users (first_name, last_name, nick_name, email, passhash) VALUES (?, ?, ?, ?, ?) RETURNING *",
 			u.FirstName, u.LastName, u.NickName, u.Email, u.Password).Scan(&user)
 	if tx.Error != nil {
-		fmt.Println(tx.Error)
 		return nil, tx.Error
 	}
 
