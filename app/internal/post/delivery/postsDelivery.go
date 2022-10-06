@@ -1,6 +1,7 @@
 package postsRouter
 
 import (
+	"fmt"
 	"net/http"
 
 	postsUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/usecase"
@@ -16,6 +17,7 @@ type delivery struct {
 }
 
 func (delivery *delivery) Feed(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.Header)
 	if r.Method != http.MethodGet {
 		pkg.ErrorResponse(w, http.StatusMethodNotAllowed, "invalid http method")
 		return

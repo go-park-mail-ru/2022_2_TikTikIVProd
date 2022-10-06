@@ -2,6 +2,7 @@ package delivery
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -42,6 +43,7 @@ func New(uc usecase.UseCaseI) DeliveryI {
 // @Failure 500 {object} pkg.Error "internal server error"
 // @Router   /signup [post]
 func (del *delivery) SignUp(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.Header)
 	if r.Method != http.MethodPost {
 		pkg.ErrorResponse(w, http.StatusMethodNotAllowed, "invalid http method")
 		return
@@ -103,6 +105,7 @@ func (del *delivery) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} pkg.Error "internal server error"
 // @Router   /signin [post]
 func (del *delivery) SignIn(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.Header)
 	if r.Method != http.MethodPost {
 		pkg.ErrorResponse(w, http.StatusMethodNotAllowed, "invalid http method")
 		return
@@ -161,6 +164,7 @@ func (del *delivery) SignIn(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} pkg.Error "no cookie"
 // @Router   /logout [get]
 func (del *delivery) Logout(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.Header)
 	if r.Method != http.MethodGet {
 		pkg.ErrorResponse(w, http.StatusMethodNotAllowed, "invalid http method")
 		return
@@ -206,6 +210,7 @@ func (del *delivery) Logout(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} pkg.Error "no cookie"
 // @Router   /auth [get]
 func (del *delivery) Auth(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.Header)
 	if r.Method != http.MethodGet {
 		pkg.ErrorResponse(w, http.StatusMethodNotAllowed, "invalid http method")
 		return
