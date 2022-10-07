@@ -1,10 +1,7 @@
 package postgres
 
 import (
-	"fmt"
-
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/model"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository"
@@ -23,10 +20,9 @@ func New(db *gorm.DB) repository.RepositoryI {
 func (dbUsers *dataBase) SelectUserById(id int) (*model.User, error) {
 	user := model.User{}
 
-	row := dbUsers.db.Table("users").Where("id = ?", id).Row()
-	err := row.Scan(&user.Id, &user.FirstName, &user.LastName, &user.NickName, &user.Avatar, &user.Email, &user.Password)
-	if err != nil {
-		return nil, err
+	tx := dbUsers.db.Table("users").Where("id = ?", id).Scan(&user)
+	if tx.Error != nil {
+		return nil, tx.Error
 	}
 
 	return &user, nil
@@ -35,10 +31,9 @@ func (dbUsers *dataBase) SelectUserById(id int) (*model.User, error) {
 func (dbUsers *dataBase) SelectUserByNickName(nickname string) (*model.User, error) {
 	user := model.User{}
 
-	row := dbUsers.db.Table("users").Where("nick_name = ?", nickname).Row()
-	err := row.Scan(&user.Id, &user.FirstName, &user.LastName, &user.NickName, &user.Avatar, &user.Email, &user.Password)
-	if err != nil {
-		return nil, err
+	tx := dbUsers.db.Table("users").Where("nick_name = ?", nickname).Scan(&user)
+	if tx.Error != nil {
+		return nil, tx.Error
 	}
 
 	return &user, nil
@@ -46,11 +41,9 @@ func (dbUsers *dataBase) SelectUserByNickName(nickname string) (*model.User, err
 
 func (dbUsers *dataBase) SelectUserByEmail(email string) (*model.User, error) {
 	user := model.User{}
-	row := dbUsers.db.Table("users").Select("id, first_name, last_name," +
-		"nick_name, COALESCE(avatar_img_id, 0), email, passhash").Where("email = ?", email).Row()
-	err := row.Scan(&user.Id, &user.FirstName, &user.LastName, &user.NickName, &user.Avatar, &user.Email, &user.Password)
-	if err != nil {
-		return nil, err
+	tx := dbUsers.db.Table("users").Where("email = ?", email).Scan(&user)
+	if tx.Error != nil {
+		return nil, tx.Error
 	}
 
 	return &user, nil
@@ -59,14 +52,11 @@ func (dbUsers *dataBase) SelectUserByEmail(email string) (*model.User, error) {
 func (dbUsers *dataBase) CreateUser(u model.User) (*model.User, error) {
 	user := model.User{}
 
-	fmt.Println(u)
 	tx := dbUsers.db.Table("users").Raw("INSERT INTO users (first_name, last_name, nick_name, email, passhash) VALUES (?, ?, ?, ?, ?) RETURNING *",
 			u.FirstName, u.LastName, u.NickName, u.Email, u.Password).Scan(&user)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
-
-	fmt.Println(user)
 
 	return &user, nil
 }
@@ -74,10 +64,10 @@ func (dbUsers *dataBase) CreateUser(u model.User) (*model.User, error) {
 func (dbUsers *dataBase) CreateCookie(c model.Cookie) (*model.Cookie, error) {
 	cookie := model.Cookie{}
 
-	row := dbUsers.db.Table("cookies").Create(&c).Clauses(clause.Returning{}).Row()
-	err := row.Scan(&cookie.SessionToken, &cookie.UserId, &cookie.Expires)
-	if err != nil {
-		return nil, err
+	tx := dbUsers.db.Table("cookies").Raw("INSERT INTO cookies VALUES (?, ?, ?) RETURNING *",
+			c.SessionToken, c.UserId, c.Expires).Scan(&cookie)
+	if tx.Error != nil {
+		return nil, tx.Error
 	}
 	
 	return &cookie, nil
@@ -86,21 +76,18 @@ func (dbUsers *dataBase) CreateCookie(c model.Cookie) (*model.Cookie, error) {
 func (dbUsers *dataBase) SelectCookie(value string) (*model.Cookie, error) {
 	cookie := model.Cookie{}
 
-	row := dbUsers.db.Table("cookies").Where("value = ?", value).Row()
-	err := row.Scan(&cookie.SessionToken, &cookie.UserId, &cookie.Expires)
-	if err != nil {
-		return nil, err
+	tx := dbUsers.db.Table("cookies").Where("value = ?", value).Scan(&cookie)
+	if tx.Error != nil {
+		return nil, tx.Error
 	}
 
 	return &cookie, nil
 }
 
 func (dbUsers *dataBase) DeleteCookie(value string) (error) {
-	err := dbUsers.db.Table("cookies").Delete(&model.Cookie {
-											SessionToken: value,
-										}).Error
-	if err != nil {
-		return err
+	tx := dbUsers.db.Table("cookies").Exec("DELETE FROM cookies WHERE value = ?", value)
+	if tx.Error != nil {
+		return tx.Error
 	}
 	
 	return nil
