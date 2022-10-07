@@ -80,10 +80,10 @@ func (dbUsers *dataBase) CreateCookie(c model.Cookie) (*model.Cookie, error) {
 func (dbUsers *dataBase) SelectCookie(value string) (*model.Cookie, error) {
 	cookie := model.Cookie{}
 
-	row := dbUsers.db.Table("cookies").Where("value = ?", value).Row()
-	err := row.Scan(&cookie.SessionToken, &cookie.UserId, &cookie.Expires)
-	if err != nil {
-		return nil, err
+	row := dbUsers.db.Table("cookies").Raw("SELECT * FROM cookies WHERE value = ?", value). Scan(&cookie)
+
+	if row.Error != nil {
+		return nil, row.Error
 	}
 
 	return &cookie, nil
