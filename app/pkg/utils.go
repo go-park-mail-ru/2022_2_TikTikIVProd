@@ -15,7 +15,7 @@ type Error struct {
 
 func JSONresponse(w http.ResponseWriter, code int, body interface{}) error {
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Origin", "http://89.208.197.127")
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 	w.Header().Set("Content-Type", "application/json")
 
