@@ -1,10 +1,7 @@
 package postgres
 
 import (
-	"fmt"
-
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/model"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository"
@@ -59,14 +56,11 @@ func (dbUsers *dataBase) SelectUserByEmail(email string) (*model.User, error) {
 func (dbUsers *dataBase) CreateUser(u model.User) (*model.User, error) {
 	user := model.User{}
 
-	fmt.Println(u)
 	tx := dbUsers.db.Table("users").Raw("INSERT INTO users (first_name, last_name, nick_name, email, passhash) VALUES (?, ?, ?, ?, ?) RETURNING *",
 			u.FirstName, u.LastName, u.NickName, u.Email, u.Password).Scan(&user)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
-
-	fmt.Println(user)
 
 	return &user, nil
 }
@@ -74,12 +68,12 @@ func (dbUsers *dataBase) CreateUser(u model.User) (*model.User, error) {
 func (dbUsers *dataBase) CreateCookie(c model.Cookie) (*model.Cookie, error) {
 	cookie := model.Cookie{}
 
-	row := dbUsers.db.Table("cookies").Create(&c).Clauses(clause.Returning{}).Row()
-	err := row.Scan(&cookie.SessionToken, &cookie.UserId, &cookie.Expires)
-	if err != nil {
-		return nil, err
+	tx := dbUsers.db.Table("cookies").Raw("INSERT INTO cookies VALUES (?, ?, ?) RETURNING *",
+			c.SessionToken, c.UserId, c.Expires).Scan(&cookie)
+	if tx.Error != nil {
+		return nil, tx.Error
 	}
-	
+
 	return &cookie, nil
 }
 
