@@ -27,6 +27,7 @@ func main() {
 
 	if err != nil {
 		log.Fatal(err)
+		return
 	}
 
 	dbPosts := postsRep.NewDataBasePosts(db)
