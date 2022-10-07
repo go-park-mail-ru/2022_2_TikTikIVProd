@@ -15,6 +15,9 @@ rm_db:
 create_tables:
 	psql postgresql://postgres:postgres@localhost:13080/postgres -f SQL/create.sql
 
+fill_tables:
+	psql postgresql://postgres:postgres@localhost:13080/postgres -f SQL/data.sql
+
 drop_tables:
 	psql postgresql://postgres:postgres@localhost:13080/postgres -f SQL/drop_all.sql
 

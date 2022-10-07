@@ -1,5 +1,12 @@
 module github.com/go-park-mail-ru/2022_2_TikTikIVProd
 
-go 1.19
+go 1.16
 
-require github.com/gorilla/mux v1.8.0 // indirect
+require (
+	github.com/google/uuid v1.3.0
+	github.com/gorilla/mux v1.8.0
+	github.com/swaggo/swag v1.8.6
+	golang.org/x/crypto v0.0.0-20221005025214-4161e89ecf1b
+	gorm.io/driver/postgres v1.3.10
+	gorm.io/gorm v1.23.10
+)
