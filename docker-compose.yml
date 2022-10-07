@@ -15,8 +15,9 @@ services:
 
   server:
     build: .
+    restart: always
     depends_on:
-      - "ws_pg"
+      - ws_pg
     ports:
       - "8080:8080"
     networks:
