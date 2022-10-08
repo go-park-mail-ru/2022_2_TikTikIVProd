@@ -101,7 +101,7 @@ func (uc *useCase) SignIn(user model.UserSignIn) (*model.User, *model.Cookie, er
 	}
 
 	if err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(user.Password)); err != nil {
-		return nil, nil, errors.New("incorrect password")
+		return nil, nil, errors.New("invalid password")
 	}
 
 	cookie, err := uc.CreateCookie(u.Id)

@@ -59,10 +59,10 @@ func (del *delivery) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	createdUser, createdCookie, err := del.uc.SignUp(user)
 	if err != nil {
-		if err.Error() == "nickname already in use." {
+		if err.Error() == "nickname already in use" {
 			pkg.ErrorResponse(w, http.StatusConflict, err.Error())
 			return
-		} else if err.Error() == "user with such email already exists." {
+		} else if err.Error() == "user with such email already exists" {
 			pkg.ErrorResponse(w, http.StatusConflict, err.Error())
 			return
 		}
