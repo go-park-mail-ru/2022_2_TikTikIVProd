@@ -1,6 +1,8 @@
 package postgres
 
 import (
+	"errors"
+
 	"gorm.io/gorm"
 
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/model"
@@ -34,6 +36,8 @@ func (dbUsers *dataBase) SelectUserByNickName(nickname string) (*model.User, err
 	tx := dbUsers.db.Table("users").Where("nick_name = ?", nickname).Scan(&user)
 	if tx.Error != nil {
 		return nil, tx.Error
+	} else if user.NickName == "" {
+		return nil, errors.New("user with such nickname doesn't exist")
 	}
 
 	return &user, nil
@@ -44,6 +48,8 @@ func (dbUsers *dataBase) SelectUserByEmail(email string) (*model.User, error) {
 	tx := dbUsers.db.Table("users").Where("email = ?", email).Scan(&user)
 	if tx.Error != nil {
 		return nil, tx.Error
+	} else if user.NickName == "" {
+		return nil, errors.New("user with such email doesn't exists")
 	}
 
 	return &user, nil
@@ -77,8 +83,8 @@ func (dbUsers *dataBase) SelectCookie(value string) (*model.Cookie, error) {
 	cookie := model.Cookie{}
 
 	tx := dbUsers.db.Table("cookies").Where("value = ?", value).Scan(&cookie)
-	if tx.Error != nil {
-		return nil, tx.Error
+	if tx.Error != nil || cookie.SessionToken == "" {
+		return nil, errors.New("cookie doesn't exist")
 	}
 
 	return &cookie, nil

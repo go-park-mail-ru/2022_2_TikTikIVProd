@@ -59,10 +59,10 @@ func (del *delivery) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	createdUser, createdCookie, err := del.uc.SignUp(user)
 	if err != nil {
-		if err.Error() == "nickname " + user.NickName + "already in use." {
+		if err.Error() == "nickname already in use." {
 			pkg.ErrorResponse(w, http.StatusConflict, err.Error())
 			return
-		} else if err.Error() == "user with email " + user.Email + "already exists." {
+		} else if err.Error() == "user with such email already exists." {
 			pkg.ErrorResponse(w, http.StatusConflict, err.Error())
 			return
 		}
@@ -116,7 +116,7 @@ func (del *delivery) SignIn(w http.ResponseWriter, r *http.Request) {
 
 	gotUser, createdCookie, err := del.uc.SignIn(user)
 	if err != nil {
-		if err.Error() == "can't find user with email " + user.Email {
+		if err.Error() == "can't find user with such email" {
 			pkg.ErrorResponse(w, http.StatusNotFound, err.Error())
 			return
 		} else if err.Error() == "invalid password" {

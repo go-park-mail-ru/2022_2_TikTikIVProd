@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"errors"
-	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -71,7 +70,7 @@ func (uc *useCase) DeleteCookie(value string) (error) {
 func (uc *useCase) SelectUserById(id int) (*model.User, error) {
 	user, err := uc.repository.SelectUserById(id)
 	if err != nil {
-		return nil, errors.New("can't find user with id " + strconv.Itoa(id))
+		return nil, errors.New("can't find user with such id")
 	}
 
 	return user, nil
@@ -80,7 +79,7 @@ func (uc *useCase) SelectUserById(id int) (*model.User, error) {
 func (uc *useCase) SelectUserByNickName(nickname string) (*model.User, error) {
 	user, err := uc.repository.SelectUserByNickName(nickname)
 	if err != nil {
-		return nil, errors.New("can't find user with nickname " + nickname)
+		return nil, errors.New("can't find user with such nickname")
 	}
 
 	return user, nil
@@ -89,7 +88,7 @@ func (uc *useCase) SelectUserByNickName(nickname string) (*model.User, error) {
 func (uc *useCase) SelectUserByEmail(email string) (*model.User, error) {
 	user, err := uc.repository.SelectUserByEmail(email)
 	if err != nil {
-		return nil, errors.New("can't find user with email " + email)
+		return nil, errors.New("can't find user with such email")
 	}
 
 	return user, nil
@@ -129,11 +128,11 @@ func (uc *useCase) SignUp(user model.User) (*model.User, *model.Cookie, error) {
 
 func (uc *useCase) CreateUser(user model.User) (*model.User, error) {	
 	if _, err := uc.repository.SelectUserByNickName(user.NickName); err == nil {
-		return nil, errors.New("nickname " + user.NickName + "already in use.")
+		return nil, errors.New("nickname already in use")
 	}
 
 	if _, err := uc.repository.SelectUserByEmail(user.Email); err == nil {
-		return nil, errors.New("user with email " + user.Email + "already exists.")
+		return nil, errors.New("user with such email already exists")
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), 8)
