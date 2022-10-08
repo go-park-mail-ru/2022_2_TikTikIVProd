@@ -3,21 +3,21 @@ package router
 import (
 	"github.com/gorilla/mux"
 
-	usersDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/delivery"
 	postsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/delivery"
+	usersDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/delivery"
 )
 
 type Router struct {
 	*mux.Router
 	usersD usersDelivery.DeliveryI
-	pd postsDelivery.DeliveryI
+	pd     postsDelivery.DeliveryI
 }
 
 func NewRouter(usersD usersDelivery.DeliveryI, pd postsDelivery.DeliveryI) *Router {
-	r := &Router {
+	r := &Router{
 		Router: mux.NewRouter(),
 		usersD: usersD,
-		pd: pd,
+		pd:     pd,
 	}
 
 	r.HandleFunc("/signin", usersD.SignIn)
@@ -27,4 +27,3 @@ func NewRouter(usersD usersDelivery.DeliveryI, pd postsDelivery.DeliveryI) *Rout
 	r.HandleFunc("/feed", pd.Feed)
 	return r
 }
-

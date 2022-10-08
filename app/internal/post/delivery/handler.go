@@ -1,6 +1,7 @@
 package postsRouter
 
 import (
+	"log"
 	"net/http"
 
 	postsUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/usecase"
@@ -12,7 +13,7 @@ type DeliveryI interface {
 }
 
 type delivery struct {
-	pUsecase postsUsecase.UseCaseI
+	pUsecase postsUsecase.PostUseCaseI
 }
 
 // Feed godoc
@@ -26,13 +27,14 @@ type delivery struct {
 // @Failure 500 {object} pkg.Error "internal server error"
 // @Router   /feed [get]
 func (delivery *delivery) Feed(w http.ResponseWriter, r *http.Request) {
+	log.Println("/feed")
 	w.Header().Set("Access-Control-Allow-Methods", "GET")
 	if r.Method != http.MethodGet {
 		pkg.ErrorResponse(w, http.StatusMethodNotAllowed, "invalid http method")
 		return
 	}
 
-	posts, err := delivery.pUsecase.SelectAllPosts()
+	posts, err := delivery.pUsecase.GetAllPosts()
 
 	if err != nil {
 		pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error())
@@ -45,7 +47,7 @@ func (delivery *delivery) Feed(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func NewDelivery(pUsecase postsUsecase.UseCaseI) DeliveryI {
+func NewDelivery(pUsecase postsUsecase.PostUseCaseI) DeliveryI {
 	return &delivery{
 		pUsecase: pUsecase,
 	}

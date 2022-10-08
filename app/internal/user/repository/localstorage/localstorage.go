@@ -10,9 +10,9 @@ import (
 )
 
 type UserStorage struct {
-	users []model.User
+	users  []model.User
 	cookie []model.Cookie
-	mtx     sync.RWMutex
+	mtx    sync.RWMutex
 }
 
 // type dataBase struct {
@@ -21,11 +21,10 @@ type UserStorage struct {
 
 func New() repository.RepositoryI {
 	return &UserStorage{
-		users: make([]model.User, 0),
+		users:  make([]model.User, 0),
 		cookie: make([]model.Cookie, 0),
 	}
 }
-
 
 // var MyUserStorage repository.RepositoryI = &UserStorage{
 // 	users: make([]model.User, 0),
@@ -84,14 +83,14 @@ func (usersStorage *UserStorage) CreateUser(u model.User) (*model.User, error) {
 	usersStorage.mtx.Lock()
 	usersStorage.users = append(usersStorage.users, u)
 	usersStorage.mtx.Unlock()
-	return &usersStorage.users[u.Id - 1], nil
+	return &usersStorage.users[u.Id-1], nil
 }
 
 func (usersStorage *UserStorage) CreateCookie(c model.Cookie) (*model.Cookie, error) {
 	usersStorage.mtx.Lock()
 	usersStorage.cookie = append(usersStorage.cookie, c)
 	usersStorage.mtx.Unlock()
-	return &usersStorage.cookie[len(usersStorage.cookie) - 1], nil
+	return &usersStorage.cookie[len(usersStorage.cookie)-1], nil
 }
 
 func (usersStorage *UserStorage) SelectCookie(value string) (*model.Cookie, error) {
@@ -106,7 +105,7 @@ func (usersStorage *UserStorage) SelectCookie(value string) (*model.Cookie, erro
 	return nil, errors.New("cookie doesn't exist")
 }
 
-func (usersStorage *UserStorage) DeleteCookie(value string) (error) {
+func (usersStorage *UserStorage) DeleteCookie(value string) error {
 	usersStorage.mtx.Lock()
 	defer usersStorage.mtx.Unlock()
 	for i := 0; i < len(usersStorage.cookie); i++ {
@@ -118,5 +117,3 @@ func (usersStorage *UserStorage) DeleteCookie(value string) (error) {
 
 	return errors.New("cookie doesn't exist")
 }
-
-

@@ -10,7 +10,6 @@ type RepositoryI interface {
 	CreateUser(u model.User) (*model.User, error)
 	CreateCookie(c model.Cookie) (*model.Cookie, error)
 	SelectCookie(value string) (*model.Cookie, error)
-	DeleteCookie(value string) (error)
+	DeleteCookie(value string) error
 	SelectUserById(id int) (*model.User, error)
 }
-

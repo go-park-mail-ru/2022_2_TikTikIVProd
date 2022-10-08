@@ -1,11 +1,11 @@
 package main
 
 import (
+	postsRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/repository/postgres"
 	"log"
 
-	imagesRepository "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/repository"
+	imagesRepository "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/repository/postgres"
 	postsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/delivery"
-	postsRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/repository"
 	postsUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/usecase"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -30,10 +30,10 @@ func main() {
 		return
 	}
 
-	dbPosts := postsRep.NewDataBasePosts(db)
-	dbImages := imagesRepository.NewDataBaseImages(db)
-	postsUsecase := postsUsecase.NewPostsUsecase(dbPosts, dbImages)
-	postsDeliver := postsDelivery.NewDelivery(postsUsecase)
+	postDB := postsRep.NewPostRepository(db)
+	imageDB := imagesRepository.NewImageRepository(db)
+	postsUC := postsUsecase.NewPostUsecase(postDB, imageDB)
+	postsDeliver := postsDelivery.NewDelivery(postsUC)
 
 	usersDB := usersPg.New(db)
 	usersUC := usersUseCase.New(usersDB)
@@ -43,6 +43,6 @@ func main() {
 
 	s := server.NewServer(r)
 	if err := s.Start(); err != nil {
-		log.Fatal(err)
+		log.Fatal("ERROR", err)
 	}
 }

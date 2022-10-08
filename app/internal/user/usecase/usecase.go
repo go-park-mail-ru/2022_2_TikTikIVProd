@@ -22,7 +22,7 @@ type UseCaseI interface {
 	CreateUser(user model.User) (*model.User, error)
 	CreateCookie(userId int) (*model.Cookie, error)
 	SelectCookie(value string) (*model.Cookie, error)
-	DeleteCookie(value string) (error)
+	DeleteCookie(value string) error
 }
 
 type useCase struct {
@@ -36,10 +36,10 @@ func New(rep repository.RepositoryI) UseCaseI {
 }
 
 func (uc *useCase) CreateCookie(userId int) (*model.Cookie, error) {
-	cookie := model.Cookie {
-					UserId: userId,
-					SessionToken: uuid.NewString(),
-					Expires: time.Now().AddDate(1, 0, 0)}
+	cookie := model.Cookie{
+		UserId:       userId,
+		SessionToken: uuid.NewString(),
+		Expires:      time.Now().AddDate(1, 0, 0)}
 
 	newCookie, err := uc.repository.CreateCookie(cookie)
 	if err != nil {
@@ -58,7 +58,7 @@ func (uc *useCase) SelectCookie(value string) (*model.Cookie, error) {
 	return cookie, nil
 }
 
-func (uc *useCase) DeleteCookie(value string) (error) {
+func (uc *useCase) DeleteCookie(value string) error {
 	err := uc.repository.DeleteCookie(value)
 	if err != nil {
 		return errors.New("cookie doesn't exist")
@@ -126,7 +126,7 @@ func (uc *useCase) SignUp(user model.User) (*model.User, *model.Cookie, error) {
 	return createdUser, cookie, nil
 }
 
-func (uc *useCase) CreateUser(user model.User) (*model.User, error) {	
+func (uc *useCase) CreateUser(user model.User) (*model.User, error) {
 	if _, err := uc.repository.SelectUserByNickName(user.NickName); err == nil {
 		return nil, errors.New("nickname already in use")
 	}

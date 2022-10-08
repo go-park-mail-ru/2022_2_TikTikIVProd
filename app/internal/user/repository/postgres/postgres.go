@@ -61,7 +61,7 @@ func (dbUsers *dataBase) CreateUser(u model.User) (*model.User, error) {
 	user := model.User{}
 
 	tx := dbUsers.db.Table("users").Raw("INSERT INTO users (first_name, last_name, nick_name, email, passhash) VALUES (?, ?, ?, ?, ?) RETURNING *",
-			u.FirstName, u.LastName, u.NickName, u.Email, u.Password).Scan(&user)
+		u.FirstName, u.LastName, u.NickName, u.Email, u.Password).Scan(&user)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -73,11 +73,11 @@ func (dbUsers *dataBase) CreateCookie(c model.Cookie) (*model.Cookie, error) {
 	cookie := model.Cookie{}
 
 	tx := dbUsers.db.Table("cookies").Raw("INSERT INTO cookies VALUES (?, ?, ?) RETURNING *",
-			c.SessionToken, c.UserId, c.Expires).Scan(&cookie)
+		c.SessionToken, c.UserId, c.Expires).Scan(&cookie)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
-	
+
 	return &cookie, nil
 }
 
@@ -92,12 +92,11 @@ func (dbUsers *dataBase) SelectCookie(value string) (*model.Cookie, error) {
 	return &cookie, nil
 }
 
-func (dbUsers *dataBase) DeleteCookie(value string) (error) {
+func (dbUsers *dataBase) DeleteCookie(value string) error {
 	tx := dbUsers.db.Table("cookies").Exec("DELETE FROM cookies WHERE value = ?", value)
 	if tx.Error != nil {
 		return tx.Error
 	}
-	
+
 	return nil
 }
-
