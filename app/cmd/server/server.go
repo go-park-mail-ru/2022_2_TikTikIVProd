@@ -24,6 +24,6 @@ func NewServer(r http.Handler) *Server {
 }
 
 func (s *Server) Start() error {
-	log.Println("start serving :8080")
+	log.Println("start serving in :8080")
 	return s.ListenAndServe()
 }
