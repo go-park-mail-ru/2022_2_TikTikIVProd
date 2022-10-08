@@ -25,6 +25,8 @@ func (dbUsers *dataBase) SelectUserById(id int) (*model.User, error) {
 	tx := dbUsers.db.Table("users").Where("id = ?", id).Scan(&user)
 	if tx.Error != nil {
 		return nil, tx.Error
+	} else if user.NickName == "" {
+		return nil, errors.New("user with such id doesn't exist")
 	}
 
 	return &user, nil
