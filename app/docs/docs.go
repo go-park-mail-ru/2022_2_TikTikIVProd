@@ -33,7 +33,19 @@ const docTemplate = `{
                     "200": {
                         "description": "success auth",
                         "schema": {
-                            "$ref": "#/definitions/model.User"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/pkg.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "body": {
+                                            "$ref": "#/definitions/models.User"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -46,6 +58,56 @@ const docTemplate = `{
                         "description": "no cookie",
                         "schema": {
                             "$ref": "#/definitions/pkg.Error"
+                        }
+                    },
+                    "405": {
+                        "description": "invalid http method",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/feed": {
+            "get": {
+                "description": "Feed",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "Feed",
+                "responses": {
+                    "200": {
+                        "description": "success get feed",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/pkg.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "body": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.Post"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "405": {
@@ -121,7 +183,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.UserSignIn"
+                            "$ref": "#/definitions/models.UserSignIn"
                         }
                     }
                 ],
@@ -129,7 +191,19 @@ const docTemplate = `{
                     "200": {
                         "description": "success sign in",
                         "schema": {
-                            "$ref": "#/definitions/model.User"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/pkg.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "body": {
+                                            "$ref": "#/definitions/models.User"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -185,7 +259,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.User"
+                            "$ref": "#/definitions/models.User"
                         }
                     }
                 ],
@@ -193,7 +267,19 @@ const docTemplate = `{
                     "201": {
                         "description": "user created",
                         "schema": {
-                            "$ref": "#/definitions/model.User"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/pkg.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "body": {
+                                            "$ref": "#/definitions/models.User"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -225,7 +311,47 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "model.User": {
+        "models.Image": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "link": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Post": {
+            "type": "object",
+            "properties": {
+                "create_date": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Image"
+                    }
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.User": {
             "type": "object",
             "properties": {
                 "avatar": {
@@ -251,7 +377,7 @@ const docTemplate = `{
                 }
             }
         },
-        "model.UserSignIn": {
+        "models.UserSignIn": {
             "type": "object",
             "properties": {
                 "email": {
@@ -268,6 +394,12 @@ const docTemplate = `{
                 "error": {
                     "type": "string"
                 }
+            }
+        },
+        "pkg.Response": {
+            "type": "object",
+            "properties": {
+                "body": {}
             }
         }
     }

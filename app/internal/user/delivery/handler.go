@@ -33,8 +33,8 @@ func New(uc usecase.UseCaseI) DeliveryI {
 // @Tags     users
 // @Accept	 application/json
 // @Produce  application/json
-// @Param    user body model.User true "user info"
-// @Success  201 {object} model.User "user created"
+// @Param    user body models.User true "user info"
+// @Success  201 {object} pkg.Response{body=models.User} "user created"
 // @Failure 405 {object} pkg.Error "invalid http method"
 // @Failure 400 {object} pkg.Error "bad request"
 // @Failure 409 {object} pkg.Error "nickname already in use"
@@ -91,7 +91,7 @@ func (del *delivery) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Accept	 application/json
 // @Produce  application/json
 // @Param    user body models.UserSignIn true "user info"
-// @Success  200 {object} models.User "success sign in"
+// @Success  200 {object} pkg.Response{body=models.User} "success sign in"
 // @Failure 405 {object} pkg.Error "invalid http method"
 // @Failure 400 {object} pkg.Error "bad request"
 // @Failure 404 {object} pkg.Error "user doesn't exist"
@@ -189,7 +189,7 @@ func (del *delivery) Logout(w http.ResponseWriter, r *http.Request) {
 // @Tags     users
 // @Accept	 application/json
 // @Produce  application/json
-// @Success  200 {object} models.User "success auth"
+// @Success  200 {object} pkg.Response{body=models.User} "success auth"
 // @Failure 405 {object} pkg.Error "invalid http method"
 // @Failure 400 {object} pkg.Error "bad request"
 // @Failure 500 {object} pkg.Error "internal server error"

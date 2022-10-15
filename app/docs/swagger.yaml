@@ -1,5 +1,31 @@
 definitions:
-  model.User:
+  models.Image:
+    properties:
+      id:
+        type: integer
+      link:
+        type: string
+    type: object
+  models.Post:
+    properties:
+      create_date:
+        type: string
+      firstName:
+        type: string
+      id:
+        type: integer
+      images:
+        items:
+          $ref: '#/definitions/models.Image'
+        type: array
+      lastName:
+        type: string
+      message:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  models.User:
     properties:
       avatar:
         type: integer
@@ -16,7 +42,7 @@ definitions:
       password:
         type: string
     type: object
-  model.UserSignIn:
+  models.UserSignIn:
     properties:
       email:
         type: string
@@ -27,6 +53,10 @@ definitions:
     properties:
       error:
         type: string
+    type: object
+  pkg.Response:
+    properties:
+      body: {}
     type: object
 host: 89.208.197.127:8080
 info:
@@ -45,7 +75,12 @@ paths:
         "200":
           description: success auth
           schema:
-            $ref: '#/definitions/model.User'
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  $ref: '#/definitions/models.User'
+              type: object
         "400":
           description: bad request
           schema:
@@ -65,6 +100,36 @@ paths:
       summary: Auth
       tags:
       - users
+  /feed:
+    get:
+      consumes:
+      - application/json
+      description: Feed
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get feed
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  items:
+                    $ref: '#/definitions/models.Post'
+                  type: array
+              type: object
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/pkg.Error'
+      summary: Feed
+      tags:
+      - posts
   /logout:
     get:
       consumes:
@@ -101,14 +166,19 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/model.UserSignIn'
+          $ref: '#/definitions/models.UserSignIn'
       produces:
       - application/json
       responses:
         "200":
           description: success sign in
           schema:
-            $ref: '#/definitions/model.User'
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  $ref: '#/definitions/models.User'
+              type: object
         "400":
           description: bad request
           schema:
@@ -143,14 +213,19 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/model.User'
+          $ref: '#/definitions/models.User'
       produces:
       - application/json
       responses:
         "201":
           description: user created
           schema:
-            $ref: '#/definitions/model.User'
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  $ref: '#/definitions/models.User'
+              type: object
         "400":
           description: bad request
           schema:

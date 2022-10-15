@@ -22,7 +22,7 @@ type delivery struct {
 // @Tags     	 posts
 // @Accept	 application/json
 // @Produce  application/json
-// @Success  200 {object} []model.Post "success get feed"
+// @Success  200 {object} pkg.Response{body=[]models.Post} "success get feed"
 // @Failure 405 {object} pkg.Error "invalid http method"
 // @Failure 500 {object} pkg.Error "internal server error"
 // @Router   /feed [get]
