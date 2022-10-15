@@ -1,8 +1,8 @@
 package postsRep
 
 import (
-	imageRepository "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/repository/postgres"
-	postsRepository "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/repository/postgres"
+	imageRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/repository"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/repository"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
 )
 
@@ -13,11 +13,11 @@ type PostUseCaseI interface {
 }
 
 type postsUsecase struct {
-	postsRep postsRepository.RepositoryI
-	imageRep imageRepository.RepositoryI
+	postsRep repository.RepositoryI
+	imageRep imageRep.RepositoryI
 }
 
-func NewPostUsecase(ps postsRepository.RepositoryI, ir imageRepository.RepositoryI) PostUseCaseI {
+func NewPostUsecase(ps repository.RepositoryI, ir imageRep.RepositoryI) PostUseCaseI {
 	return &postsUsecase{
 		postsRep: ps,
 		imageRep: ir,
@@ -34,7 +34,7 @@ func (p *postsUsecase) CreatePost(u *models.Post) (*models.Post, error) {
 	panic("implement me")
 }
 
-func addPostImages(posts []*models.Post, repImg imageRepository.RepositoryI) error {
+func addPostImages(posts []*models.Post, repImg imageRep.RepositoryI) error {
 	for idx := range posts {
 		postImages, err := repImg.GetPostImages(posts[idx].ID)
 

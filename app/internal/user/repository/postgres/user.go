@@ -5,22 +5,22 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/model"
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository"
+	userRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
 )
 
 type dataBase struct {
 	db *gorm.DB
 }
 
-func New(db *gorm.DB) repository.RepositoryI {
+func New(db *gorm.DB) userRep.RepositoryI {
 	return &dataBase{
 		db: db,
 	}
 }
 
-func (dbUsers *dataBase) SelectUserById(id int) (*model.User, error) {
-	user := model.User{}
+func (dbUsers *dataBase) SelectUserById(id int) (*models.User, error) {
+	user := models.User{}
 
 	tx := dbUsers.db.Table("users").Where("id = ?", id).Scan(&user)
 	if tx.Error != nil {
@@ -32,8 +32,8 @@ func (dbUsers *dataBase) SelectUserById(id int) (*model.User, error) {
 	return &user, nil
 }
 
-func (dbUsers *dataBase) SelectUserByNickName(nickname string) (*model.User, error) {
-	user := model.User{}
+func (dbUsers *dataBase) SelectUserByNickName(nickname string) (*models.User, error) {
+	user := models.User{}
 
 	tx := dbUsers.db.Table("users").Where("nick_name = ?", nickname).Scan(&user)
 	if tx.Error != nil {
@@ -45,8 +45,8 @@ func (dbUsers *dataBase) SelectUserByNickName(nickname string) (*model.User, err
 	return &user, nil
 }
 
-func (dbUsers *dataBase) SelectUserByEmail(email string) (*model.User, error) {
-	user := model.User{}
+func (dbUsers *dataBase) SelectUserByEmail(email string) (*models.User, error) {
+	user := models.User{}
 	tx := dbUsers.db.Table("users").Where("email = ?", email).Scan(&user)
 	if tx.Error != nil {
 		return nil, tx.Error
@@ -57,8 +57,8 @@ func (dbUsers *dataBase) SelectUserByEmail(email string) (*model.User, error) {
 	return &user, nil
 }
 
-func (dbUsers *dataBase) CreateUser(u model.User) (*model.User, error) {
-	user := model.User{}
+func (dbUsers *dataBase) CreateUser(u models.User) (*models.User, error) {
+	user := models.User{}
 
 	tx := dbUsers.db.Table("users").Raw("INSERT INTO users (first_name, last_name, nick_name, email, passhash) VALUES (?, ?, ?, ?, ?) RETURNING *",
 		u.FirstName, u.LastName, u.NickName, u.Email, u.Password).Scan(&user)
@@ -69,8 +69,8 @@ func (dbUsers *dataBase) CreateUser(u model.User) (*model.User, error) {
 	return &user, nil
 }
 
-func (dbUsers *dataBase) CreateCookie(c model.Cookie) (*model.Cookie, error) {
-	cookie := model.Cookie{}
+func (dbUsers *dataBase) CreateCookie(c models.Cookie) (*models.Cookie, error) {
+	cookie := models.Cookie{}
 
 	tx := dbUsers.db.Table("cookies").Raw("INSERT INTO cookies VALUES (?, ?, ?) RETURNING *",
 		c.SessionToken, c.UserId, c.Expires).Scan(&cookie)
@@ -81,8 +81,8 @@ func (dbUsers *dataBase) CreateCookie(c model.Cookie) (*model.Cookie, error) {
 	return &cookie, nil
 }
 
-func (dbUsers *dataBase) SelectCookie(value string) (*model.Cookie, error) {
-	cookie := model.Cookie{}
+func (dbUsers *dataBase) SelectCookie(value string) (*models.Cookie, error) {
+	cookie := models.Cookie{}
 
 	tx := dbUsers.db.Table("cookies").Where("value = ?", value).Scan(&cookie)
 	if tx.Error != nil || cookie.SessionToken == "" {

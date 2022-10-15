@@ -1,14 +1,11 @@
 package postgres
 
 import (
+	imageRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/repository"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
 	"gorm.io/gorm"
 	"log"
 )
-
-type RepositoryI interface {
-	GetPostImages(postID int) ([]*models.Image, error)
-}
 
 type Image struct {
 	ID      int
@@ -19,7 +16,7 @@ type imageRepository struct {
 	db *gorm.DB
 }
 
-func NewImageRepository(db *gorm.DB) RepositoryI {
+func NewImageRepository(db *gorm.DB) imageRep.RepositoryI {
 	return &imageRepository{
 		db: db,
 	}

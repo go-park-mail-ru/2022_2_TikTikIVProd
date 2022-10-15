@@ -19,14 +19,14 @@ type UserStorage struct {
 // 	db *gorm.DB
 // }
 
-func New() repository.RepositoryI {
+func New() repository.UserRepositoryI {
 	return &UserStorage{
 		users:  make([]model.User, 0),
 		cookie: make([]model.Cookie, 0),
 	}
 }
 
-// var MyUserStorage repository.RepositoryI = &UserStorage{
+// var MyUserStorage repository.UserRepositoryI = &UserStorage{
 // 	users: make([]model.User, 0),
 // }
 

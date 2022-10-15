@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"database/sql"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/repository"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
 	"log"
 	"time"
@@ -50,17 +51,11 @@ func toModelPosts(posts []*Post) []*models.Post {
 	return out
 }
 
-type RepositoryI interface {
-	GetPostById(id int) (*models.Post, error)
-	CreatePost(u models.Post) (*models.Post, error)
-	GetAllPosts() ([]*models.Post, error)
-}
-
 type postRepository struct {
 	db *gorm.DB
 }
 
-func NewPostRepository(db *gorm.DB) RepositoryI {
+func NewPostRepository(db *gorm.DB) repository.RepositoryI {
 	return &postRepository{
 		db: db,
 	}

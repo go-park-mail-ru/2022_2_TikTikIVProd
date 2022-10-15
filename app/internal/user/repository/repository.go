@@ -1,15 +1,15 @@
 package repository
 
 import (
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/model"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
 )
 
 type RepositoryI interface {
-	SelectUserByNickName(name string) (*model.User, error)
-	SelectUserByEmail(email string) (*model.User, error)
-	CreateUser(u model.User) (*model.User, error)
-	CreateCookie(c model.Cookie) (*model.Cookie, error)
-	SelectCookie(value string) (*model.Cookie, error)
+	SelectUserByNickName(name string) (*models.User, error)
+	SelectUserByEmail(email string) (*models.User, error)
+	CreateUser(u models.User) (*models.User, error)
+	CreateCookie(c models.Cookie) (*models.Cookie, error)
+	SelectCookie(value string) (*models.Cookie, error)
 	DeleteCookie(value string) error
-	SelectUserById(id int) (*model.User, error)
+	SelectUserById(id int) (*models.User, error)
 }

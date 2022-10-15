@@ -7,36 +7,36 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/model"
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository"
+	userRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
 )
 
 //go:generate mockgen -source=usecase.go -destination=mocks/mock.go
 
 type UseCaseI interface {
-	SelectUserByNickName(nickname string) (*model.User, error)
-	SelectUserByEmail(email string) (*model.User, error)
-	SelectUserById(id int) (*model.User, error)
-	SignIn(user model.UserSignIn) (*model.User, *model.Cookie, error)
-	SignUp(user model.User) (*model.User, *model.Cookie, error)
-	CreateUser(user model.User) (*model.User, error)
-	CreateCookie(userId int) (*model.Cookie, error)
-	SelectCookie(value string) (*model.Cookie, error)
+	SelectUserByNickName(nickname string) (*models.User, error)
+	SelectUserByEmail(email string) (*models.User, error)
+	SelectUserById(id int) (*models.User, error)
+	SignIn(user models.UserSignIn) (*models.User, *models.Cookie, error)
+	SignUp(user models.User) (*models.User, *models.Cookie, error)
+	CreateUser(user models.User) (*models.User, error)
+	CreateCookie(userId int) (*models.Cookie, error)
+	SelectCookie(value string) (*models.Cookie, error)
 	DeleteCookie(value string) error
 }
 
 type useCase struct {
-	repository repository.RepositoryI
+	repository userRep.RepositoryI
 }
 
-func New(rep repository.RepositoryI) UseCaseI {
+func New(rep userRep.RepositoryI) UseCaseI {
 	return &useCase{
 		repository: rep,
 	}
 }
 
-func (uc *useCase) CreateCookie(userId int) (*model.Cookie, error) {
-	cookie := model.Cookie{
+func (uc *useCase) CreateCookie(userId int) (*models.Cookie, error) {
+	cookie := models.Cookie{
 		UserId:       userId,
 		SessionToken: uuid.NewString(),
 		Expires:      time.Now().AddDate(1, 0, 0)}
@@ -49,7 +49,7 @@ func (uc *useCase) CreateCookie(userId int) (*model.Cookie, error) {
 	return newCookie, nil
 }
 
-func (uc *useCase) SelectCookie(value string) (*model.Cookie, error) {
+func (uc *useCase) SelectCookie(value string) (*models.Cookie, error) {
 	cookie, err := uc.repository.SelectCookie(value)
 	if err != nil {
 		return nil, errors.New("cookie doesn't exist")
@@ -67,7 +67,7 @@ func (uc *useCase) DeleteCookie(value string) error {
 	return nil
 }
 
-func (uc *useCase) SelectUserById(id int) (*model.User, error) {
+func (uc *useCase) SelectUserById(id int) (*models.User, error) {
 	user, err := uc.repository.SelectUserById(id)
 	if err != nil {
 		return nil, errors.New("can't find user with such id")
@@ -76,7 +76,7 @@ func (uc *useCase) SelectUserById(id int) (*model.User, error) {
 	return user, nil
 }
 
-func (uc *useCase) SelectUserByNickName(nickname string) (*model.User, error) {
+func (uc *useCase) SelectUserByNickName(nickname string) (*models.User, error) {
 	user, err := uc.repository.SelectUserByNickName(nickname)
 	if err != nil {
 		return nil, errors.New("can't find user with such nickname")
@@ -85,7 +85,7 @@ func (uc *useCase) SelectUserByNickName(nickname string) (*model.User, error) {
 	return user, nil
 }
 
-func (uc *useCase) SelectUserByEmail(email string) (*model.User, error) {
+func (uc *useCase) SelectUserByEmail(email string) (*models.User, error) {
 	user, err := uc.repository.SelectUserByEmail(email)
 	if err != nil {
 		return nil, errors.New("can't find user with such email")
@@ -94,7 +94,7 @@ func (uc *useCase) SelectUserByEmail(email string) (*model.User, error) {
 	return user, nil
 }
 
-func (uc *useCase) SignIn(user model.UserSignIn) (*model.User, *model.Cookie, error) {
+func (uc *useCase) SignIn(user models.UserSignIn) (*models.User, *models.Cookie, error) {
 	u, err := uc.SelectUserByEmail(user.Email)
 	if err != nil {
 		return nil, nil, err
@@ -112,7 +112,7 @@ func (uc *useCase) SignIn(user model.UserSignIn) (*model.User, *model.Cookie, er
 	return u, cookie, nil
 }
 
-func (uc *useCase) SignUp(user model.User) (*model.User, *model.Cookie, error) {
+func (uc *useCase) SignUp(user models.User) (*models.User, *models.Cookie, error) {
 	createdUser, err := uc.CreateUser(user)
 	if err != nil {
 		return nil, nil, err
@@ -126,7 +126,7 @@ func (uc *useCase) SignUp(user model.User) (*model.User, *model.Cookie, error) {
 	return createdUser, cookie, nil
 }
 
-func (uc *useCase) CreateUser(user model.User) (*model.User, error) {
+func (uc *useCase) CreateUser(user models.User) (*models.User, error) {
 	if _, err := uc.repository.SelectUserByNickName(user.NickName); err == nil {
 		return nil, errors.New("nickname already in use")
 	}

@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/model"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/usecase"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg"
 )
 
@@ -22,8 +22,8 @@ type delivery struct {
 }
 
 func New(uc usecase.UseCaseI) DeliveryI {
-	return &delivery {
-		uc:     uc,
+	return &delivery{
+		uc: uc,
 	}
 }
 
@@ -48,7 +48,7 @@ func (del *delivery) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := model.User{}
+	user := models.User{}
 
 	defer r.Body.Close()
 	err := json.NewDecoder(r.Body).Decode(&user)
@@ -71,9 +71,9 @@ func (del *delivery) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:    "session_token",
-		Value:   createdCookie.SessionToken,
-		Expires: createdCookie.Expires,
+		Name:     "session_token",
+		Value:    createdCookie.SessionToken,
+		Expires:  createdCookie.Expires,
 		HttpOnly: true,
 	})
 
@@ -90,8 +90,8 @@ func (del *delivery) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Tags     users
 // @Accept	 application/json
 // @Produce  application/json
-// @Param    user body model.UserSignIn true "user info"
-// @Success  200 {object} model.User "success sign in"
+// @Param    user body models.UserSignIn true "user info"
+// @Success  200 {object} models.User "success sign in"
 // @Failure 405 {object} pkg.Error "invalid http method"
 // @Failure 400 {object} pkg.Error "bad request"
 // @Failure 404 {object} pkg.Error "user doesn't exist"
@@ -104,8 +104,8 @@ func (del *delivery) SignIn(w http.ResponseWriter, r *http.Request) {
 		pkg.ErrorResponse(w, http.StatusMethodNotAllowed, "invalid http method")
 		return
 	}
-	
-	user := model.UserSignIn{}
+
+	user := models.UserSignIn{}
 
 	defer r.Body.Close()
 	err := json.NewDecoder(r.Body).Decode(&user)
@@ -128,9 +128,9 @@ func (del *delivery) SignIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:    "session_token",
-		Value:   createdCookie.SessionToken,
-		Expires: createdCookie.Expires,
+		Name:     "session_token",
+		Value:    createdCookie.SessionToken,
+		Expires:  createdCookie.Expires,
 		HttpOnly: true,
 	})
 
@@ -189,7 +189,7 @@ func (del *delivery) Logout(w http.ResponseWriter, r *http.Request) {
 // @Tags     users
 // @Accept	 application/json
 // @Produce  application/json
-// @Success  200 {object} model.User "success auth"
+// @Success  200 {object} models.User "success auth"
 // @Failure 405 {object} pkg.Error "invalid http method"
 // @Failure 400 {object} pkg.Error "bad request"
 // @Failure 500 {object} pkg.Error "internal server error"
@@ -229,4 +229,3 @@ func (del *delivery) Auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-
