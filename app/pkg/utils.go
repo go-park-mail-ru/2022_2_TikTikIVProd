@@ -15,13 +15,13 @@ type Error struct {
 
 func JSONresponse(w http.ResponseWriter, code int, body interface{}) error {
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost")
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 	w.Header().Set("Content-Type", "application/json")
 
-	response, err := json.Marshal(Response {
-									Body:body,
-								  })
+	response, err := json.Marshal(Response{
+		Body: body,
+	})
 	if err != nil {
 		return err
 	}
@@ -32,7 +32,7 @@ func JSONresponse(w http.ResponseWriter, code int, body interface{}) error {
 }
 
 func ErrorResponse(w http.ResponseWriter, code int, errorMessage string) error {
-	return JSONresponse(w, code, Error {
-										Message: errorMessage,
-									})
+	return JSONresponse(w, code, Error{
+		Message: errorMessage,
+	})
 }

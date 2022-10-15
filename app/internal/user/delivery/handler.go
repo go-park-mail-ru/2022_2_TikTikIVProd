@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/model"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/usecase"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg"
 )
 
@@ -22,8 +22,8 @@ type delivery struct {
 }
 
 func New(uc usecase.UseCaseI) DeliveryI {
-	return &delivery {
-		uc:     uc,
+	return &delivery{
+		uc: uc,
 	}
 }
 
@@ -48,7 +48,7 @@ func (del *delivery) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := model.User{}
+	user := models.User{}
 
 	defer r.Body.Close()
 	err := json.NewDecoder(r.Body).Decode(&user)
@@ -59,10 +59,10 @@ func (del *delivery) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	createdUser, createdCookie, err := del.uc.SignUp(user)
 	if err != nil {
-		if err.Error() == "nickname " + user.NickName + "already in use." {
+		if err.Error() == "nickname already in use" {
 			pkg.ErrorResponse(w, http.StatusConflict, err.Error())
 			return
-		} else if err.Error() == "user with email " + user.Email + "already exists." {
+		} else if err.Error() == "user with such email already exists" {
 			pkg.ErrorResponse(w, http.StatusConflict, err.Error())
 			return
 		}
@@ -70,21 +70,14 @@ func (del *delivery) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Headers", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-	w.Header().Set("Content-Type", "application/json")
-
 	http.SetCookie(w, &http.Cookie{
-		Name:    "session_token",
-		Value:   createdCookie.SessionToken,
-		Expires: createdCookie.Expires,
+		Name:     "session_token",
+		Value:    createdCookie.SessionToken,
+		Expires:  createdCookie.Expires,
 		HttpOnly: true,
 	})
 
-	err = pkg.JSONresponse(w, http.StatusCreated, pkg.Response {
-												Body: createdUser,
-											})
+	err = pkg.JSONresponse(w, http.StatusCreated, createdUser)
 	if err != nil {
 		pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
@@ -97,8 +90,8 @@ func (del *delivery) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Tags     users
 // @Accept	 application/json
 // @Produce  application/json
-// @Param    user body model.UserSignIn true "user info"
-// @Success  200 {object} model.User "success sign in"
+// @Param    user body models.UserSignIn true "user info"
+// @Success  200 {object} models.User "success sign in"
 // @Failure 405 {object} pkg.Error "invalid http method"
 // @Failure 400 {object} pkg.Error "bad request"
 // @Failure 404 {object} pkg.Error "user doesn't exist"
@@ -111,8 +104,8 @@ func (del *delivery) SignIn(w http.ResponseWriter, r *http.Request) {
 		pkg.ErrorResponse(w, http.StatusMethodNotAllowed, "invalid http method")
 		return
 	}
-	
-	user := model.UserSignIn{}
+
+	user := models.UserSignIn{}
 
 	defer r.Body.Close()
 	err := json.NewDecoder(r.Body).Decode(&user)
@@ -123,7 +116,7 @@ func (del *delivery) SignIn(w http.ResponseWriter, r *http.Request) {
 
 	gotUser, createdCookie, err := del.uc.SignIn(user)
 	if err != nil {
-		if err.Error() == "can't find user with email " + user.Email {
+		if err.Error() == "can't find user with such email" {
 			pkg.ErrorResponse(w, http.StatusNotFound, err.Error())
 			return
 		} else if err.Error() == "invalid password" {
@@ -135,15 +128,13 @@ func (del *delivery) SignIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:    "session_token",
-		Value:   createdCookie.SessionToken,
-		Expires: createdCookie.Expires,
+		Name:     "session_token",
+		Value:    createdCookie.SessionToken,
+		Expires:  createdCookie.Expires,
 		HttpOnly: true,
 	})
 
-	err = pkg.JSONresponse(w, http.StatusOK, pkg.Response {
-												Body: gotUser,
-											 })
+	err = pkg.JSONresponse(w, http.StatusOK, gotUser)
 	if err != nil {
 		pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
@@ -198,7 +189,7 @@ func (del *delivery) Logout(w http.ResponseWriter, r *http.Request) {
 // @Tags     users
 // @Accept	 application/json
 // @Produce  application/json
-// @Success  200 {object} model.User "success auth"
+// @Success  200 {object} models.User "success auth"
 // @Failure 405 {object} pkg.Error "invalid http method"
 // @Failure 400 {object} pkg.Error "bad request"
 // @Failure 500 {object} pkg.Error "internal server error"
@@ -232,12 +223,9 @@ func (del *delivery) Auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = pkg.JSONresponse(w, http.StatusOK, pkg.Response {
-												Body: gotUser,
-											})
+	err = pkg.JSONresponse(w, http.StatusOK, gotUser)
 	if err != nil {
 		pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 }
-
