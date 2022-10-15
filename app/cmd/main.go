@@ -22,12 +22,12 @@ import (
 // @host 89.208.197.127:8080
 
 func main() {
-	db, err := gorm.Open(postgres.New(postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=8080"}),
+	db, err := gorm.Open(postgres.New(postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}),
 		&gorm.Config{})
 
 	if err != nil {
 		log.Fatal(err)
-		returngit
+		return
 	}
 
 	postDB := postsRep.NewPostRepository(db)
