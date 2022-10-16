@@ -155,6 +155,144 @@ paths:
       summary: Logout
       tags:
       - users
+  /post/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get post by id
+      parameters:
+      - description: Post ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get post
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  $ref: '#/definitions/models.Post'
+              type: object
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/pkg.Error'
+      summary: Show a post
+      tags:
+      - posts
+  /post/create:
+    post:
+      consumes:
+      - application/json
+      description: Create a post
+      parameters:
+      - description: post info
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/models.Post'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get post
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  $ref: '#/definitions/models.Post'
+              type: object
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/pkg.Error'
+      summary: Create a post
+      tags:
+      - posts
+  /post/delete/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a post
+      parameters:
+      - description: Post ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get post
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  $ref: '#/definitions/models.Post'
+              type: object
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/pkg.Error'
+      summary: Delete a post
+      tags:
+      - posts
+  /post/update:
+    post:
+      consumes:
+      - application/json
+      description: Update a post
+      parameters:
+      - description: post info
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/models.Post'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get post
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  $ref: '#/definitions/models.Post'
+              type: object
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/pkg.Error'
+      summary: Update a post
+      tags:
+      - posts
   /signin:
     post:
       consumes:
