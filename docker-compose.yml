@@ -8,6 +8,7 @@ services:
       - mynetwork
     volumes:
       - ./SQL:/docker-entrypoint-initdb.d/
+      - ./gen:/home/gen
     environment:
       POSTGRES_USER: postgres
       POSTGRES_DB: postgres

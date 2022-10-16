@@ -15,8 +15,11 @@ rm_db:
 create_tables:
 	psql postgresql://postgres:postgres@localhost:13080/postgres -f SQL/create.sql
 
+generate_data:
+	cd gen && python3 gen.py
+
 fill_tables:
-	psql postgresql://postgres:postgres@localhost:13080/postgres -f SQL/data.sql
+	psql postgresql://postgres:postgres@localhost:13080/postgres -f gen/load_data.sql
 
 drop_tables:
 	psql postgresql://postgres:postgres@localhost:13080/postgres -f SQL/drop_all.sql
