@@ -3,6 +3,7 @@ package postsRep
 import (
 	imageRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/repository"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/repository"
+	userRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
 )
 
@@ -13,14 +14,16 @@ type PostUseCaseI interface {
 }
 
 type postsUsecase struct {
-	postsRep repository.RepositoryI
-	imageRep imageRep.RepositoryI
+	postsRepo repository.RepositoryI
+	imageRepo imageRep.RepositoryI
+	userRepo  userRep.RepositoryI
 }
 
-func NewPostUsecase(ps repository.RepositoryI, ir imageRep.RepositoryI) PostUseCaseI {
+func NewPostUsecase(ps repository.RepositoryI, ir imageRep.RepositoryI, ur userRep.RepositoryI) PostUseCaseI {
 	return &postsUsecase{
-		postsRep: ps,
-		imageRep: ir,
+		postsRepo: ps,
+		imageRepo: ir,
+		userRepo:  ur,
 	}
 }
 
@@ -34,7 +37,7 @@ func (p *postsUsecase) CreatePost(u *models.Post) (*models.Post, error) {
 	panic("implement me")
 }
 
-func addPostImages(posts []*models.Post, repImg imageRep.RepositoryI) error {
+func addPostImagesAuthors(posts []*models.Post, repImg imageRep.RepositoryI, repUsers userRep.RepositoryI) error {
 	for idx := range posts {
 		postImages, err := repImg.GetPostImages(posts[idx].ID)
 
@@ -45,19 +48,23 @@ func addPostImages(posts []*models.Post, repImg imageRep.RepositoryI) error {
 		for _, img := range postImages {
 			posts[idx].Images = append(posts[idx].Images, *img)
 		}
+
+		author, err := repUsers.SelectUserById(posts[idx].ID)
+		posts[idx].UserFirstName = author.FirstName
+		posts[idx].UserLastName = author.LastName
 	}
 
 	return nil
 }
 
 func (p *postsUsecase) GetAllPosts() ([]*models.Post, error) {
-	posts, err := p.postsRep.GetAllPosts() //TODO ошибки
+	posts, err := p.postsRepo.GetAllPosts() //TODO ошибки
 
 	if err != nil {
 		return nil, err
 	}
 
-	err = addPostImages(posts, p.imageRep)
+	err = addPostImagesAuthors(posts, p.imageRepo, p.userRepo)
 
 	if err != nil {
 		return nil, err

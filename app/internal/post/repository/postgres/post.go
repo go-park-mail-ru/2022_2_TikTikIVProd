@@ -15,8 +15,6 @@ type Post struct {
 	UserID     int
 	Message    string
 	CreateDate time.Time
-	FirstName  string
-	LastName   string
 }
 
 func toPostgresPost(p *models.Post) *Post {
@@ -25,8 +23,6 @@ func toPostgresPost(p *models.Post) *Post {
 		UserID:     p.UserID,
 		Message:    p.Message,
 		CreateDate: p.CreateDate,
-		FirstName:  p.FirstName,
-		LastName:   p.LastName,
 	}
 }
 
@@ -36,8 +32,6 @@ func toModelPost(p *Post) *models.Post {
 		UserID:     p.UserID,
 		Message:    p.Message,
 		CreateDate: p.CreateDate,
-		FirstName:  p.FirstName,
-		LastName:   p.LastName,
 	}
 }
 
@@ -90,7 +84,7 @@ func getLinksFromRows(rows *sql.Rows) ([]string, error) {
 
 func (dbPost *postRepository) GetAllPosts() ([]*models.Post, error) {
 	var posts []*Post
-	tx := dbPost.db.Table("user_posts").Select("user_posts.id, user_posts.message", "user_posts.create_date", "users.first_name", "users.last_name").Joins("JOIN users ON users.id = user_posts.user_id ").Scan(&posts) //TODO оттрекать ошибки
+	tx := dbPost.db.Table("user_posts").Find(&posts) //TODO оттрекать ошибки
 
 	if tx.Error != nil {
 		log.Println()

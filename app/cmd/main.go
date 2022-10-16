@@ -31,11 +31,11 @@ func main() {
 	}
 
 	postDB := postsRep.NewPostRepository(db)
+	usersDB := usersPg.New(db)
 	imageDB := imagesRepository.NewImageRepository(db)
-	postsUC := postsUsecase.NewPostUsecase(postDB, imageDB)
+	postsUC := postsUsecase.NewPostUsecase(postDB, imageDB, usersDB)
 	postsDeliver := postsDelivery.NewDelivery(postsUC)
 
-	usersDB := usersPg.New(db)
 	usersUC := usersUseCase.New(usersDB)
 	usersDeliver := usersDelivery.New(usersUC)
 
