@@ -1,29 +1,28 @@
 package router
 
 import (
-	"github.com/gorilla/mux"
-
 	postsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/delivery"
 	usersDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/delivery"
+	"github.com/labstack/echo/v4"
 )
 
-type Router struct {
-	*mux.Router
+type EchoRouter struct {
+	*echo.Echo
 	usersD usersDelivery.DeliveryI
 	pd     postsDelivery.DeliveryI
 }
 
-func NewRouter(usersD usersDelivery.DeliveryI, pd postsDelivery.DeliveryI) *Router {
-	r := &Router{
-		Router: mux.NewRouter(),
+func NewEchoRouter(usersD usersDelivery.DeliveryI, pd postsDelivery.DeliveryI) *EchoRouter {
+	e := &EchoRouter{
+		Echo:   echo.New(),
 		usersD: usersD,
 		pd:     pd,
 	}
 
-	r.HandleFunc("/signin", usersD.SignIn)
-	r.HandleFunc("/signup", usersD.SignUp)
-	r.HandleFunc("/auth", usersD.Auth)
-	r.HandleFunc("/logout", usersD.Logout)
-	r.HandleFunc("/feed", pd.Feed)
-	return r
+	//e.HandleFunc("/signin", usersD.SignIn)
+	//e.HandleFunc("/signup", usersD.SignUp)
+	//e.HandleFunc("/auth", usersD.Auth)
+	//e.HandleFunc("/logout", usersD.Logout)
+	e.GET("/feed", pd.Feed)
+	return e
 }

@@ -39,9 +39,9 @@ func main() {
 	usersUC := usersUseCase.New(usersDB)
 	usersDeliver := usersDelivery.New(usersUC)
 
-	r := router.NewRouter(usersDeliver, postsDeliver)
+	e := router.NewEchoRouter(usersDeliver, postsDeliver)
 
-	s := server.NewServer(r)
+	s := server.NewServer(e)
 	if err := s.Start(); err != nil {
 		log.Fatal("ERROR", err)
 	}

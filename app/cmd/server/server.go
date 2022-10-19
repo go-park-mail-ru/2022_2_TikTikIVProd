@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/cmd/router"
 	"log"
 	"net/http"
 	"time"
@@ -11,11 +12,11 @@ type Server struct {
 	/*тут конфиги и логгер ещё будет*/
 }
 
-func NewServer(r http.Handler) *Server {
+func NewServer(e *router.EchoRouter) *Server {
 	return &Server{
 		http.Server{
 			Addr:              ":8080",
-			Handler:           r,
+			Handler:           e,
 			ReadTimeout:       10 * time.Second,
 			ReadHeaderTimeout: 10 * time.Second,
 			WriteTimeout:      10 * time.Second,

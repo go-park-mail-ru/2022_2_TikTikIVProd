@@ -1,6 +1,7 @@
 package postsRouter
 
 import (
+	"github.com/labstack/echo/v4"
 	"log"
 	"net/http"
 
@@ -9,11 +10,11 @@ import (
 )
 
 type DeliveryI interface {
-	Feed(w http.ResponseWriter, r *http.Request)
-	GetPost(w http.ResponseWriter, r *http.Request)
-	CreatePost(w http.ResponseWriter, r *http.Request)
-	UpdatePost(w http.ResponseWriter, r *http.Request)
-	DeletePost(w http.ResponseWriter, r *http.Request)
+	Feed(c echo.Context) error
+	//GetPost(w http.ResponseWriter, r *http.Request)
+	//CreatePost(w http.ResponseWriter, r *http.Request)
+	//UpdatePost(w http.ResponseWriter, r *http.Request)
+	//DeletePost(w http.ResponseWriter, r *http.Request)
 }
 
 type delivery struct {
@@ -94,25 +95,28 @@ func (delivery *delivery) DeletePost(w http.ResponseWriter, r *http.Request) {
 // @Failure 405 {object} pkg.Error "invalid http method"
 // @Failure 500 {object} pkg.Error "internal server error"
 // @Router   /feed [get]
-func (delivery *delivery) Feed(w http.ResponseWriter, r *http.Request) {
+func (delivery *delivery) Feed(c echo.Context) error {
 	log.Println("/feed")
-	w.Header().Set("Access-Control-Allow-Methods", "GET")
-	if r.Method != http.MethodGet {
-		pkg.ErrorResponse(w, http.StatusMethodNotAllowed, "invalid http method")
-		return
-	}
+	c.Response().Header().Set("Access-Control-Allow-Methods", "GET")
+	//if r.Method != http.MethodGet {
+	//	pkg.ErrorResponse(w, http.StatusMethodNotAllowed, "invalid http method")
+	//	return
+	//}
 
 	posts, err := delivery.pUsecase.GetAllPosts()
 
 	if err != nil {
-		pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error())
-		return
+		//pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error()) TODO сделать через echo
+		return err
 	}
 
-	err = pkg.JSONresponse(w, http.StatusOK, posts)
+	err = pkg.JSONresponse(c.Response(), http.StatusOK, posts)
 	if err != nil {
-		pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error())
+		//pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error()) TODO сделать через echo
+		return err
 	}
+
+	return nil
 }
 
 func NewDelivery(pUsecase postsUsecase.PostUseCaseI) DeliveryI {
