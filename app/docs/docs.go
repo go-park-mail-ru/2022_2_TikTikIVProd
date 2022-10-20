@@ -19,14 +19,11 @@ const docTemplate = `{
         "/auth": {
             "get": {
                 "description": "check user auth",
-                "consumes": [
-                    "application/json"
-                ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "auth"
                 ],
                 "summary": "Auth",
                 "responses": {
@@ -125,9 +122,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/logout": {
-            "get": {
-                "description": "user logout",
+        "/friends/add": {
+            "post": {
+                "description": "add friend",
                 "consumes": [
                     "application/json"
                 ],
@@ -135,12 +132,119 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "friends"
+                ],
+                "summary": "AddFriend",
+                "parameters": [
+                    {
+                        "description": "friends info",
+                        "name": "friends",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Friends"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "friend added"
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.Error"
+                        }
+                    },
+                    "405": {
+                        "description": "invalid http method",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.Error"
+                        }
+                    },
+                    "409": {
+                        "description": "friendship already exists",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/friends/delete": {
+            "delete": {
+                "description": "delete friend",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "friends"
+                ],
+                "summary": "DeleteFriend",
+                "parameters": [
+                    {
+                        "description": "friends info",
+                        "name": "friends",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Friends"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "friend deleted, body is empty"
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "friend or user doesn't exist",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.Error"
+                        }
+                    },
+                    "405": {
+                        "description": "invalid http method",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/logout": {
+            "delete": {
+                "description": "user logout",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
                 ],
                 "summary": "Logout",
                 "responses": {
-                    "200": {
-                        "description": "success logout"
+                    "204": {
+                        "description": "success logout, body is empty"
                     },
                     "400": {
                         "description": "bad request",
@@ -401,7 +505,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "auth"
                 ],
                 "summary": "SignIn",
                 "parameters": [
@@ -477,7 +581,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "auth"
                 ],
                 "summary": "SignUp",
                 "parameters": [
@@ -539,6 +643,17 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "models.Friends": {
+            "type": "object",
+            "properties": {
+                "id1": {
+                    "type": "integer"
+                },
+                "id2": {
+                    "type": "integer"
+                }
+            }
+        },
         "models.Image": {
             "type": "object",
             "properties": {
@@ -556,9 +671,6 @@ const docTemplate = `{
                 "create_date": {
                     "type": "string"
                 },
-                "firstName": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "integer"
                 },
@@ -568,14 +680,17 @@ const docTemplate = `{
                         "$ref": "#/definitions/models.Image"
                     }
                 },
-                "lastName": {
+                "message": {
                     "type": "string"
                 },
-                "message": {
+                "user_first_name": {
                     "type": "string"
                 },
                 "user_id": {
                     "type": "integer"
+                },
+                "user_last_name": {
+                    "type": "string"
                 }
             }
         },

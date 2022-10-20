@@ -1,20 +1,25 @@
 package main
 
 import (
-	postsRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/repository/postgres"
 	"log"
-
-	imagesRepository "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/repository/postgres"
-	postsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/delivery"
-	postsUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/usecase"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/cmd/router"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/cmd/server"
+	imagesRepository "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/repository/postgres"
+	postsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/delivery"
+	postsUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/usecase"
+	postsRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/repository/postgres"
 	usersDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/delivery"
-	usersPg "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository/postgres"
+	usersRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository/postgres"
 	usersUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/usecase"
+	authDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/delivery"
+	authRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/repository/postgres"
+	authUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/usecase"
+	friendsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/delivery"
+	friendsRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/repository/postgres"
+	friendsUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/usecase"
 )
 
 // @title WS Swagger API
@@ -31,15 +36,22 @@ func main() {
 	}
 
 	postDB := postsRep.NewPostRepository(db)
-	usersDB := usersPg.New(db)
+	usersDB := usersRep.New(db)
+	authDB := authRep.New(db)
+	friendsDB := friendsRep.New(db)
 	imageDB := imagesRepository.NewImageRepository(db)
+
 	postsUC := postsUsecase.NewPostUsecase(postDB, imageDB, usersDB)
-	postsDeliver := postsDelivery.NewDelivery(postsUC)
-
 	usersUC := usersUseCase.New(usersDB)
-	usersDeliver := usersDelivery.New(usersUC)
+	authUC := authUseCase.New(authDB, usersDB)
+	friendsUC := friendsUseCase.New(friendsDB)
 
-	e := router.NewEchoRouter(usersDeliver, postsDeliver)
+	postsDeliver := postsDelivery.NewDelivery(postsUC)
+	usersDeliver := usersDelivery.New(usersUC)
+	authDeliver := authDelivery.New(authUC)
+	friendsDeliver := friendsDelivery.New(friendsUC)
+
+	e := router.NewEchoRouter(usersDeliver, friendsDeliver, authDeliver, postsDeliver)
 
 	s := server.NewServer(e)
 	if err := s.Start(); err != nil {

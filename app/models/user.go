@@ -1,9 +1,5 @@
 package models
 
-import (
-	"time"
-)
-
 type User struct {
 	Id        int    `json:"id" gorm:"column:id"`
 	FirstName string `json:"first_name" gorm:"column:first_name"`
@@ -19,8 +15,3 @@ type UserSignIn struct {
 	Password string `json:"password"`
 }
 
-type Cookie struct {
-	SessionToken string    `json:"session_token" gorm:"column:value"`
-	UserId       int       `json:"user_id" gorm:"column:user_id"`
-	Expires      time.Time `json:"expires" gorm:"column:expires"`
-}

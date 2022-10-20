@@ -13,6 +13,12 @@ CREATE TABLE IF NOT EXISTS users (
 	passhash VARCHAR(128) NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS friends (
+	id1 INT REFERENCES users(id),
+	id2 INT REFERENCES users(id),
+	UNIQUE (id1, id2)
+);
+
 CREATE TABLE IF NOT EXISTS cookies (
 	value varchar(64) PRIMARY KEY,
 	user_id INT REFERENCES users(id),

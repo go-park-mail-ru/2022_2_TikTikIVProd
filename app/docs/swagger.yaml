@@ -1,4 +1,11 @@
 definitions:
+  models.Friends:
+    properties:
+      id1:
+        type: integer
+      id2:
+        type: integer
+    type: object
   models.Image:
     properties:
       id:
@@ -10,20 +17,20 @@ definitions:
     properties:
       create_date:
         type: string
-      firstName:
-        type: string
       id:
         type: integer
       images:
         items:
           $ref: '#/definitions/models.Image'
         type: array
-      lastName:
-        type: string
       message:
+        type: string
+      user_first_name:
         type: string
       user_id:
         type: integer
+      user_last_name:
+        type: string
     type: object
   models.User:
     properties:
@@ -66,8 +73,6 @@ info:
 paths:
   /auth:
     get:
-      consumes:
-      - application/json
       description: check user auth
       produces:
       - application/json
@@ -99,7 +104,7 @@ paths:
             $ref: '#/definitions/pkg.Error'
       summary: Auth
       tags:
-      - users
+      - auth
   /feed:
     get:
       consumes:
@@ -130,16 +135,86 @@ paths:
       summary: Feed
       tags:
       - posts
-  /logout:
-    get:
+  /friends/add:
+    post:
       consumes:
       - application/json
+      description: add friend
+      parameters:
+      - description: friends info
+        in: body
+        name: friends
+        required: true
+        schema:
+          $ref: '#/definitions/models.Friends'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: friend added
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "409":
+          description: friendship already exists
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/pkg.Error'
+      summary: AddFriend
+      tags:
+      - friends
+  /friends/delete:
+    delete:
+      consumes:
+      - application/json
+      description: delete friend
+      parameters:
+      - description: friends info
+        in: body
+        name: friends
+        required: true
+        schema:
+          $ref: '#/definitions/models.Friends'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: friend deleted, body is empty
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "404":
+          description: friend or user doesn't exist
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/pkg.Error'
+      summary: DeleteFriend
+      tags:
+      - friends
+  /logout:
+    delete:
       description: user logout
       produces:
       - application/json
       responses:
-        "200":
-          description: success logout
+        "204":
+          description: success logout, body is empty
         "400":
           description: bad request
           schema:
@@ -154,7 +229,7 @@ paths:
             $ref: '#/definitions/pkg.Error'
       summary: Logout
       tags:
-      - users
+      - auth
   /post/{id}:
     get:
       consumes:
@@ -339,7 +414,7 @@ paths:
             $ref: '#/definitions/pkg.Error'
       summary: SignIn
       tags:
-      - users
+      - auth
   /signup:
     post:
       consumes:
@@ -382,5 +457,5 @@ paths:
             $ref: '#/definitions/pkg.Error'
       summary: SignUp
       tags:
-      - users
+      - auth
 swagger: "2.0"

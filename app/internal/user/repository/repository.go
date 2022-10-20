@@ -8,8 +8,5 @@ type RepositoryI interface {
 	SelectUserByNickName(name string) (*models.User, error)
 	SelectUserByEmail(email string) (*models.User, error)
 	CreateUser(u models.User) (*models.User, error)
-	CreateCookie(c models.Cookie) (*models.Cookie, error)
-	SelectCookie(value string) (*models.Cookie, error)
-	DeleteCookie(value string) error
 	SelectUserById(id int) (*models.User, error)
 }
