@@ -1,6 +1,8 @@
 package main
 
 import (
+	imageDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/delivery"
+	imageUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/usecase"
 	postsRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/repository/postgres"
 	"log"
 
@@ -21,8 +23,12 @@ import (
 // @version 1.0
 // @host 89.208.197.127:8080
 
+var testCfg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
+
+//var prod_cfg = postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}
+
 func main() {
-	db, err := gorm.Open(postgres.New(postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}),
+	db, err := gorm.Open(postgres.New(testCfg),
 		&gorm.Config{})
 
 	if err != nil {
@@ -30,16 +36,19 @@ func main() {
 		return
 	}
 
-	postDB := postsRep.NewPostRepository(db)
-	usersDB := usersPg.New(db)
 	imageDB := imagesRepository.NewImageRepository(db)
-	postsUC := postsUsecase.NewPostUsecase(postDB, imageDB, usersDB)
-	postsDeliver := postsDelivery.NewDelivery(postsUC)
+	usersDB := usersPg.New(db)
+	postDB := postsRep.NewPostRepository(db)
 
+	postsUC := postsUsecase.NewPostUsecase(postDB, imageDB, usersDB) //TODO  сделать единый стиль
 	usersUC := usersUseCase.New(usersDB)
-	usersDeliver := usersDelivery.New(usersUC)
+	imageUC := imageUsecase.NewImageUsecase(imageDB)
 
-	e := router.NewEchoRouter(usersDeliver, postsDeliver)
+	postsDeliver := postsDelivery.NewDelivery(postsUC)
+	usersDeliver := usersDelivery.New(usersUC)
+	imageDeliver := imageDelivery.NewDelivery(imageUC)
+
+	e := router.NewEchoRouter(usersDeliver, postsDeliver, imageDeliver)
 
 	s := server.NewServer(e)
 	if err := s.Start(); err != nil {

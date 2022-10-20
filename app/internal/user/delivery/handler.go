@@ -1,13 +1,8 @@
 package delivery
 
 import (
-	"encoding/json"
-	"net/http"
-	"time"
-
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/usecase"
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg"
+	"net/http"
 )
 
 type DeliveryI interface {
@@ -42,46 +37,46 @@ func New(uc usecase.UseCaseI) DeliveryI {
 // @Failure 500 {object} pkg.Error "internal server error"
 // @Router   /signup [post]
 func (del *delivery) SignUp(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Methods", "POST")
-	if r.Method != http.MethodPost {
-		pkg.ErrorResponse(w, http.StatusMethodNotAllowed, "invalid http method")
-		return
-	}
-
-	user := models.User{}
-
-	defer r.Body.Close()
-	err := json.NewDecoder(r.Body).Decode(&user)
-	if err != nil {
-		pkg.ErrorResponse(w, http.StatusBadRequest, "bad request")
-		return
-	}
-
-	createdUser, createdCookie, err := del.uc.SignUp(user)
-	if err != nil {
-		if err.Error() == "nickname already in use" {
-			pkg.ErrorResponse(w, http.StatusConflict, err.Error())
-			return
-		} else if err.Error() == "user with such email already exists" {
-			pkg.ErrorResponse(w, http.StatusConflict, err.Error())
-			return
-		}
-		pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	http.SetCookie(w, &http.Cookie{
-		Name:     "session_token",
-		Value:    createdCookie.SessionToken,
-		Expires:  createdCookie.Expires,
-		HttpOnly: true,
-	})
-
-	err = pkg.JSONresponse(w, http.StatusCreated, createdUser)
-	if err != nil {
-		pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error())
-		return
-	}
+	//w.Header().Set("Access-Control-Allow-Methods", "POST")
+	//if r.Method != http.MethodPost {
+	//	//pkg.ErrorResponse(w, http.StatusMethodNotAllowed, "invalid http method")
+	//	return
+	//}
+	//
+	//user := models.User{}
+	//
+	//defer r.Body.Close()
+	//err := json.NewDecoder(r.Body).Decode(&user)
+	//if err != nil {
+	//	//pkg.ErrorResponse(w, http.StatusBadRequest, "bad request")
+	//	return
+	//}
+	//
+	//createdUser, createdCookie, err := del.uc.SignUp(user)
+	//if err != nil {
+	//	if err.Error() == "nickname already in use" {
+	//		//pkg.ErrorResponse(w, http.StatusConflict, err.Error())
+	//		return
+	//	} else if err.Error() == "user with such email already exists" {
+	//		//pkg.ErrorResponse(w, http.StatusConflict, err.Error())
+	//		return
+	//	}
+	//	//pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error())
+	//	return
+	//}
+	//
+	//http.SetCookie(w, &http.Cookie{
+	//	Name:     "session_token",
+	//	Value:    createdCookie.SessionToken,
+	//	Expires:  createdCookie.Expires,
+	//	HttpOnly: true,
+	//})
+	//
+	//err = pkg.JSONresponse(w, http.StatusCreated, createdUser)
+	//if err != nil {
+	//	pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error())
+	//	return
+	//}
 }
 
 // SignIn godoc
@@ -99,46 +94,46 @@ func (del *delivery) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} pkg.Error "internal server error"
 // @Router   /signin [post]
 func (del *delivery) SignIn(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Methods", "POST")
-	if r.Method != http.MethodPost {
-		pkg.ErrorResponse(w, http.StatusMethodNotAllowed, "invalid http method")
-		return
-	}
-
-	user := models.UserSignIn{}
-
-	defer r.Body.Close()
-	err := json.NewDecoder(r.Body).Decode(&user)
-	if err != nil {
-		pkg.ErrorResponse(w, http.StatusBadRequest, "bad request")
-		return
-	}
-
-	gotUser, createdCookie, err := del.uc.SignIn(user)
-	if err != nil {
-		if err.Error() == "can't find user with such email" {
-			pkg.ErrorResponse(w, http.StatusNotFound, err.Error())
-			return
-		} else if err.Error() == "invalid password" {
-			pkg.ErrorResponse(w, http.StatusUnauthorized, err.Error())
-			return
-		}
-		pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	http.SetCookie(w, &http.Cookie{
-		Name:     "session_token",
-		Value:    createdCookie.SessionToken,
-		Expires:  createdCookie.Expires,
-		HttpOnly: true,
-	})
-
-	err = pkg.JSONresponse(w, http.StatusOK, gotUser)
-	if err != nil {
-		pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error())
-		return
-	}
+	//w.Header().Set("Access-Control-Allow-Methods", "POST")
+	//if r.Method != http.MethodPost {
+	//	pkg.ErrorResponse(w, http.StatusMethodNotAllowed, "invalid http method")
+	//	return
+	//}
+	//
+	//user := models.UserSignIn{}
+	//
+	//defer r.Body.Close()
+	//err := json.NewDecoder(r.Body).Decode(&user)
+	//if err != nil {
+	//	pkg.ErrorResponse(w, http.StatusBadRequest, "bad request")
+	//	return
+	//}
+	//
+	//gotUser, createdCookie, err := del.uc.SignIn(user)
+	//if err != nil {
+	//	if err.Error() == "can't find user with such email" {
+	//		pkg.ErrorResponse(w, http.StatusNotFound, err.Error())
+	//		return
+	//	} else if err.Error() == "invalid password" {
+	//		pkg.ErrorResponse(w, http.StatusUnauthorized, err.Error())
+	//		return
+	//	}
+	//	pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error())
+	//	return
+	//}
+	//
+	//http.SetCookie(w, &http.Cookie{
+	//	Name:     "session_token",
+	//	Value:    createdCookie.SessionToken,
+	//	Expires:  createdCookie.Expires,
+	//	HttpOnly: true,
+	//})
+	//
+	//err = pkg.JSONresponse(w, http.StatusOK, gotUser)
+	//if err != nil {
+	//	pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error())
+	//	return
+	//}
 }
 
 // Logout godoc
@@ -153,34 +148,34 @@ func (del *delivery) SignIn(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} pkg.Error "no cookie"
 // @Router   /logout [get]
 func (del *delivery) Logout(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Methods", "GET")
-	if r.Method != http.MethodGet {
-		pkg.ErrorResponse(w, http.StatusMethodNotAllowed, "invalid http method")
-		return
-	}
-
-	cookie, err := r.Cookie("session_token")
-	if err == http.ErrNoCookie {
-		pkg.ErrorResponse(w, http.StatusUnauthorized, err.Error())
-		return
-	} else if err != nil {
-		pkg.ErrorResponse(w, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	err = del.uc.DeleteCookie(cookie.Value)
-	if err != nil {
-		pkg.ErrorResponse(w, http.StatusUnauthorized, err.Error())
-		return
-	}
-
-	http.SetCookie(w, &http.Cookie{
-		Name:    "session_token",
-		Value:   "",
-		Expires: time.Now().AddDate(0, 0, -1),
-	})
-
-	w.WriteHeader(http.StatusOK)
+	//w.Header().Set("Access-Control-Allow-Methods", "GET")
+	//if r.Method != http.MethodGet {
+	//	pkg.ErrorResponse(w, http.StatusMethodNotAllowed, "invalid http method")
+	//	return
+	//}
+	//
+	//cookie, err := r.Cookie("session_token")
+	//if err == http.ErrNoCookie {
+	//	pkg.ErrorResponse(w, http.StatusUnauthorized, err.Error())
+	//	return
+	//} else if err != nil {
+	//	pkg.ErrorResponse(w, http.StatusBadRequest, err.Error())
+	//	return
+	//}
+	//
+	//err = del.uc.DeleteCookie(cookie.Value)
+	//if err != nil {
+	//	pkg.ErrorResponse(w, http.StatusUnauthorized, err.Error())
+	//	return
+	//}
+	//
+	//http.SetCookie(w, &http.Cookie{
+	//	Name:    "session_token",
+	//	Value:   "",
+	//	Expires: time.Now().AddDate(0, 0, -1),
+	//})
+	//
+	//w.WriteHeader(http.StatusOK)
 }
 
 // Auth godoc
@@ -196,36 +191,36 @@ func (del *delivery) Logout(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} pkg.Error "no cookie"
 // @Router   /auth [get]
 func (del *delivery) Auth(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Methods", "GET")
-	if r.Method != http.MethodGet {
-		pkg.ErrorResponse(w, http.StatusMethodNotAllowed, "invalid http method")
-		return
-	}
-
-	cookie, err := r.Cookie("session_token")
-	if err == http.ErrNoCookie {
-		pkg.ErrorResponse(w, http.StatusUnauthorized, err.Error())
-		return
-	} else if err != nil {
-		pkg.ErrorResponse(w, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	gotCookie, err := del.uc.SelectCookie(cookie.Value)
-	if err != nil {
-		pkg.ErrorResponse(w, http.StatusUnauthorized, err.Error())
-		return
-	}
-
-	gotUser, err := del.uc.SelectUserById(gotCookie.UserId)
-	if err != nil {
-		pkg.ErrorResponse(w, http.StatusUnauthorized, err.Error())
-		return
-	}
-
-	err = pkg.JSONresponse(w, http.StatusOK, gotUser)
-	if err != nil {
-		pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error())
-		return
-	}
+	//w.Header().Set("Access-Control-Allow-Methods", "GET")
+	//if r.Method != http.MethodGet {
+	//	pkg.ErrorResponse(w, http.StatusMethodNotAllowed, "invalid http method")
+	//	return
+	//}
+	//
+	//cookie, err := r.Cookie("session_token")
+	//if err == http.ErrNoCookie {
+	//	pkg.ErrorResponse(w, http.StatusUnauthorized, err.Error())
+	//	return
+	//} else if err != nil {
+	//	pkg.ErrorResponse(w, http.StatusBadRequest, err.Error())
+	//	return
+	//}
+	//
+	//gotCookie, err := del.uc.SelectCookie(cookie.Value)
+	//if err != nil {
+	//	pkg.ErrorResponse(w, http.StatusUnauthorized, err.Error())
+	//	return
+	//}
+	//
+	//gotUser, err := del.uc.SelectUserById(gotCookie.UserId)
+	//if err != nil {
+	//	pkg.ErrorResponse(w, http.StatusUnauthorized, err.Error())
+	//	return
+	//}
+	//
+	//err = pkg.JSONresponse(w, http.StatusOK, gotUser)
+	//if err != nil {
+	//	pkg.ErrorResponse(w, http.StatusInternalServerError, err.Error())
+	//	return
+	//}
 }

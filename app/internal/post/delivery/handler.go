@@ -1,4 +1,4 @@
-package postsRouter
+package delivery
 
 import (
 	"github.com/labstack/echo/v4"
