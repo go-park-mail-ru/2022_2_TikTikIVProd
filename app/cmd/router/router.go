@@ -28,7 +28,10 @@ func NewEchoRouter(ud usersDelivery.DeliveryI, fd friendsDelivery.DeliveryI, ad 
 	e.POST("/signin", ad.SignIn)
 	e.POST("/signup", ad.SignUp)
 	e.GET("/auth", ad.Auth)
-	e.GET("/logout", ad.Logout)
+	e.DELETE("/logout", ad.Logout)
+	e.GET("/users/:id", ud.GetProfile)
+	e.POST("/friends/add", fd.AddFriend)
+	e.DELETE("/friends/delete", fd.DeleteFriend)
 	e.GET("/feed", pd.Feed)
 	return e
 }

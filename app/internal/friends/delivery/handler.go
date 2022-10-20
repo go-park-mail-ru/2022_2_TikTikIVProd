@@ -55,13 +55,15 @@ func (del *delivery) AddFriend(c echo.Context) error {
 	}
 
 	err = del.uc.AddFriend(friends)
-	switch {
-	case err.Error() == "friendship already exists":
-		c.Logger().Error(err)
-		return pkg.ErrorResponse(c.Response(), http.StatusConflict, err.Error())
-	case err != nil:
-		c.Logger().Error(err)
-		return pkg.ErrorResponse(c.Response(), http.StatusInternalServerError, err.Error())
+	if err != nil {
+		switch err.Error() {
+		case "friendship already exists":
+			c.Logger().Error(err)
+			return pkg.ErrorResponse(c.Response(), http.StatusConflict, err.Error())
+		default:
+			c.Logger().Error(err)
+			return pkg.ErrorResponse(c.Response(), http.StatusInternalServerError, err.Error())
+		}
 	}
 
 	c.Response().WriteHeader(http.StatusCreated)
@@ -97,13 +99,15 @@ func (del *delivery) DeleteFriend(c echo.Context) error {
 	}
 
 	err = del.uc.DeleteFriend(friends)
-	switch {
-	case err.Error() == "friend or user doesn't exist":
-		c.Logger().Error(err)
-		return pkg.ErrorResponse(c.Response(), http.StatusNotFound, err.Error())
-	case err != nil:
-		c.Logger().Error(err)
-		return pkg.ErrorResponse(c.Response(), http.StatusInternalServerError, err.Error())
+	if err != nil {
+		switch err.Error() {
+		case "friend or user doesn't exist":
+			c.Logger().Error(err)
+			return pkg.ErrorResponse(c.Response(), http.StatusNotFound, err.Error())
+		default:
+			c.Logger().Error(err)
+			return pkg.ErrorResponse(c.Response(), http.StatusInternalServerError, err.Error())
+		}
 	}
 
 	c.Response().WriteHeader(http.StatusNoContent)

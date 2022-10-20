@@ -18,7 +18,7 @@ func New(db *gorm.DB) friendsRep.RepositoryI {
 }
 
 func (dbFriends *dataBase) AddFriend(friends models.Friends) (error) {
-	tx := dbFriends.db.Table("friends").Exec("INSERT INTO friends VALUES (?, ?, ?, ?, ?)", friends.Id1, friends.Id2)
+	tx := dbFriends.db.Table("friends").Exec("INSERT INTO friends VALUES (?, ?)", friends.Id1, friends.Id2)
 	return tx.Error
 }
 

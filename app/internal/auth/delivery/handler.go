@@ -59,16 +59,18 @@ func (del *delivery) SignUp(c echo.Context) error {
 	}
 
 	createdUser, createdCookie, err := del.authUC.SignUp(user)
-	switch {
-	case err.Error() == "nickname already in use":
-		c.Logger().Error(err.Error())
-		return pkg.ErrorResponse(c.Response(), http.StatusConflict, err.Error())
-	case err.Error() == "user with such email already exists":
-		c.Logger().Error(err.Error())
-		return pkg.ErrorResponse(c.Response(), http.StatusConflict, err.Error())
-	case err != nil:
-		c.Logger().Error(err.Error())
-		return pkg.ErrorResponse(c.Response(), http.StatusInternalServerError, err.Error())
+	if err != nil {
+		switch err.Error() {
+		case "nickname already in use":
+			c.Logger().Error(err.Error())
+			return pkg.ErrorResponse(c.Response(), http.StatusConflict, err.Error())
+		case "user with such email already exists":
+			c.Logger().Error(err.Error())
+			return pkg.ErrorResponse(c.Response(), http.StatusConflict, err.Error())
+		default:
+			c.Logger().Error(err.Error())
+			return pkg.ErrorResponse(c.Response(), http.StatusInternalServerError, err.Error())
+		}
 	}
 
 	http.SetCookie(c.Response(), &http.Cookie{
@@ -116,16 +118,18 @@ func (del *delivery) SignIn(c echo.Context) error {
 	}
 
 	gotUser, createdCookie, err := del.authUC.SignIn(user)
-	switch {
-	case err.Error() == "can't find user with such email":
-		c.Logger().Error(err.Error())
-		return pkg.ErrorResponse(c.Response(), http.StatusNotFound, err.Error())
-	case err.Error() == "invalid password":
-		c.Logger().Error(err.Error())
-		return pkg.ErrorResponse(c.Response(), http.StatusUnauthorized, err.Error())
-	case err != nil:
-		c.Logger().Error(err.Error())
-		return pkg.ErrorResponse(c.Response(), http.StatusInternalServerError, err.Error())
+	if err != nil {
+		switch err.Error() {
+		case "can't find user with such email":
+			c.Logger().Error(err.Error())
+			return pkg.ErrorResponse(c.Response(), http.StatusNotFound, err.Error())
+		case "invalid password":
+			c.Logger().Error(err.Error())
+			return pkg.ErrorResponse(c.Response(), http.StatusUnauthorized, err.Error())
+		default:
+			c.Logger().Error(err.Error())
+			return pkg.ErrorResponse(c.Response(), http.StatusInternalServerError, err.Error())
+		}
 	}
 
 	http.SetCookie(c.Response(), &http.Cookie{

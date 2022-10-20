@@ -1,9 +1,9 @@
 definitions:
   models.Friends:
     properties:
-      id1:
+      id_friend:
         type: integer
-      id2:
+      id_user:
         type: integer
     type: object
   models.Image:
@@ -458,4 +458,38 @@ paths:
       summary: SignUp
       tags:
       - auth
+  /users/{id}:
+    get:
+      description: get user's profile
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  $ref: '#/definitions/models.User'
+              type: object
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "404":
+          description: can't find user with such id
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/pkg.Error'
+      summary: GetProfile
+      tags:
+      - users
 swagger: "2.0"
