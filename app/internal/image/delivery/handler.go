@@ -2,7 +2,10 @@ package delivery
 
 import (
 	imgUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/usecase"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg"
 	"github.com/labstack/echo/v4"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
@@ -10,10 +13,7 @@ import (
 
 type DeliveryI interface {
 	GetImageByID(c echo.Context) error
-	//GetPost(w http.ResponseWriter, r *http.Request)
-	//CreatePost(w http.ResponseWriter, r *http.Request)
-	//UpdatePost(w http.ResponseWriter, r *http.Request)
-	//DeletePost(w http.ResponseWriter, r *http.Request)
+	UploadImage(c echo.Context) error
 }
 
 type delivery struct {
@@ -45,7 +45,7 @@ func (delivery *delivery) GetImageByID(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
 	}
 
-	img, err := delivery.imgUsecase.GetImage(id)
+	img, err := delivery.imgUsecase.GetImageById(id)
 	if err != nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
@@ -58,4 +58,50 @@ func (delivery *delivery) GetImageByID(c echo.Context) error {
 	}
 
 	return c.Stream(http.StatusOK, "image/png", f)
+}
+
+// UploadImage godoc
+// @Summary      Upload image
+// @Description  Upload image
+// @Tags     	 image
+// @Param image formData file  true  "image file"
+// @Accept multipart/form-data
+// @Produce  application/json
+// @Success  200 "success upload image"
+// @Failure 405 {object} echo.HTTPError "invalid http method"
+// @Failure 500 {object} echo.HTTPError "internal server error"
+// @Router   /image/upload [post]
+func (delivery *delivery) UploadImage(c echo.Context) error {
+	// Source
+	file, err := c.FormFile("image")
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "Not image in form")
+	}
+	src, err := file.Open()
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+	}
+	defer src.Close()
+
+	// Destination
+	dst, err := os.Create("images/" + file.Filename)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+
+	}
+	defer dst.Close()
+
+	// Copy
+	if _, err = io.Copy(dst, src); err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+	}
+
+	image := models.Image{ImgLink: file.Filename}
+	err = delivery.imgUsecase.CreateImage(&image)
+
+	return c.JSON(http.StatusOK, pkg.Response{Body: image})
 }

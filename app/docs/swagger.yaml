@@ -235,6 +235,33 @@ paths:
       summary: Get image by id
       tags:
       - image
+  /image/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload image
+      parameters:
+      - description: image file
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success upload image
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Upload image
+      tags:
+      - image
   /logout:
     delete:
       description: user logout

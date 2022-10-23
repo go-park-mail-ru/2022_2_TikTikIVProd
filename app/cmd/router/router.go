@@ -37,6 +37,7 @@ func NewEchoRouter(ud usersDelivery.DeliveryI, fd friendsDelivery.DeliveryI, ad 
 	e.DELETE("/friends/delete", fd.DeleteFriend)
 	e.GET("/feed", pd.Feed)
 	e.DELETE("/post/:id", pd.DeletePost)
+	e.POST("/image/upload", imgd.UploadImage)
 	e.GET("/image/:id", imgd.GetImageByID)
 	e.POST("/post/create", pd.CreatePost)
 	e.POST("/post/edit", pd.UpdatePost)
