@@ -229,6 +229,44 @@ const docTemplate = `{
                 }
             }
         },
+        "/image/{id}": {
+            "get": {
+                "description": "Get image by id",
+                "produces": [
+                    "image/png"
+                ],
+                "tags": [
+                    "image"
+                ],
+                "summary": "Get image by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "image ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success get image"
+                    },
+                    "405": {
+                        "description": "invalid http method",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/logout": {
             "delete": {
                 "description": "user logout",

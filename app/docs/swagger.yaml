@@ -210,6 +210,31 @@ paths:
       summary: DeleteFriend
       tags:
       - friends
+  /image/{id}:
+    get:
+      description: Get image by id
+      parameters:
+      - description: image ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - image/png
+      responses:
+        "200":
+          description: success get image
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Get image by id
+      tags:
+      - image
   /logout:
     delete:
       description: user logout

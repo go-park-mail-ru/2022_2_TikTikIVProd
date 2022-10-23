@@ -26,6 +26,16 @@ func NewDelivery(imgUsecase imgUsecase.ImageUseCaseI) DeliveryI {
 	}
 }
 
+// GetImageByID godoc
+// @Summary      Get image by id
+// @Description  Get image by id
+// @Tags     	 image
+// @Param id path int  true  "image ID"
+// @Produce  image/png
+// @Success  200 "success get image"
+// @Failure 405 {object} echo.HTTPError "invalid http method"
+// @Failure 500 {object} echo.HTTPError "internal server error"
+// @Router   /image/{id} [get]
 func (delivery *delivery) GetImageByID(c echo.Context) error {
 	idStr := c.Param("id")
 
