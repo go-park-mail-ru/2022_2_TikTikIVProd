@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/usecase"
+	_ "github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg"
 	"github.com/labstack/echo/v4"
 )
@@ -22,7 +23,6 @@ func New(uc usecase.UseCaseI) DeliveryI {
 		uc: uc,
 	}
 }
-
 
 // GetProfile godoc
 // @Summary      GetProfile
@@ -61,4 +61,3 @@ func (del *delivery) GetProfile(c echo.Context) error {
 	}
 	return pkg.JSONresponse(c.Response(), http.StatusOK, user)
 }
-

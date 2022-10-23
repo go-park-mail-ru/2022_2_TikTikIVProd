@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"errors"
+	"fmt"
 
 	"gorm.io/gorm"
 
@@ -26,7 +27,7 @@ func (dbUsers *dataBase) SelectUserById(id int) (*models.User, error) {
 	if tx.Error != nil {
 		return nil, tx.Error
 	} else if user.NickName == "" {
-		return nil, errors.New("user with such id doesn't exist")
+		return nil, errors.New(fmt.Sprintf("user with such id = %d doesn't exist", id))
 	}
 
 	return &user, nil
@@ -68,4 +69,3 @@ func (dbUsers *dataBase) CreateUser(u models.User) (*models.User, error) {
 
 	return &user, nil
 }
-

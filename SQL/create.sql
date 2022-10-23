@@ -28,14 +28,14 @@ CREATE TABLE IF NOT EXISTS cookies (
 
 CREATE TABLE IF NOT EXISTS user_posts (
 	id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-	user_id INT REFERENCES users(id),
-	message TEXT,
+	user_id INT REFERENCES users(id) NOT NULL,
+	message TEXT NOT NULL,
 	create_date DATE NOT NULL
 );
 
 
 CREATE TABLE IF NOT EXISTS user_posts_images (
-	user_post_id INT REFERENCES user_posts(id),
-	img_id INT REFERENCES images(id),
+	user_post_id INT REFERENCES user_posts(id) on delete cascade,
+	img_id INT REFERENCES images(id) on delete cascade,
 	PRIMARY KEY (user_post_id, img_id)
 );

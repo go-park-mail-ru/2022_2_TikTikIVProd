@@ -5,12 +5,16 @@ import (
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/repository"
 	userRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
+	"github.com/pkg/errors"
 )
 
 type PostUseCaseI interface {
 	GetPostById(id int) (*models.Post, error)
-	CreatePost(u *models.Post) (*models.Post, error)
+	GetUserPosts(userId int) ([]*models.Post, error)
+	CreatePost(p *models.Post) error
+	UpdatePost(p *models.Post) error
 	GetAllPosts() ([]*models.Post, error)
+	DeletePost(id int) error
 }
 
 type postsUsecase struct {
@@ -28,46 +32,136 @@ func NewPostUsecase(ps repository.RepositoryI, ir imageRep.RepositoryI, ur userR
 }
 
 func (p *postsUsecase) GetPostById(id int) (*models.Post, error) {
-	//TODO implement me
-	panic("implement me")
+	resPost, err := p.postsRepo.GetPostById(id)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "postsUsecase.GetPostById error while get post info") // TODO
+	}
+
+	err = addAdditionalFieldsToPost(resPost, p.userRepo, p.imageRepo)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "postsUsecase.GetPostById error while get additional info") // TODO
+	}
+
+	return resPost, nil
 }
 
-func (p *postsUsecase) CreatePost(u *models.Post) (*models.Post, error) {
-	//TODO implement me
-	panic("implement me")
+func (p *postsUsecase) DeletePost(id int) error {
+	existedPost, err := p.postsRepo.GetPostById(id)
+	if err != nil {
+		return err //TODO наверху обработать эту ошибку(схема с файлом)
+	}
+
+	if existedPost == nil {
+		return errors.New("Post not found") // TODO
+	}
+
+	err = p.postsRepo.DeletePostById(id)
+
+	if err != nil {
+		return errors.Wrap(err, "postsUsecase.DeletePost error") //TODO
+	}
+
+	return nil
 }
 
-func addPostImagesAuthors(posts []*models.Post, repImg imageRep.RepositoryI, repUsers userRep.RepositoryI) error {
-	for idx := range posts {
-		postImages, err := repImg.GetPostImages(posts[idx].ID)
+func (p *postsUsecase) CreatePost(post *models.Post) error {
+	err := p.postsRepo.CreatePost(post)
 
-		if err != nil {
-			return err
-		}
+	if err != nil {
+		return errors.Wrap(err, "Error in func postsUsecase.CreatePost")
+	}
 
-		for _, img := range postImages {
-			posts[idx].Images = append(posts[idx].Images, *img)
-		}
+	return nil
+}
 
-		author, err := repUsers.SelectUserById(posts[idx].ID)
-		posts[idx].UserFirstName = author.FirstName
-		posts[idx].UserLastName = author.LastName
+func (p *postsUsecase) UpdatePost(post *models.Post) error {
+	err := p.postsRepo.UpdatePost(post)
+
+	if err != nil {
+		return errors.Wrap(err, "Error in func postsUsecase.UpdatePost")
+	}
+
+	return nil
+}
+
+func addAuthorForPost(post *models.Post, repUsers userRep.RepositoryI) error {
+	author, err := repUsers.SelectUserById(post.UserID)
+
+	if err != nil {
+		return errors.Wrap(err, "Error in func addAuthorForPost")
+	}
+
+	post.UserLastName = author.LastName
+	post.UserFirstName = author.FirstName
+
+	return nil
+}
+
+func addImagesForPost(post *models.Post, repImg imageRep.RepositoryI) error {
+	images, err := repImg.GetPostImages(post.ID)
+
+	if err != nil {
+		return errors.Wrap(err, "Error in func addPostImagesAuthors")
+	}
+
+	post.Images = make([]models.Image, 0, 10)
+
+	for _, image := range images {
+		post.Images = append(post.Images, *image)
+	}
+
+	return nil
+}
+
+func addAdditionalFieldsToPost(post *models.Post, repUsers userRep.RepositoryI, repImg imageRep.RepositoryI) error {
+	err := addImagesForPost(post, repImg)
+
+	if err != nil {
+		return errors.Wrap(err, "error while get images")
+	}
+
+	err = addAuthorForPost(post, repUsers)
+
+	if err != nil {
+		return errors.Wrap(err, "error while get users")
 	}
 
 	return nil
 }
 
 func (p *postsUsecase) GetAllPosts() ([]*models.Post, error) {
-	posts, err := p.postsRepo.GetAllPosts() //TODO ошибки
+	posts, err := p.postsRepo.GetAllPosts()
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error in func postsUsecase.GetAllPosts")
 	}
 
-	err = addPostImagesAuthors(posts, p.imageRepo, p.userRepo)
+	for idx := range posts {
+		err = addAdditionalFieldsToPost(posts[idx], p.userRepo, p.imageRepo)
+
+		if err != nil {
+			return nil, errors.Wrap(err, "postsUsecase.GetAllPosts error while add additional fields")
+		}
+	}
+
+	return posts, nil
+}
+
+func (p *postsUsecase) GetUserPosts(userId int) ([]*models.Post, error) {
+	posts, err := p.postsRepo.GetUserPosts(userId)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error in func postsUsecase.GetUserPosts")
+	}
+
+	for idx := range posts {
+		err = addAdditionalFieldsToPost(posts[idx], p.userRepo, p.imageRepo)
+
+		if err != nil {
+			return nil, errors.Wrap(err, "postsUsecase.GetUserPosts error while add additional fields")
+		}
 	}
 
 	return posts, nil

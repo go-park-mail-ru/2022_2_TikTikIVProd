@@ -41,7 +41,7 @@ func (delivery *delivery) GetImageByID(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
 	}
 
-	f, err := os.Open(img.ImgLink)
+	f, err := os.Open("images/" + img.ImgLink)
 	if err != nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")

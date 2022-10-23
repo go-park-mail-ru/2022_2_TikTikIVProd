@@ -1,8 +1,8 @@
 package router
 
 import (
-	friendsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/delivery"
 	authDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/delivery"
+	friendsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/delivery"
 	imageDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/delivery"
 	postsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/delivery"
 	usersDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/delivery"
@@ -11,10 +11,10 @@ import (
 
 type EchoRouter struct {
 	*echo.Echo
-	ud usersDelivery.DeliveryI
-	fd friendsDelivery.DeliveryI
-	ad authDelivery.DeliveryI
-	pd postsDelivery.DeliveryI
+	ud   usersDelivery.DeliveryI
+	fd   friendsDelivery.DeliveryI
+	ad   authDelivery.DeliveryI
+	pd   postsDelivery.DeliveryI
 	imgd imageDelivery.DeliveryI
 }
 
@@ -36,6 +36,11 @@ func NewEchoRouter(ud usersDelivery.DeliveryI, fd friendsDelivery.DeliveryI, ad 
 	e.POST("/friends/add", fd.AddFriend)
 	e.DELETE("/friends/delete", fd.DeleteFriend)
 	e.GET("/feed", pd.Feed)
+	e.DELETE("/post/:id", pd.DeletePost)
 	e.GET("/image/:id", imgd.GetImageByID)
+	e.POST("/post/create", pd.CreatePost)
+	e.POST("/post/edit", pd.UpdatePost)
+	e.GET("/post/:id", pd.GetPost)
+	e.GET("/users/:id/posts", pd.GetUserPosts)
 	return e
 }
