@@ -28,12 +28,12 @@ import (
 // @version 1.0
 // @host 89.208.197.127:8080
 
-var testCfg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
+//var testCfg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
 
-//var prod_cfg = postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}
+var prod_cfg = postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}
 
 func main() {
-	db, err := gorm.Open(postgres.New(testCfg),
+	db, err := gorm.Open(postgres.New(prod_cfg),
 		&gorm.Config{})
 
 	if err != nil {
@@ -54,6 +54,7 @@ func main() {
 	imageUC := imageUsecase.NewImageUsecase(imageDB)
 
 	e := echo.New()
+	//e.Use(middleware.Logger())
 
 	_postsDelivery.NewDelivery(e, postsUC)
 	_usersDelivery.NewDelivery(e, usersUC)
