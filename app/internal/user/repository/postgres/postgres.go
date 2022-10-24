@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"errors"
-	"fmt"
 
 	"gorm.io/gorm"
 
@@ -23,11 +22,11 @@ func New(db *gorm.DB) userRep.RepositoryI {
 func (dbUsers *dataBase) SelectUserById(id int) (*models.User, error) {
 	user := models.User{}
 
-	tx := dbUsers.db.Table("users").Where("id = ?", id).Scan(&user)
-	if tx.Error != nil {
+	tx := dbUsers.db.Table("users").Where("id = ?", id).Take(&user)
+	if tx.Error == gorm.ErrRecordNotFound {
+		return nil, errors.New("user with such id doesn't exist")
+	} else if tx.Error != nil {
 		return nil, tx.Error
-	} else if user.NickName == "" {
-		return nil, errors.New(fmt.Sprintf("user with such id = %d doesn't exist", id))
 	}
 
 	return &user, nil
