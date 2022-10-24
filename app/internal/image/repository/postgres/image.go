@@ -52,7 +52,7 @@ func toModelImages(images []*Image) []*models.Image {
 
 func (dbImage *imageRepository) GetPostImages(postID int) ([]*models.Image, error) {
 	var images []*Image
-	tx := dbImage.db.Joins("JOIN user_posts_images upi ON upi.img_id = images.id AND upi.user_post_id = ?", postID).Scan(&images)
+	tx := dbImage.db.Model(Image{}).Joins("JOIN user_posts_images upi ON upi.img_id = images.id AND upi.user_post_id = ?", postID).Scan(&images)
 
 	if tx.Error != nil {
 		return nil, tx.Error

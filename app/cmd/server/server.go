@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/cmd/router"
+	"github.com/labstack/echo/v4"
 	"log"
 	"net/http"
 	"time"
@@ -12,7 +12,7 @@ type Server struct {
 	/*тут конфиги и логгер ещё будет*/
 }
 
-func NewServer(e *router.EchoRouter) *Server {
+func NewServer(e *echo.Echo) *Server {
 	return &Server{
 		http.Server{
 			Addr:              ":8080",

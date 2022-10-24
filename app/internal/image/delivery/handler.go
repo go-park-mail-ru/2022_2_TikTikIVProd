@@ -20,12 +20,6 @@ type delivery struct {
 	imgUsecase imgUsecase.ImageUseCaseI
 }
 
-func NewDelivery(imgUsecase imgUsecase.ImageUseCaseI) DeliveryI {
-	return &delivery{
-		imgUsecase: imgUsecase,
-	}
-}
-
 // GetImageByID godoc
 // @Summary      Get image by id
 // @Description  Get image by id
@@ -104,4 +98,13 @@ func (delivery *delivery) UploadImage(c echo.Context) error {
 	err = delivery.imgUsecase.CreateImage(&image)
 
 	return c.JSON(http.StatusOK, pkg.Response{Body: image})
+}
+
+func NewDelivery(e *echo.Echo, iu imgUsecase.ImageUseCaseI) {
+	handler := &delivery{
+		imgUsecase: iu,
+	}
+
+	e.POST("/image/upload", handler.UploadImage)
+	e.GET("/image/:id", handler.GetImageByID)
 }

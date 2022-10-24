@@ -209,8 +209,15 @@ func (delivery *delivery) GetUserPosts(c echo.Context) error {
 	return c.JSON(http.StatusOK, pkg.Response{Body: posts})
 }
 
-func NewDelivery(pUsecase postsUsecase.PostUseCaseI) DeliveryI {
-	return &delivery{
-		pUsecase: pUsecase,
+func NewDelivery(e *echo.Echo, up postsUsecase.PostUseCaseI) {
+	handler := &delivery{
+		pUsecase: up,
 	}
+
+	e.POST("/post/create", handler.CreatePost)
+	e.POST("/post/edit", handler.UpdatePost)
+	e.GET("/post/:id", handler.GetPost)
+	e.GET("/users/:id/posts", handler.GetUserPosts)
+	e.GET("/feed", handler.Feed)
+	e.DELETE("/post/:id", handler.DeletePost)
 }

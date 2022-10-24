@@ -1,25 +1,25 @@
 package main
 
 import (
+	"github.com/labstack/echo/v4"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
 
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/cmd/router"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/cmd/server"
-	authDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/delivery"
+	_authDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/delivery"
 	authRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/repository/postgres"
 	authUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/usecase"
-	friendsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/delivery"
+	_friendsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/delivery"
 	friendsRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/repository/postgres"
 	friendsUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/usecase"
-	imageDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/delivery"
+	_imageDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/delivery"
 	imagesRepository "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/repository/postgres"
 	imageUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/usecase"
-	postsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/delivery"
+	_postsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/delivery"
 	postsRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/repository/postgres"
 	postsUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/usecase"
-	usersDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/delivery"
+	_usersDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/delivery"
 	usersRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository/postgres"
 	usersUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/usecase"
 )
@@ -53,13 +53,13 @@ func main() {
 	friendsUC := friendsUseCase.New(friendsDB)
 	imageUC := imageUsecase.NewImageUsecase(imageDB)
 
-	postsDeliver := postsDelivery.NewDelivery(postsUC)
-	usersDeliver := usersDelivery.New(usersUC)
-	authDeliver := authDelivery.New(authUC)
-	friendsDeliver := friendsDelivery.New(friendsUC)
-	imageDeliver := imageDelivery.NewDelivery(imageUC)
+	e := echo.New()
 
-	e := router.NewEchoRouter(usersDeliver, friendsDeliver, authDeliver, postsDeliver, imageDeliver)
+	_postsDelivery.NewDelivery(e, postsUC)
+	_usersDelivery.NewDelivery(e, usersUC)
+	_imageDelivery.NewDelivery(e, imageUC)
+	_authDelivery.NewDelivery(e, authUC)
+	_friendsDelivery.NewDelivery(e, friendsUC)
 
 	s := server.NewServer(e)
 	if err := s.Start(); err != nil {
