@@ -3,6 +3,7 @@ package delivery
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	friendUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/usecase"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
@@ -68,15 +69,15 @@ func (del *delivery) AddFriend(c echo.Context) error {
 // @Summary      DeleteFriend
 // @Description  delete friend
 // @Tags     friends
-// @Accept	 application/json
 // @Produce  application/json
-// @Param    friends body models.Friends true "friends info"
+// @Param id_user path int true "User ID"
+// @Param id_friend path int true "Friend ID"
 // @Success  204 "friend deleted, body is empty"
 // @Failure 405 {object} pkg.Error "invalid http method"
 // @Failure 400 {object} pkg.Error "bad request"
 // @Failure 500 {object} pkg.Error "internal server error"
 // @Failure 404 {object} pkg.Error "friend or user doesn't exist"
-// @Router   /friends/delete [delete]
+// @Router   /friends/delete/{id_user}/{id_friend} [delete]
 func (del *delivery) DeleteFriend(c echo.Context) error {
 	c.Response().Header().Set(echo.HeaderAccessControlAllowMethods, echo.DELETE)
 	if c.Request().Method != http.MethodDelete {
@@ -84,11 +85,18 @@ func (del *delivery) DeleteFriend(c echo.Context) error {
 		return pkg.ErrorResponse(c.Response(), http.StatusMethodNotAllowed, "invalid http method")
 	}
 
+	var err error
 	friends := models.Friends{}
-	defer c.Request().Body.Close()
-	err := json.NewDecoder(c.Request().Body).Decode(&friends)
+	idUserStr := c.Param("id_user")
+	friends.Id1, err = strconv.Atoi(idUserStr)
 	if err != nil {
-		c.Logger().Error(err.Error())
+		c.Logger().Error(err)
+		return pkg.ErrorResponse(c.Response(), http.StatusBadRequest, "bad request")
+	}
+	idFriendStr := c.Param("id_friend")
+	friends.Id2, err = strconv.Atoi(idFriendStr)
+	if err != nil {
+		c.Logger().Error(err)
 		return pkg.ErrorResponse(c.Response(), http.StatusBadRequest, "bad request")
 	}
 
