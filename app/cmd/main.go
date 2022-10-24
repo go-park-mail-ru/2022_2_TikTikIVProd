@@ -65,6 +65,6 @@ func main() {
 
 	s := server.NewServer(e)
 	if err := s.Start(); err != nil {
-		log.Fatal("ERROR", err)
+		e.Logger.Fatal(err)
 	}
 }
