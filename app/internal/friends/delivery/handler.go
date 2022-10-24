@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/usecase"
+	friendUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/usecase"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg"
 	"github.com/labstack/echo/v4"
@@ -17,13 +17,7 @@ type DeliveryI interface {
 }
 
 type delivery struct {
-	uc usecase.UseCaseI
-}
-
-func New(uc usecase.UseCaseI) DeliveryI {
-	return &delivery{
-		uc: uc,
-	}
+	uc friendUsecase.UseCaseI
 }
 
 // AddFriend godoc
@@ -120,4 +114,13 @@ func (del *delivery) DeleteFriend(c echo.Context) error {
 
 	c.Response().WriteHeader(http.StatusNoContent)
 	return nil
+}
+
+func NewDelivery(e *echo.Echo, uc friendUsecase.UseCaseI) {
+	handler := &delivery{
+		uc: uc,
+	}
+
+	e.POST("/friends/add", handler.AddFriend)
+	e.DELETE("/friends/delete", handler.DeleteFriend)
 }

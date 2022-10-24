@@ -14,10 +14,10 @@ type Error struct {
 }
 
 func JSONresponse(r *echo.Response, code int, body interface{}) error {
-	r.Header().Set("Access-Control-Allow-Credentials", "true")
-	r.Header().Set("Access-Control-Allow-Origin", "http://localhost")
-	r.Header().Set("Access-Control-Allow-Headers", "*")
-	r.Header().Set("Content-Type", "application/json")
+	//r.Header().Set("Access-Control-Allow-Credentials", "true") // TODO это в мидлвару
+	//r.Header().Set("Access-Control-Allow-Origin", "http://localhost")
+	//r.Header().Set("Access-Control-Allow-Headers", "*")
+	//r.Header().Set("Content-Type", "application/json")
 
 	response, err := json.Marshal(Response{
 		Body: body,

@@ -12,6 +12,10 @@ type Image struct {
 	ImgLink string
 }
 
+func (Image) TableName() string {
+	return "images"
+}
+
 type imageRepository struct {
 	db *gorm.DB
 }
@@ -48,7 +52,7 @@ func toModelImages(images []*Image) []*models.Image {
 
 func (dbImage *imageRepository) GetPostImages(postID int) ([]*models.Image, error) {
 	var images []*Image
-	tx := dbImage.db.Table("images").Select("img_link").Joins("JOIN user_posts_images upi ON upi.img_id = images.id AND upi.user_post_id = ?", postID).Scan(&images)
+	tx := dbImage.db.Model(Image{}).Joins("JOIN user_posts_images upi ON upi.img_id = images.id AND upi.user_post_id = ?", postID).Scan(&images)
 
 	if tx.Error != nil {
 		return nil, tx.Error
@@ -66,4 +70,17 @@ func (dbImage *imageRepository) GetImage(imageID int) (*models.Image, error) {
 	}
 
 	return toModelImage(&img), nil
+}
+
+func (dbImage *imageRepository) CreateImage(image *models.Image) error {
+	img := toPostgresImage(image)
+
+	tx := dbImage.db.Create(img)
+	if tx.Error != nil {
+		return errors.Wrap(tx.Error, "imageRepository.CreateImage error while insert image")
+	}
+
+	image.ID = img.ID
+
+	return nil
 }

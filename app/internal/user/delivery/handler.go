@@ -4,7 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/usecase"
+	userUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/usecase"
+	_ "github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg"
 	"github.com/labstack/echo/v4"
 )
@@ -14,15 +15,8 @@ type DeliveryI interface {
 }
 
 type delivery struct {
-	uc usecase.UseCaseI
+	uc userUsecase.UseCaseI
 }
-
-func New(uc usecase.UseCaseI) DeliveryI {
-	return &delivery{
-		uc: uc,
-	}
-}
-
 
 // GetProfile godoc
 // @Summary      GetProfile
@@ -63,3 +57,10 @@ func (del *delivery) GetProfile(c echo.Context) error {
 	return pkg.JSONresponse(c.Response(), http.StatusOK, user)
 }
 
+func NewDelivery(e *echo.Echo, uc userUsecase.UseCaseI) {
+	handler := &delivery{
+		uc: uc,
+	}
+
+	e.GET("/users/:id", handler.GetProfile)
+}

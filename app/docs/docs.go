@@ -75,9 +75,6 @@ const docTemplate = `{
         "/feed": {
             "get": {
                 "description": "Feed",
-                "consumes": [
-                    "application/json"
-                ],
                 "produces": [
                     "application/json"
                 ],
@@ -110,13 +107,13 @@ const docTemplate = `{
                     "405": {
                         "description": "invalid http method",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
                     "500": {
                         "description": "internal server error",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     }
                 }
@@ -234,6 +231,85 @@ const docTemplate = `{
                 }
             }
         },
+        "/image/upload": {
+            "post": {
+                "description": "Upload image",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "image"
+                ],
+                "summary": "Upload image",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "image file",
+                        "name": "image",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success upload image"
+                    },
+                    "405": {
+                        "description": "invalid http method",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/image/{id}": {
+            "get": {
+                "description": "Get image by id",
+                "produces": [
+                    "image/png"
+                ],
+                "tags": [
+                    "image"
+                ],
+                "summary": "Get image by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "image ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success get image"
+                    },
+                    "405": {
+                        "description": "invalid http method",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/logout": {
             "delete": {
                 "description": "user logout",
@@ -315,69 +391,13 @@ const docTemplate = `{
                     "405": {
                         "description": "invalid http method",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
                     "500": {
                         "description": "internal server error",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/post/delete/{id}": {
-            "delete": {
-                "description": "Delete a post",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "posts"
-                ],
-                "summary": "Delete a post",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Post ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "success get post",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/pkg.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "body": {
-                                            "$ref": "#/definitions/models.Post"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "405": {
-                        "description": "invalid http method",
-                        "schema": {
-                            "$ref": "#/definitions/pkg.Error"
-                        }
-                    },
-                    "500": {
-                        "description": "internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     }
                 }
@@ -429,13 +449,13 @@ const docTemplate = `{
                     "405": {
                         "description": "invalid http method",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
                     "500": {
                         "description": "internal server error",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     }
                 }
@@ -485,13 +505,49 @@ const docTemplate = `{
                     "405": {
                         "description": "invalid http method",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
                     "500": {
                         "description": "internal server error",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a post",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "Delete a post",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Post ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "405": {
+                        "description": "invalid http method",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     }
                 }
@@ -707,9 +763,77 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/users/{id}/posts": {
+            "get": {
+                "description": "Get all users posts",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "Get users posts",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Post ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success get feed",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/pkg.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "body": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.Post"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Post not found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "405": {
+                        "description": "invalid http method",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "echo.HTTPError": {
+            "type": "object",
+            "properties": {
+                "message": {}
+            }
+        },
         "models.Friends": {
             "type": "object",
             "properties": {
@@ -726,14 +850,15 @@ const docTemplate = `{
             "properties": {
                 "id": {
                     "type": "integer"
-                },
-                "link": {
-                    "type": "string"
                 }
             }
         },
         "models.Post": {
             "type": "object",
+            "required": [
+                "message",
+                "user_id"
+            ],
             "properties": {
                 "create_date": {
                     "type": "string"

@@ -1,4 +1,8 @@
 definitions:
+  echo.HTTPError:
+    properties:
+      message: {}
+    type: object
   models.Friends:
     properties:
       id_friend:
@@ -10,8 +14,6 @@ definitions:
     properties:
       id:
         type: integer
-      link:
-        type: string
     type: object
   models.Post:
     properties:
@@ -31,6 +33,9 @@ definitions:
         type: integer
       user_last_name:
         type: string
+    required:
+    - message
+    - user_id
     type: object
   models.User:
     properties:
@@ -107,8 +112,6 @@ paths:
       - auth
   /feed:
     get:
-      consumes:
-      - application/json
       description: Feed
       produces:
       - application/json
@@ -127,11 +130,11 @@ paths:
         "405":
           description: invalid http method
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "500":
           description: internal server error
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
       summary: Feed
       tags:
       - posts
@@ -209,6 +212,58 @@ paths:
       summary: DeleteFriend
       tags:
       - friends
+  /image/{id}:
+    get:
+      description: Get image by id
+      parameters:
+      - description: image ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - image/png
+      responses:
+        "200":
+          description: success get image
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Get image by id
+      tags:
+      - image
+  /image/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload image
+      parameters:
+      - description: image file
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success upload image
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Upload image
+      tags:
+      - image
   /logout:
     delete:
       description: user logout
@@ -233,6 +288,30 @@ paths:
       tags:
       - auth
   /post/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a post
+      parameters:
+      - description: Post ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Delete a post
+      tags:
+      - posts
     get:
       consumes:
       - application/json
@@ -258,11 +337,11 @@ paths:
         "405":
           description: invalid http method
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "500":
           description: internal server error
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
       summary: Show a post
       tags:
       - posts
@@ -293,46 +372,12 @@ paths:
         "405":
           description: invalid http method
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "500":
           description: internal server error
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
       summary: Create a post
-      tags:
-      - posts
-  /post/delete/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete a post
-      parameters:
-      - description: Post ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: success get post
-          schema:
-            allOf:
-            - $ref: '#/definitions/pkg.Response'
-            - properties:
-                body:
-                  $ref: '#/definitions/models.Post'
-              type: object
-        "405":
-          description: invalid http method
-          schema:
-            $ref: '#/definitions/pkg.Error'
-        "500":
-          description: internal server error
-          schema:
-            $ref: '#/definitions/pkg.Error'
-      summary: Delete a post
       tags:
       - posts
   /post/update:
@@ -362,11 +407,11 @@ paths:
         "405":
           description: invalid http method
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "500":
           description: internal server error
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
       summary: Update a post
       tags:
       - posts
@@ -500,4 +545,42 @@ paths:
       summary: GetProfile
       tags:
       - users
+  /users/{id}/posts:
+    get:
+      description: Get all users posts
+      parameters:
+      - description: Post ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get feed
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  items:
+                    $ref: '#/definitions/models.Post'
+                  type: array
+              type: object
+        "404":
+          description: Post not found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Get users posts
+      tags:
+      - posts
 swagger: "2.0"

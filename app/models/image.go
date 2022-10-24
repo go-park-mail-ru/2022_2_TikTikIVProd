@@ -2,5 +2,5 @@ package models
 
 type Image struct {
 	ID      int    `json:"id"`
-	ImgLink string `json:"link"`
+	ImgLink string `json:"-"`
 }

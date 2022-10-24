@@ -22,12 +22,6 @@ type delivery struct {
 	authUC authUsecase.UseCaseI
 }
 
-func New(authUC authUsecase.UseCaseI) DeliveryI {
-	return &delivery{
-		authUC: authUC,
-	}
-}
-
 // SignUp godoc
 // @Summary      SignUp
 // @Description  user sign up
@@ -218,4 +212,15 @@ func (del *delivery) Auth(c echo.Context) error {
 		return pkg.ErrorResponse(c.Response(), http.StatusInternalServerError, err.Error())
 	}
 	return nil
+}
+
+func NewDelivery(e *echo.Echo, au authUsecase.UseCaseI) {
+	handler := &delivery{
+		authUC: au,
+	}
+
+	e.POST("/signin", handler.SignIn)
+	e.POST("/signup", handler.SignUp)
+	e.GET("/auth", handler.Auth)
+	e.DELETE("/logout", handler.Logout)
 }

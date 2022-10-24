@@ -6,8 +6,8 @@ COUNT_POSTS = 30
 COUNT_IMAGES = 30
 
 def gen_users():
+    faker = Faker()
     def _gen_users_string():
-        faker = Faker()
         first_name = faker.first_name()
         last_name = faker.last_name()
         nick_name = faker.unique.word()

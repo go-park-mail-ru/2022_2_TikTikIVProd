@@ -8,7 +8,8 @@ import (
 
 type ImageUseCaseI interface {
 	GetPostImages(postID int) ([]*models.Image, error)
-	GetImage(imageID int) (*models.Image, error)
+	GetImageById(imageID int) (*models.Image, error)
+	CreateImage(img *models.Image) error
 }
 
 type imageUsecase struct {
@@ -31,7 +32,7 @@ func (i *imageUsecase) GetPostImages(postID int) ([]*models.Image, error) {
 	return images, nil
 }
 
-func (i *imageUsecase) GetImage(imageID int) (*models.Image, error) {
+func (i *imageUsecase) GetImageById(imageID int) (*models.Image, error) {
 	image, err := i.imageRep.GetImage(imageID) //TODO ошибки
 
 	if err != nil {
@@ -39,4 +40,14 @@ func (i *imageUsecase) GetImage(imageID int) (*models.Image, error) {
 	}
 
 	return image, nil
+}
+
+func (i *imageUsecase) CreateImage(img *models.Image) error {
+	err := i.imageRep.CreateImage(img)
+
+	if err != nil {
+		return errors.Wrap(err, "imageUsecase.CreateImage error")
+	}
+
+	return nil
 }
