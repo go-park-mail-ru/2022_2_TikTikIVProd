@@ -29,6 +29,7 @@ func New(uc usecase.UseCaseI) DeliveryI {
 // @Description  get user's profile
 // @Tags     users
 // @Produce  application/json
+// @Param id path int true "User ID"
 // @Success  200 {object} pkg.Response{body=models.User} "success"
 // @Failure 405 {object} pkg.Error "invalid http method"
 // @Failure 400 {object} pkg.Error "bad request"
