@@ -177,12 +177,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/friends/delete": {
+        "/friends/delete/{id_user}/{id_friend}": {
             "delete": {
                 "description": "delete friend",
-                "consumes": [
-                    "application/json"
-                ],
                 "produces": [
                     "application/json"
                 ],
@@ -192,13 +189,18 @@ const docTemplate = `{
                 "summary": "DeleteFriend",
                 "parameters": [
                     {
-                        "description": "friends info",
-                        "name": "friends",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.Friends"
-                        }
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id_user",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Friend ID",
+                        "name": "id_friend",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -651,6 +653,15 @@ const docTemplate = `{
                     "users"
                 ],
                 "summary": "GetProfile",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "success",

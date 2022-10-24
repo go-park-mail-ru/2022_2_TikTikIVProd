@@ -91,9 +91,24 @@ func (uc *useCase) SignIn(user models.UserSignIn) (*models.User, *models.Cookie,
 }
 
 func (uc *useCase) SignUp(user models.User) (*models.User, *models.Cookie, error) {
+	if _, err := uc.userRepository.SelectUserByNickName(user.NickName); err == nil {
+		return nil, nil, errors.New("nickname already in use")
+	}
+
+	if _, err := uc.userRepository.SelectUserByEmail(user.Email); err == nil {
+		return nil, nil, errors.New("user with such email already exists")
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), 8)
+	if err != nil {
+		return nil, nil, errors.New("hash error")
+	}
+
+	user.Password = string(hashedPassword)
+
 	createdUser, err := uc.userRepository.CreateUser(user)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, errors.New("create user error")
 	}
 
 	cookie := models.Cookie{

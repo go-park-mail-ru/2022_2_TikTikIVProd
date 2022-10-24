@@ -22,11 +22,11 @@ func New(db *gorm.DB) userRep.RepositoryI {
 func (dbUsers *dataBase) SelectUserById(id int) (*models.User, error) {
 	user := models.User{}
 
-	tx := dbUsers.db.Table("users").Where("id = ?", id).Scan(&user)
-	if tx.Error != nil {
-		return nil, tx.Error
-	} else if user.NickName == "" {
+	tx := dbUsers.db.Table("users").Where("id = ?", id).Take(&user)
+	if tx.Error == gorm.ErrRecordNotFound {
 		return nil, errors.New("user with such id doesn't exist")
+	} else if tx.Error != nil {
+		return nil, tx.Error
 	}
 
 	return &user, nil
@@ -35,11 +35,11 @@ func (dbUsers *dataBase) SelectUserById(id int) (*models.User, error) {
 func (dbUsers *dataBase) SelectUserByNickName(nickname string) (*models.User, error) {
 	user := models.User{}
 
-	tx := dbUsers.db.Table("users").Where("nick_name = ?", nickname).Scan(&user)
-	if tx.Error != nil {
-		return nil, tx.Error
-	} else if user.NickName == "" {
+	tx := dbUsers.db.Table("users").Where("nick_name = ?", nickname).Take(&user)
+	if tx.Error == gorm.ErrRecordNotFound {
 		return nil, errors.New("user with such nickname doesn't exist")
+	} else if tx.Error != nil {
+		return nil, tx.Error
 	}
 
 	return &user, nil
@@ -47,11 +47,11 @@ func (dbUsers *dataBase) SelectUserByNickName(nickname string) (*models.User, er
 
 func (dbUsers *dataBase) SelectUserByEmail(email string) (*models.User, error) {
 	user := models.User{}
-	tx := dbUsers.db.Table("users").Where("email = ?", email).Scan(&user)
-	if tx.Error != nil {
-		return nil, tx.Error
-	} else if user.NickName == "" {
+	tx := dbUsers.db.Table("users").Where("email = ?", email).Take(&user)
+	if tx.Error == gorm.ErrRecordNotFound {
 		return nil, errors.New("user with such email doesn't exist")
+	} else if tx.Error != nil {
+		return nil, tx.Error
 	}
 
 	return &user, nil

@@ -34,13 +34,13 @@ func (dbCookies *dataBase) CreateCookie(c models.Cookie) (*models.Cookie, error)
 func (dbCookies *dataBase) SelectCookie(value string) (*models.Cookie, error) {
 	cookie := models.Cookie{}
 
-	tx := dbCookies.db.Table("cookies").Where("value = ?", value).Scan(&cookie)
-	if tx.Error != nil {
-		return nil, tx.Error
-	} else if cookie.SessionToken == "" {
+	tx := dbCookies.db.Table("cookies").Where("value = ?", value).Take(&cookie)
+	if tx.Error == gorm.ErrRecordNotFound {
 		return nil, errors.New("cookie doesn't exist")
+	} else if tx.Error != nil {
+		return nil, tx.Error
 	}
-
+	
 	return &cookie, nil
 }
 
