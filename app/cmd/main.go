@@ -3,14 +3,12 @@ package main
 import (
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
-	"gorm.io/driver/postgres"
 	"github.com/sirupsen/logrus"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
 
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/cmd/server"
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg/logger"
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/middleware"
 	_authDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/delivery"
 	authRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/repository/postgres"
 	authUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/usecase"
@@ -20,24 +18,26 @@ import (
 	_imageDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/delivery"
 	imagesRepository "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/repository/postgres"
 	imageUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/usecase"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/middleware"
 	_postsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/delivery"
 	postsRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/repository/postgres"
 	postsUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/usecase"
 	_usersDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/delivery"
 	usersRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository/postgres"
 	usersUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/usecase"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg/logger"
 )
 
 // @title WS Swagger API
 // @version 1.0
 // @host 89.208.197.127:8080
 
-var testCfg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
+//var testCfg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
 
-//var prod_cfg = postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}
+var prodCfg = postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}
 
 func main() {
-	db, err := gorm.Open(postgres.New(testCfg),
+	db, err := gorm.Open(postgres.New(prodCfg),
 		&gorm.Config{})
 
 	if err != nil {
@@ -67,7 +67,7 @@ func main() {
 		LogStatus: true,
 		LogValuesFunc: func(c echo.Context, values echoMiddleware.RequestLoggerValues) error {
 			log.Logrus.WithFields(logrus.Fields{
-				"URI":   values.URI,
+				"URI":    values.URI,
 				"method": c.Request().Method,
 				"status": values.Status,
 			}).Info("request")
@@ -78,8 +78,8 @@ func main() {
 	e.Use(echoMiddleware.Recover())
 	e.Use(echoMiddleware.Secure())
 	e.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
-		AllowOrigins: []string{"http://localhost"},
-		AllowHeaders: []string{"*"},
+		AllowOrigins:     []string{"http://localhost"},
+		AllowHeaders:     []string{"*"},
 		AllowCredentials: true,
 	}))
 	// e.Use(echoMiddleware.CSRF())
