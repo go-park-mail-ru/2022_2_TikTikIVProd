@@ -2,12 +2,15 @@ package main
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	echoMiddleware "github.com/labstack/echo/v4/middleware"
 	"gorm.io/driver/postgres"
+	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"log"
 
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/cmd/server"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg/logger"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/middleware"
 	_authDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/delivery"
 	authRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/repository/postgres"
 	authUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/usecase"
@@ -51,17 +54,41 @@ func main() {
 	postsUC := postsUsecase.NewPostUsecase(postDB, imageDB, usersDB)
 	usersUC := usersUseCase.New(usersDB)
 	authUC := authUseCase.New(authDB, usersDB)
-	friendsUC := friendsUseCase.New(friendsDB)
+	friendsUC := friendsUseCase.New(friendsDB, usersDB)
 	imageUC := imageUsecase.NewImageUsecase(imageDB)
 
 	e := echo.New()
-	e.Use(middleware.Logger())
+	authMiddleware := middleware.NewMiddleware(authUC)
+	// e.Use(middleware.Auth)
 
-	_postsDelivery.NewDelivery(e, postsUC)
-	_usersDelivery.NewDelivery(e, usersUC)
-	_imageDelivery.NewDelivery(e, imageUC)
-	_authDelivery.NewDelivery(e, authUC)
-	_friendsDelivery.NewDelivery(e, friendsUC)
+	log := logger.New()
+	e.Use(echoMiddleware.RequestLoggerWithConfig(echoMiddleware.RequestLoggerConfig{
+		LogURI:    true,
+		LogStatus: true,
+		LogValuesFunc: func(c echo.Context, values echoMiddleware.RequestLoggerValues) error {
+			log.Logrus.WithFields(logrus.Fields{
+				"URI":   values.URI,
+				"method": c.Request().Method,
+				"status": values.Status,
+			}).Info("request")
+			return nil
+		},
+	}))
+
+	e.Use(echoMiddleware.Recover())
+	e.Use(echoMiddleware.Secure())
+	e.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
+		AllowOrigins: []string{"http://localhost"},
+		AllowHeaders: []string{"*"},
+		AllowCredentials: true,
+	}))
+	// e.Use(echoMiddleware.CSRF())
+
+	_postsDelivery.NewDelivery(e, postsUC, authMiddleware)
+	_usersDelivery.NewDelivery(e, usersUC, authMiddleware)
+	_imageDelivery.NewDelivery(e, imageUC, authMiddleware)
+	_authDelivery.NewDelivery(e, authUC, authMiddleware)
+	_friendsDelivery.NewDelivery(e, friendsUC, authMiddleware)
 
 	s := server.NewServer(e)
 	if err := s.Start(); err != nil {

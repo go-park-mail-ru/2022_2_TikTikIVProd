@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
 	nick_name VARCHAR(30) NOT NULL UNIQUE,
 	avatar_img_id INT REFERENCES images(id),
 	email VARCHAR(50) NOT NULL UNIQUE,
-	passhash VARCHAR(128) NOT NULL
+	password VARCHAR(128) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS friends (

@@ -1,9 +1,8 @@
 package postgres
 
 import (
-	"errors"
-
 	"gorm.io/gorm"
+	"github.com/pkg/errors"
 
 	authRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/repository"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
@@ -19,32 +18,35 @@ func New(db *gorm.DB) authRep.RepositoryI {
 	}
 }
 
-func (dbCookies *dataBase) CreateCookie(c models.Cookie) (*models.Cookie, error) {
-	cookie := models.Cookie{}
-
-	tx := dbCookies.db.Table("cookies").Raw("INSERT INTO cookies VALUES (?, ?, ?) RETURNING *",
-		c.SessionToken, c.UserId, c.Expires).Scan(&cookie)
+func (dbCookies *dataBase) CreateCookie(cookie *models.Cookie) error {
+	tx := dbCookies.db.Create(cookie)
 	if tx.Error != nil {
-		return nil, tx.Error
+		return errors.Wrap(tx.Error, "database error (table cookies)")
 	}
 
-	return &cookie, nil
+	return nil
 }
 
 func (dbCookies *dataBase) SelectCookie(value string) (*models.Cookie, error) {
 	cookie := models.Cookie{}
 
-	tx := dbCookies.db.Table("cookies").Where("value = ?", value).Take(&cookie)
-	if tx.Error == gorm.ErrRecordNotFound {
-		return nil, errors.New("cookie doesn't exist")
+	tx := dbCookies.db.Where("value = ?", value).Take(&cookie)
+	if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+		return nil, models.ErrNotFound
 	} else if tx.Error != nil {
-		return nil, tx.Error
+		return nil, errors.Wrap(tx.Error, "database error (table cookies)")
 	}
 	
 	return &cookie, nil
 }
 
 func (dbCookies *dataBase) DeleteCookie(value string) error {
-	tx := dbCookies.db.Table("cookies").Exec("DELETE FROM cookies WHERE value = ?", value)
+	tx := dbCookies.db.Delete(&models.Cookie{}, "value = ?", value)
+
+	if tx.Error != nil {
+		return errors.Wrap(tx.Error, "database error (table cookies)")
+	}
+
 	return tx.Error
 }
+

@@ -1,13 +1,12 @@
 package usecase
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 
 	friendsRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/repository"
+	usersRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
 )
-
-//go:generate mockgen -source=usecase.go -destination=mocks/mock.go
 
 type UseCaseI interface {
 	AddFriend(friends models.Friends) (error)
@@ -15,27 +14,74 @@ type UseCaseI interface {
 }
 
 type useCase struct {
-	repository friendsRep.RepositoryI
+	friendsRepository friendsRep.RepositoryI
+	userRepository usersRep.RepositoryI
 }
 
-func New(rep friendsRep.RepositoryI) UseCaseI {
+func New(fRep friendsRep.RepositoryI, uRep usersRep.RepositoryI) UseCaseI {
 	return &useCase{
-		repository: rep,
+		friendsRepository: fRep,
+		userRepository: uRep,
 	}
 }
 
-func (uc *useCase) AddFriend(friends models.Friends) (error) {
-	err := uc.repository.AddFriend(friends)
+func (uc *useCase) AddFriend(friends models.Friends) error {
+	_, err := uc.userRepository.SelectUserById(friends.Id1)
 	if err != nil {
-		return errors.New("friendship already exists")
+		return errors.Wrap(err, "user repository error")
+	}
+
+	_, err = uc.userRepository.SelectUserById(friends.Id2)
+	if err != nil {
+		return errors.Wrap(err, "user repository error")
+	}
+
+	if friends.Id1 == friends.Id2 {
+		return models.ErrBadRequest
+	}
+
+	friendExists, err := uc.friendsRepository.CheckFriends(friends)
+	if err != nil {
+		return errors.Wrap(err, "friends repository error")
+	}
+	if friendExists {
+		return models.ErrConflictFriend
+	}
+
+	err = uc.friendsRepository.AddFriend(friends)
+	if err != nil {
+		return errors.Wrap(err, "friends repository error")
 	}
 	return err
 }
 
-func (uc *useCase) DeleteFriend(friends models.Friends) (error) {
-	err := uc.repository.DeleteFriend(friends)
+func (uc *useCase) DeleteFriend(friends models.Friends) error {
+	_, err := uc.userRepository.SelectUserById(friends.Id1)
 	if err != nil {
-		return errors.New("friend or user doesn't exist")
+		return errors.Wrap(err, "user repository error")
 	}
+
+	_, err = uc.userRepository.SelectUserById(friends.Id2)
+	if err != nil {
+		return errors.Wrap(err, "user repository error")
+	}
+
+	if friends.Id1 == friends.Id2 {
+		return models.ErrBadRequest
+	}
+
+	friendExists, err := uc.friendsRepository.CheckFriends(friends)
+	if err != nil {
+		return errors.Wrap(err, "friends repository error")
+	}
+	if !friendExists {
+		return models.ErrNotFound
+	}
+
+	err = uc.friendsRepository.DeleteFriend(friends)
+	if err != nil {
+		return errors.Wrap(err, "friends repository error")
+	}
+
 	return nil
 }

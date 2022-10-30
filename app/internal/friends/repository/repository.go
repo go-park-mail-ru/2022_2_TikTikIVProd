@@ -5,6 +5,7 @@ import (
 )
 
 type RepositoryI interface {
-	AddFriend(friends models.Friends) (error)
-	DeleteFriend(friends models.Friends) (error)
+	AddFriend(friends models.Friends) error
+	DeleteFriend(friends models.Friends) error
+	CheckFriends(friends models.Friends) (bool, error)
 }

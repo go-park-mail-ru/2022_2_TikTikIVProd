@@ -48,25 +48,25 @@ const docTemplate = `{
                     "400": {
                         "description": "bad request",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
                     "401": {
                         "description": "no cookie",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
                     "405": {
                         "description": "invalid http method",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
                     "500": {
                         "description": "internal server error",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     }
                 }
@@ -150,25 +150,31 @@ const docTemplate = `{
                     "400": {
                         "description": "bad request",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "friend or user doesn't exist",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
                     "405": {
                         "description": "invalid http method",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
                     "409": {
-                        "description": "friendship already exists",
+                        "description": "friend already exists",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
                     "500": {
                         "description": "internal server error",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     }
                 }
@@ -207,25 +213,25 @@ const docTemplate = `{
                     "400": {
                         "description": "bad request",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
                     "404": {
-                        "description": "friend or user doesn't exist",
+                        "description": "friend/user/friendship doesn't exist",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
                     "405": {
                         "description": "invalid http method",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
                     "500": {
                         "description": "internal server error",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     }
                 }
@@ -327,19 +333,19 @@ const docTemplate = `{
                     "400": {
                         "description": "bad request",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
                     "401": {
                         "description": "no cookie",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
                     "405": {
                         "description": "invalid http method",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     }
                 }
@@ -599,31 +605,31 @@ const docTemplate = `{
                     "400": {
                         "description": "bad request",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
                     "401": {
                         "description": "invalid password",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
                     "404": {
                         "description": "user doesn't exist",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
                     "405": {
                         "description": "invalid http method",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
                     "500": {
                         "description": "internal server error",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     }
                 }
@@ -675,25 +681,25 @@ const docTemplate = `{
                     "400": {
                         "description": "bad request",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
                     "405": {
                         "description": "invalid http method",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
                     "409": {
                         "description": "user with this email already exists",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
                     "500": {
                         "description": "internal server error",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     }
                 }
@@ -740,25 +746,25 @@ const docTemplate = `{
                     "400": {
                         "description": "bad request",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
                     "404": {
                         "description": "can't find user with such id",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
                     "405": {
                         "description": "invalid http method",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
                     "500": {
                         "description": "internal server error",
                         "schema": {
-                            "$ref": "#/definitions/pkg.Error"
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     }
                 }
@@ -836,6 +842,10 @@ const docTemplate = `{
         },
         "models.Friends": {
             "type": "object",
+            "required": [
+                "id_friend",
+                "id_user"
+            ],
             "properties": {
                 "id_friend": {
                     "type": "integer"
@@ -888,6 +898,13 @@ const docTemplate = `{
         },
         "models.User": {
             "type": "object",
+            "required": [
+                "email",
+                "first_name",
+                "last_name",
+                "nick_name",
+                "password"
+            ],
             "properties": {
                 "avatar": {
                     "type": "integer"
@@ -899,7 +916,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "readOnly": true
                 },
                 "last_name": {
                     "type": "string"
@@ -914,19 +932,15 @@ const docTemplate = `{
         },
         "models.UserSignIn": {
             "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
             "properties": {
                 "email": {
                     "type": "string"
                 },
                 "password": {
-                    "type": "string"
-                }
-            }
-        },
-        "pkg.Error": {
-            "type": "object",
-            "properties": {
-                "error": {
                     "type": "string"
                 }
             }
