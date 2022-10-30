@@ -5,6 +5,7 @@ import (
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg"
 	"github.com/labstack/echo/v4"
 	"gopkg.in/go-playground/validator.v9"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/middleware"
 	"net/http"
 	"strconv"
 
@@ -130,7 +131,6 @@ func (delivery *delivery) UpdatePost(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, pkg.Response{Body: post})
-
 }
 
 // DeletePost godoc
@@ -209,15 +209,15 @@ func (delivery *delivery) GetUserPosts(c echo.Context) error {
 	return c.JSON(http.StatusOK, pkg.Response{Body: posts})
 }
 
-func NewDelivery(e *echo.Echo, up postsUsecase.PostUseCaseI) {
+func NewDelivery(e *echo.Echo, up postsUsecase.PostUseCaseI, authMid *middleware.Middleware) {
 	handler := &delivery{
 		pUsecase: up,
 	}
 
-	e.POST("/post/create", handler.CreatePost)
-	e.POST("/post/edit", handler.UpdatePost)
-	e.GET("/post/:id", handler.GetPost)
-	e.GET("/users/:id/posts", handler.GetUserPosts)
-	e.GET("/feed", handler.Feed)
-	e.DELETE("/post/:id", handler.DeletePost)
+	e.POST("/post/create", handler.CreatePost, authMid.Auth)
+	e.POST("/post/edit", handler.UpdatePost, authMid.Auth)
+	e.GET("/post/:id", handler.GetPost, authMid.Auth)
+	e.GET("/users/:id/posts", handler.GetUserPosts, authMid.Auth)
+	e.GET("/feed", handler.Feed, authMid.Auth)
+	e.DELETE("/post/:id", handler.DeletePost, authMid.Auth)
 }

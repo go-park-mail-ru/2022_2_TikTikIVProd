@@ -17,9 +17,9 @@ func NewServer(e *echo.Echo) *Server {
 		http.Server{
 			Addr:              ":8080",
 			Handler:           e,
-			ReadTimeout:       10 * time.Second,
-			ReadHeaderTimeout: 10 * time.Second,
-			WriteTimeout:      10 * time.Second,
+			ReadTimeout:       30 * time.Second,
+			ReadHeaderTimeout: 30 * time.Second,
+			WriteTimeout:      30 * time.Second,
 		},
 	}
 }

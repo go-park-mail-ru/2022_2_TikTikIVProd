@@ -1,7 +1,7 @@
 package usecase
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -12,14 +12,10 @@ import (
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
 )
 
-//go:generate mockgen -source=usecase.go -destination=mocks/mock.go
-
 type UseCaseI interface {
 	Auth(cookie string) (*models.User, error)
 	SignIn(user models.UserSignIn) (*models.User, *models.Cookie, error)
-	SignUp(user models.User) (*models.User, *models.Cookie, error)
-	CreateCookie(userId int) (*models.Cookie, error)
-	SelectCookie(value string) (*models.Cookie, error)
+	SignUp(user *models.User) (*models.Cookie, error)
 	DeleteCookie(value string) error
 }
 
@@ -35,33 +31,15 @@ func New(authRepository authRep.RepositoryI, userRepository userRep.RepositoryI)
 	}
 }
 
-func (uc *useCase) CreateCookie(userId int) (*models.Cookie, error) {
-	cookie := models.Cookie{
-		UserId:       userId,
-		SessionToken: uuid.NewString(),
-		Expires:      time.Now().AddDate(1, 0, 0)}
-
-	newCookie, err := uc.authRepository.CreateCookie(cookie)
-	if err != nil {
-		return nil, errors.New("create cookie error")
-	}
-
-	return newCookie, nil
-}
-
-func (uc *useCase) SelectCookie(value string) (*models.Cookie, error) {
-	cookie, err := uc.authRepository.SelectCookie(value)
-	if err != nil {
-		return nil, errors.New("cookie doesn't exist")
-	}
-
-	return cookie, nil
-}
-
 func (uc *useCase) DeleteCookie(value string) error {
-	err := uc.authRepository.DeleteCookie(value)
+	_, err := uc.authRepository.SelectCookie(value)
 	if err != nil {
-		return errors.New("cookie doesn't exist")
+		return errors.Wrap(err, "auth repository error")
+	}
+
+	err = uc.authRepository.DeleteCookie(value)
+	if err != nil {
+		return errors.Wrap(err, "auth usecase error")
 	}
 
 	return nil
@@ -70,70 +48,86 @@ func (uc *useCase) DeleteCookie(value string) error {
 func (uc *useCase) SignIn(user models.UserSignIn) (*models.User, *models.Cookie, error) {
 	u, err := uc.userRepository.SelectUserByEmail(user.Email)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, errors.Wrap(err, "user repository error")
 	}
 
-	if err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(user.Password)); err != nil {
-		return nil, nil, errors.New("invalid password")
+	err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(user.Password))
+	if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+		return nil, nil, models.ErrInvalidPassword
+	} else if err != nil {
+		return nil, nil, errors.Wrap(err, "bcrypt error")
 	}
+
+	u.Password = ""
 
 	cookie := models.Cookie{
 		UserId:       u.Id,
 		SessionToken: uuid.NewString(),
 		Expires:      time.Now().AddDate(1, 0, 0)}
 
-	newCookie, err := uc.authRepository.CreateCookie(cookie)
+	err = uc.authRepository.CreateCookie(&cookie)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, errors.Wrap(err, "auth repository error")
 	}
 
-	return u, newCookie, nil
+	return u, &cookie, nil
 }
 
-func (uc *useCase) SignUp(user models.User) (*models.User, *models.Cookie, error) {
-	if _, err := uc.userRepository.SelectUserByNickName(user.NickName); err == nil {
-		return nil, nil, errors.New("nickname already in use")
+func (uc *useCase) SignUp(user *models.User) (*models.Cookie, error) {
+	if user.NickName == "" || user.Password == "" || user.Email == "" || user.FirstName == "" || user.LastName == "" {
+		return nil, models.ErrBadRequest
+	}
+	_, err := uc.userRepository.SelectUserByNickName(user.NickName)
+	if err != nil && !errors.Is(err, models.ErrNotFound) {
+		return nil, errors.Wrap(err, "user repository error")
+	} else if err == nil {
+		return nil, models.ErrConflictNickname
 	}
 
-	if _, err := uc.userRepository.SelectUserByEmail(user.Email); err == nil {
-		return nil, nil, errors.New("user with such email already exists")
+	_, err = uc.userRepository.SelectUserByEmail(user.Email)
+	if err != nil && !errors.Is(err, models.ErrNotFound) {
+		return nil, errors.Wrap(err, "user repository error")
+	} else if err == nil {
+		return nil, models.ErrConflictEmail
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), 8)
 	if err != nil {
-		return nil, nil, errors.New("hash error")
+		return nil, errors.Wrap(err, "bcrypt error")
 	}
 
 	user.Password = string(hashedPassword)
 
-	createdUser, err := uc.userRepository.CreateUser(user)
+	err = uc.userRepository.CreateUser(user)
 	if err != nil {
-		return nil, nil, errors.New("create user error")
+		return nil, errors.Wrap(err, "user repository error")
 	}
+	user.Password = ""
 
 	cookie := models.Cookie{
-		UserId:       createdUser.Id,
+		UserId:       user.Id,
 		SessionToken: uuid.NewString(),
 		Expires:      time.Now().AddDate(1, 0, 0)}
 
-	newCookie, err := uc.authRepository.CreateCookie(cookie)
+	err = uc.authRepository.CreateCookie(&cookie)
 	if err != nil {
-		return nil, nil, err
+		return nil, errors.Wrap(err, "auth repository error")
 	}
 
-	return createdUser, newCookie, nil
+	return &cookie, nil
 }
 
 func (uc *useCase) Auth(cookie string) (*models.User, error) {
 	gotCookie, err := uc.authRepository.SelectCookie(cookie)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "auth repository error")
 	}
 
 	gotUser, err := uc.userRepository.SelectUserById(gotCookie.UserId)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "user repository error")
 	}
+	gotUser.Password = ""
 
 	return gotUser, nil
 }

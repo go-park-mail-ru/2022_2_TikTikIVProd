@@ -9,6 +9,9 @@ definitions:
         type: integer
       id_user:
         type: integer
+    required:
+    - id_friend
+    - id_user
     type: object
   models.Image:
     properties:
@@ -46,6 +49,7 @@ definitions:
       first_name:
         type: string
       id:
+        readOnly: true
         type: integer
       last_name:
         type: string
@@ -53,6 +57,12 @@ definitions:
         type: string
       password:
         type: string
+    required:
+    - email
+    - first_name
+    - last_name
+    - nick_name
+    - password
     type: object
   models.UserSignIn:
     properties:
@@ -60,11 +70,9 @@ definitions:
         type: string
       password:
         type: string
-    type: object
-  pkg.Error:
-    properties:
-      error:
-        type: string
+    required:
+    - email
+    - password
     type: object
   pkg.Response:
     properties:
@@ -94,19 +102,19 @@ paths:
         "400":
           description: bad request
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "401":
           description: no cookie
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "405":
           description: invalid http method
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "500":
           description: internal server error
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
       summary: Auth
       tags:
       - auth
@@ -158,19 +166,23 @@ paths:
         "400":
           description: bad request
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: friend or user doesn't exist
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
         "405":
           description: invalid http method
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "409":
-          description: friendship already exists
+          description: friend already exists
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "500":
           description: internal server error
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
       summary: AddFriend
       tags:
       - friends
@@ -196,19 +208,19 @@ paths:
         "400":
           description: bad request
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "404":
-          description: friend or user doesn't exist
+          description: friend/user/friendship doesn't exist
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "405":
           description: invalid http method
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "500":
           description: internal server error
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
       summary: DeleteFriend
       tags:
       - friends
@@ -275,15 +287,15 @@ paths:
         "400":
           description: bad request
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "401":
           description: no cookie
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "405":
           description: invalid http method
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
       summary: Logout
       tags:
       - auth
@@ -442,23 +454,23 @@ paths:
         "400":
           description: bad request
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "401":
           description: invalid password
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "404":
           description: user doesn't exist
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "405":
           description: invalid http method
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "500":
           description: internal server error
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
       summary: SignIn
       tags:
       - auth
@@ -489,19 +501,19 @@ paths:
         "400":
           description: bad request
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "405":
           description: invalid http method
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "409":
           description: user with this email already exists
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "500":
           description: internal server error
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
       summary: SignUp
       tags:
       - auth
@@ -529,19 +541,19 @@ paths:
         "400":
           description: bad request
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "404":
           description: can't find user with such id
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "405":
           description: invalid http method
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "500":
           description: internal server error
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
       summary: GetProfile
       tags:
       - users

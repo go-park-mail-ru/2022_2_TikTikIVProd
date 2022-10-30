@@ -4,6 +4,7 @@ import (
 	imgUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/usecase"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/middleware"
 	"github.com/labstack/echo/v4"
 	"io"
 	"net/http"
@@ -95,16 +96,16 @@ func (delivery *delivery) UploadImage(c echo.Context) error {
 	}
 
 	image := models.Image{ImgLink: file.Filename}
-	err = delivery.imgUsecase.CreateImage(&image)
+	_ = delivery.imgUsecase.CreateImage(&image)
 
 	return c.JSON(http.StatusOK, pkg.Response{Body: image})
 }
 
-func NewDelivery(e *echo.Echo, iu imgUsecase.ImageUseCaseI) {
+func NewDelivery(e *echo.Echo, iu imgUsecase.ImageUseCaseI, authMid *middleware.Middleware) {
 	handler := &delivery{
 		imgUsecase: iu,
 	}
 
-	e.POST("/image/upload", handler.UploadImage)
-	e.GET("/image/:id", handler.GetImageByID)
+	e.POST("/image/upload", handler.UploadImage, authMid.Auth)
+	e.GET("/image/:id", handler.GetImageByID, authMid.Auth)
 }

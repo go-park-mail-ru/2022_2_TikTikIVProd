@@ -1,9 +1,8 @@
 package postgres
 
 import (
-	"errors"
-
 	"gorm.io/gorm"
+	"github.com/pkg/errors"
 
 	userRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
@@ -22,11 +21,11 @@ func New(db *gorm.DB) userRep.RepositoryI {
 func (dbUsers *dataBase) SelectUserById(id int) (*models.User, error) {
 	user := models.User{}
 
-	tx := dbUsers.db.Table("users").Where("id = ?", id).Take(&user)
-	if tx.Error == gorm.ErrRecordNotFound {
-		return nil, errors.New("user with such id doesn't exist")
+	tx := dbUsers.db.Where("id = ?", id).Take(&user)
+	if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+		return nil, models.ErrNotFound
 	} else if tx.Error != nil {
-		return nil, tx.Error
+		return nil, errors.Wrap(tx.Error, "database error (table users)")
 	}
 
 	return &user, nil
@@ -35,11 +34,11 @@ func (dbUsers *dataBase) SelectUserById(id int) (*models.User, error) {
 func (dbUsers *dataBase) SelectUserByNickName(nickname string) (*models.User, error) {
 	user := models.User{}
 
-	tx := dbUsers.db.Table("users").Where("nick_name = ?", nickname).Take(&user)
-	if tx.Error == gorm.ErrRecordNotFound {
-		return nil, errors.New("user with such nickname doesn't exist")
+	tx := dbUsers.db.Where("nick_name = ?", nickname).Take(&user)
+	if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+		return nil, models.ErrNotFound
 	} else if tx.Error != nil {
-		return nil, tx.Error
+		return nil, errors.Wrap(tx.Error, "database error (table users)")
 	}
 
 	return &user, nil
@@ -47,24 +46,21 @@ func (dbUsers *dataBase) SelectUserByNickName(nickname string) (*models.User, er
 
 func (dbUsers *dataBase) SelectUserByEmail(email string) (*models.User, error) {
 	user := models.User{}
-	tx := dbUsers.db.Table("users").Where("email = ?", email).Take(&user)
-	if tx.Error == gorm.ErrRecordNotFound {
-		return nil, errors.New("user with such email doesn't exist")
+	tx := dbUsers.db.Where("email = ?", email).Take(&user)
+	if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+		return nil, models.ErrNotFound
 	} else if tx.Error != nil {
-		return nil, tx.Error
+		return nil, errors.Wrap(tx.Error, "database error (table users)")
 	}
 
 	return &user, nil
 }
 
-func (dbUsers *dataBase) CreateUser(u models.User) (*models.User, error) {
-	user := models.User{}
-
-	tx := dbUsers.db.Table("users").Raw("INSERT INTO users (first_name, last_name, nick_name, email, passhash) VALUES (?, ?, ?, ?, ?) RETURNING *",
-		u.FirstName, u.LastName, u.NickName, u.Email, u.Password).Scan(&user)
+func (dbUsers *dataBase) CreateUser(user *models.User) (error) {
+	tx := dbUsers.db.Omit("avatar_img_id").Create(user)
 	if tx.Error != nil {
-		return nil, tx.Error
+		return errors.Wrap(tx.Error, "database error (table users)")
 	}
 
-	return &user, nil
+	return nil
 }
