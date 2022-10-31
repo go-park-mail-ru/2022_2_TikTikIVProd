@@ -88,7 +88,6 @@ func (dbPost *postRepository) UpdatePost(p *models.Post) error {
 
 	if len(postImages) > 0 {
 		tx = dbPost.db.Create(&postImages)
-		fmt.Println(postImages)
 		if tx.Error != nil {
 			return errors.Wrap(tx.Error, "postRepository.CreatePost error while insert relation")
 		}
