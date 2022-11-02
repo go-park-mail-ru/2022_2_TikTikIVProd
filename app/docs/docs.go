@@ -58,7 +58,7 @@ const docTemplate = `{
                         }
                     },
                     "405": {
-                        "description": "invalid http method",
+                        "description": "Method Not Allowed",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
                         }
@@ -160,7 +160,7 @@ const docTemplate = `{
                         }
                     },
                     "405": {
-                        "description": "invalid http method",
+                        "description": "Method Not Allowed",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
                         }
@@ -223,7 +223,7 @@ const docTemplate = `{
                         }
                     },
                     "405": {
-                        "description": "invalid http method",
+                        "description": "Method Not Allowed",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
                         }
@@ -343,7 +343,7 @@ const docTemplate = `{
                         }
                     },
                     "405": {
-                        "description": "invalid http method",
+                        "description": "Method Not Allowed",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
                         }
@@ -621,7 +621,7 @@ const docTemplate = `{
                         }
                     },
                     "405": {
-                        "description": "invalid http method",
+                        "description": "Method Not Allowed",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
                         }
@@ -685,7 +685,7 @@ const docTemplate = `{
                         }
                     },
                     "405": {
-                        "description": "invalid http method",
+                        "description": "Method Not Allowed",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
                         }
@@ -756,7 +756,7 @@ const docTemplate = `{
                         }
                     },
                     "405": {
-                        "description": "invalid http method",
+                        "description": "Method Not Allowed",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
                         }
@@ -870,6 +870,9 @@ const docTemplate = `{
                 "user_id"
             ],
             "properties": {
+                "avatar_id": {
+                    "type": "integer"
+                },
                 "create_date": {
                     "type": "string"
                 },

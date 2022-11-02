@@ -1,12 +1,13 @@
 package main
 
 import (
+	"log"
+
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"log"
 
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/cmd/server"
 	_authDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/delivery"
@@ -78,7 +79,7 @@ func main() {
 	e.Use(echoMiddleware.Recover())
 	e.Use(echoMiddleware.Secure())
 	e.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
-		AllowOrigins:     []string{"http://localhost"},
+		AllowOrigins:     []string{"*"},
 		AllowHeaders:     []string{"*"},
 		AllowCredentials: true,
 	}))

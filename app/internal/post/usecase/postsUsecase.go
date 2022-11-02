@@ -95,6 +95,7 @@ func addAuthorForPost(post *models.Post, repUsers userRep.RepositoryI) error {
 
 	post.UserLastName = author.LastName
 	post.UserFirstName = author.FirstName
+	post.AvatarID = author.Avatar
 
 	return nil
 }

@@ -7,6 +7,7 @@ import (
 type Post struct {
 	ID            int       `json:"id"`
 	UserID        int       `json:"user_id" validate:"required"`
+	AvatarID      int       `json:"avatar_id"`
 	UserFirstName string    `json:"user_first_name"`
 	UserLastName  string    `json:"user_last_name"`
 	Message       string    `json:"message" validate:"required"`
