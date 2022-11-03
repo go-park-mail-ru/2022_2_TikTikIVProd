@@ -79,8 +79,8 @@ func main() {
 	e.Use(echoMiddleware.Recover())
 	e.Use(echoMiddleware.Secure())
 	e.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
-		AllowOrigins:     []string{"*"},
-		AllowHeaders:     []string{"*"},
+		AllowOrigins:     []string{"http://89.208.197.127"},
+		AllowHeaders:     []string{"Content-Type"},
 		AllowCredentials: true,
 	}))
 	// e.Use(echoMiddleware.CSRF())
