@@ -12,6 +12,10 @@ import (
 	_authDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/delivery"
 	authRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/repository/redis"
 	authUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/usecase"
+	_chatDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/delivery"
+	chatRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/repository/postgres"
+	chatUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/usecase"
+
 	_friendsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/delivery"
 	friendsRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/repository/postgres"
 	friendsUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/usecase"
@@ -31,12 +35,12 @@ import (
 // @version 1.0
 // @host 89.208.197.127:8080
 
-//var testCfg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
+var testCfg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
 
-var prodCfg = postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}
+//var prodCfg = postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}
 
 func main() {
-	db, err := gorm.Open(postgres.New(prodCfg),
+	db, err := gorm.Open(postgres.New(testCfg),
 		&gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
@@ -44,7 +48,7 @@ func main() {
 	}
 
 	redisClient := redis.NewClient(&redis.Options{
-		Addr:       "redis:6379",
+		Addr:       ":6379",
 		MaxRetries: 10,
 	})
 
@@ -59,12 +63,14 @@ func main() {
 	usersDB := usersRep.New(db)
 	friendsDB := friendsRep.New(db)
 	imageDB := imagesRepository.NewImageRepository(db)
+	chatDB := chatRep.NewChatRepository(db)
 
 	postsUC := postsUsecase.NewPostUsecase(postDB, imageDB, usersDB)
 	authUC := authUseCase.New(authDB, usersDB)
 	usersUC := usersUseCase.New(usersDB)
 	friendsUC := friendsUseCase.New(friendsDB, usersDB)
 	imageUC := imageUsecase.NewImageUsecase(imageDB)
+	chatUC := chatUseCase.NewChatUsecase(chatDB)
 
 	e := echo.New()
 
@@ -90,13 +96,14 @@ func main() {
 
 	authMiddleware := middleware.NewMiddleware(authUC)
 	e.Use(authMiddleware.Auth)
-	e.Use(authMiddleware.CSRF)
+	//e.Use(authMiddleware.CSRF)
 
 	_postsDelivery.NewDelivery(e, postsUC)
 	_authDelivery.NewDelivery(e, authUC)
 	_usersDelivery.NewDelivery(e, usersUC)
 	_imageDelivery.NewDelivery(e, imageUC)
 	_friendsDelivery.NewDelivery(e, friendsUC)
+	_chatDelivery.NewDelivery(e, chatUC)
 
 	s := server.NewServer(e)
 	if err := s.Start(); err != nil {

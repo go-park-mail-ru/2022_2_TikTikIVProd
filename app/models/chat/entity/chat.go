@@ -1,21 +1,45 @@
 package entity
 
 import (
-	"gopkg.in/mgo.v2/bson"
 	"time"
 )
 
 type Message struct {
-	ID        bson.ObjectId `bson:"_id"`
-	Body      string        `bson:"body"`
-	SenderID  string        `bson:"sender_id"`
-	CreatedAt time.Time     `bson:"created_at"`
+	ID        int
+	Body      string
+	SenderID  int
+	CreatedAt time.Time
+}
+
+func (Message) TableName() string {
+	return "message"
 }
 
 type Dialog struct {
-	ID           bson.ObjectId `bson:"_id"`
-	Name         string        `bson:"name"`
-	Participants []string      `bson:"participants"`
-	Messages     []Message     `bson:"messages"`
-	CreatedAt    time.Time     `bson:"created_at"`
+	ID int
+	//OwnerID   int //todo
+	Name      string
+	CreatedAt time.Time
+}
+
+func (Dialog) TableName() string {
+	return "chat"
+}
+
+type MessageDialogRelation struct {
+	ChatID    int
+	MessageID int
+}
+
+func (MessageDialogRelation) TableName() string {
+	return "message_chat"
+}
+
+type UserDialogRelation struct {
+	ChatID int
+	UserID int
+}
+
+func (UserDialogRelation) TableName() string {
+	return "user_chat"
 }

@@ -1,17 +1,29 @@
 package dto
 
+import (
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models/chat/entity"
+	"time"
+)
+
 type CreateDialogRequest struct {
-	UserID       string   `validate:"required"`
-	Name         string   `json:"name"`
-	Participants []string `json:"participants" validate:"required"`
+	UserID          int    `json:"-"`
+	Name            string `json:"name"`
+	ParticipantsIDs []int  `json:"participants_ids" validate:"required"`
+}
+
+func (dialog CreateDialogRequest) ToDialogEntities() *entity.Dialog {
+	return &entity.Dialog{
+		Name:      dialog.Name,
+		CreatedAt: time.Now(),
+	}
 }
 
 type CreateDialogResponse struct {
-	DialogID string `json:"dialog_id"`
+	DialogID int `json:"dialog_id"`
 }
 
 type GetDialogsRequest struct {
-	UserID string `query:"id"`
+	UserID int `json:"-"`
 }
 
 type GetDialogsInfoResponseBody struct {
@@ -19,27 +31,33 @@ type GetDialogsInfoResponseBody struct {
 }
 
 type Message struct {
-	ID        string `json:"id"`
-	DialogID  string `json:"dialog_id"`
-	AuthorID  string `json:"author_id"`
-	Body      string `json:"body"`
-	CreatedAt int64  `json:"created_at"`
+	ID        int       `json:"id"`
+	DialogID  int       `json:"dialog_id"`
+	AuthorID  int       `json:"author_id"`
+	Body      string    `json:"body"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type GetDialogRequest struct {
-	DialogID string `query:"id"`
+	DialogID int `json:"id"`
 }
 
 type GetDialogResponse struct {
-	DialogInfo  DialogInfo `json:"dialog"`
-	Messages    []Message  `json:"messages"`
-	Total       int64      `json:"total"`
-	AmountPages int64      `json:"amount_pages"`
+	DialogInfo DialogInfo `json:"dialog"`
+	Messages   []Message  `json:"messages"`
+	//Total       int      `json:"total"`
+	//AmountPages int      `json:"amount_pages"`
+}
+
+type Participants struct {
+	UserID    int    `json:"user_id"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
 }
 
 type DialogInfo struct {
-	DialogID     string   `json:"dialog_id"`
-	Name         string   `json:"name"`
-	Participants []string `json:"participants"`
-	CreatedAt    int64    `json:"created_at"`
+	DialogID     int            `json:"dialog_id"`
+	Name         string         `json:"name"`
+	Participants []Participants `json:"participants"`
+	CreatedAt    time.Time      `json:"created_at"`
 }
