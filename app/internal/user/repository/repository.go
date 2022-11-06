@@ -9,4 +9,5 @@ type RepositoryI interface {
 	SelectUserByEmail(email string) (*models.User, error)
 	CreateUser(u *models.User) error
 	SelectUserById(id int) (*models.User, error)
+	UpdateUser(user models.User) error
 }

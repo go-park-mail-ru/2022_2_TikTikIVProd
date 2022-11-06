@@ -1,123 +1,248 @@
-package usecase
+package usecase_test
 
-// import (
-// 	"net/http"
-// 	"net/http/httptest"
-// 	"strings"
-// 	"testing"
+import (
+	"strconv"
+	"testing"
 
-// 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository/localstorage"
-// )
+	"github.com/bxcodec/faker"
+	authMocks "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/repository/mocks"
+	authUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/usecase"
+	userMocks "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository/mocks"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+	"golang.org/x/crypto/bcrypt"
+)
 
-// type TestCase struct {
-// 	User       string
-// 	Method string
-// 	StatusCode int
-// }
+type TestCaseSignUp struct {
+	ArgData *models.User
+	ExpectedRes int
+	Error error
+}
 
-// func TestDelivery_signUp(t *testing.T) {
-// 	cases := []TestCase{
-// 		{
-// 			User:   `{"first_name":"Nastya", "last_name":"Kuznetsova", "nick_name":"kuzkus", "email":"aaa@gmail.com", "password":"password1"}`,
-// 			Method: "POST",
-// 			StatusCode: http.StatusCreated,
-// 		},
-// 		{
-// 			User:       `{""}`,
-// 			Method: "POST",
-// 			StatusCode: http.StatusBadRequest,
-// 		},
-// 		{
-// 			User:       `{""}`,
-// 			Method: "GET",
-// 			StatusCode: http.StatusMethodNotAllowed,
-// 		},
-// 	}
-// 	for caseNum, item := range cases {
-// 		url := "http://89.208.197.127:8080/signup"
-// 		req := httptest.NewRequest(item.Method, url, strings.NewReader(item.User))
-// 		w := httptest.NewRecorder()
+type TestCaseSignIn struct {
+	ArgData models.UserSignIn
+	ExpectedResUser *models.User
+	ExpectedResCookie int
+	Error error
+}
 
-// 		usersLocalStorage := localstorage.New()
-// 		usersUC := usecase.New(usersLocalStorage)
-// 		usersDeliver := New(usersUC)
-// 		usersDeliver.SignUp(w, req)
+type TestCaseDeleteCookie struct {
+	ArgData string
+	Error error
+}
 
-// 		if w.Code != item.StatusCode {
-// 			t.Errorf("[%d] wrong StatusCode: got %d, expected %d",
-// 				caseNum, w.Code, item.StatusCode)
-// 		}
-// 	}
-// }
+type TestCaseAuth struct {
+	ArgData string
+	Expected models.User
+	Error error
+}
 
-// func TestDelivery_signInFailure(t *testing.T) {
-// 	cases := []TestCase{
-// 		{
-// 			User:       `{""}`,
-// 			Method: "POST",
-// 			StatusCode: http.StatusBadRequest,
-// 		},
-// 		{
-// 			User:       `{""}`,
-// 			Method: "GET",
-// 			StatusCode: http.StatusMethodNotAllowed,
-// 		},
-// 		{
-// 			User:       `{"email":"aaa@gmail.com", "password":"password1"}`,
-// 			Method: "POST",
-// 			StatusCode: http.StatusNotFound,
-// 		},
-// 	}
-// 	for caseNum, item := range cases {
-// 		url := "http://89.208.197.127:8080/signin"
-// 		req := httptest.NewRequest(item.Method, url, strings.NewReader(item.User))
-// 		w := httptest.NewRecorder()
+func TestUsecaseSignUp(t *testing.T) {
+	var mockUserSuccess models.User
+	err := faker.FakeData(&mockUserSuccess)
+	assert.NoError(t, err)
 
-// 		usersLocalStorage := localstorage.New()
-// 		usersUC := usecase.New(usersLocalStorage)
-// 		usersDeliver := New(usersUC)
-// 		usersDeliver.SignIn(w, req)
+	var mockUserBadRequest models.User
+	err = faker.FakeData(&mockUserBadRequest)
+	assert.NoError(t, err)
+	mockUserBadRequest.Email = ""
 
-// 		if w.Code != item.StatusCode {
-// 			t.Errorf("[%d] wrong StatusCode: got %d, expected %d",
-// 				caseNum, w.Code, item.StatusCode)
-// 		}
-// 	}
-// }
+	var mockUserConflictNickName models.User
+	err = faker.FakeData(&mockUserConflictNickName)
+	assert.NoError(t, err)
 
-// func TestDelivery_LogoutFailure(t *testing.T) {
-// 	cases := []TestCase{
-// 		{
-// 			User:       `{""}`,
-// 			Method: "POST",
-// 			StatusCode: http.StatusBadRequest,
-// 		},
-// 		{
-// 			User:       `{""}`,
-// 			Method: "GET",
-// 			StatusCode: http.StatusMethodNotAllowed,
-// 		},
-// 		{
-// 			User:       `{"email":"aaa@gmail.com", "password":"password1"}`,
-// 			Method: "POST",
-// 			StatusCode: http.StatusNotFound,
-// 		},
-// 	}
-// 	for caseNum, item := range cases {
-// 		url := "http://89.208.197.127:8080/signin"
-// 		req := httptest.NewRequest(item.Method, url, strings.NewReader(item.User))
-// 		w := httptest.NewRecorder()
+	var mockUserConflictEmail models.User
+	err = faker.FakeData(&mockUserConflictEmail)
+	assert.NoError(t, err)
 
-// 		usersLocalStorage := localstorage.New()
-// 		usersUC := usecase.New(usersLocalStorage)
-// 		usersDeliver := New(usersUC)
-// 		usersDeliver.SignIn(w, req)
+	mockAuthRepo := new(authMocks.RepositoryI)
+	mockUserRepo := new(userMocks.RepositoryI)
 
-// 		if w.Code != item.StatusCode {
-// 			t.Errorf("[%d] wrong StatusCode: got %d, expected %d",
-// 				caseNum, w.Code, item.StatusCode)
-// 		}
-// 	}
-// }
+	mockUserRepo.On("SelectUserByNickName", mockUserSuccess.NickName).Return(nil, models.ErrNotFound)
+	mockUserRepo.On("SelectUserByEmail", mockUserSuccess.Email).Return(nil, models.ErrNotFound)
+	mockUserRepo.On("CreateUser", &mockUserSuccess).Return(nil)
+	mockAuthRepo.On("CreateCookie", mock.AnythingOfType("*models.Cookie")).Return(nil)
 
+	mockUserRepo.On("SelectUserByNickName", mockUserConflictNickName.NickName).Return(&mockUserConflictNickName, nil)
+	
+	mockUserRepo.On("SelectUserByNickName", mockUserConflictEmail.NickName).Return(nil, models.ErrNotFound)
+	mockUserRepo.On("SelectUserByEmail", mockUserConflictEmail.Email).Return(&mockUserConflictEmail, nil)
+
+	useCase := authUsecase.New(mockAuthRepo, mockUserRepo)
+
+	cases := map[string]TestCaseSignUp {
+		"success": {
+			ArgData:   &mockUserSuccess,
+			ExpectedRes: mockUserSuccess.Id,
+			Error: nil,
+		},
+		"bad_request": {
+			ArgData:   &mockUserBadRequest,
+			Error: models.ErrBadRequest,
+		},
+		"conflict_nickname": {
+			ArgData:   &mockUserConflictNickName,
+			Error: models.ErrConflictNickname,
+		},
+		"conflict_email": {
+			ArgData:   &mockUserConflictEmail,
+			Error: models.ErrConflictEmail,
+		},
+	}
+
+	for name, test := range cases {
+		t.Run(name, func(t *testing.T) {
+			cookie, err := useCase.SignUp(test.ArgData)
+			require.Equal(t, test.Error, err)
+
+			if err == nil {
+				assert.Equal(t, test.ExpectedRes, cookie.UserId)
+			}
+		})
+	}
+	mockUserRepo.AssertExpectations(t)
+	mockAuthRepo.AssertExpectations(t)
+}
+
+func TestUsecaseSignIn(t *testing.T) {
+	var mockUser models.User
+	err := faker.FakeData(&mockUser)
+	assert.NoError(t, err)
+
+	var mockUserSignIn models.UserSignIn
+	mockUserSignIn.Email = mockUser.Email
+	mockUserSignIn.Password = mockUser.Password
+
+	var mockUserSignInBadRequest models.UserSignIn
+	mockUserSignInBadRequest.Email = mockUser.Email
+	mockUserSignInBadRequest.Password = ""
+
+	var mockUserSignInInvalidPassword models.UserSignIn
+	err = faker.FakeData(&mockUserSignInInvalidPassword.Email)
+	assert.NoError(t, err)
+	mockUserSignInInvalidPassword.Password = "dfvdf"
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(mockUser.Password), 8)
+	assert.NoError(t, err)
+
+	mockUser.Password = string(hashedPassword)
+
+	mockAuthRepo := new(authMocks.RepositoryI)
+	mockUserRepo := new(userMocks.RepositoryI)
+
+	mockUserFail := mockUser
+	mockUserRepo.On("SelectUserByEmail", mockUserSignInInvalidPassword.Email).Return(&mockUserFail, nil)
+
+	mockUserRepo.On("SelectUserByEmail", mockUserSignIn.Email).Return(&mockUser, nil)
+	mockAuthRepo.On("CreateCookie", mock.AnythingOfType("*models.Cookie")).Return(nil)
+
+	useCase := authUsecase.New(mockAuthRepo, mockUserRepo)
+
+	expectedUser := mockUser
+	expectedUser.Password = ""
+	cases := map[string]TestCaseSignIn {
+		"bad_request": {
+			ArgData:   mockUserSignInBadRequest,
+			Error: models.ErrBadRequest,
+		},
+		"success": {
+			ArgData:   mockUserSignIn,
+			ExpectedResUser:   &expectedUser,
+			ExpectedResCookie: mockUser.Id,
+			Error: nil,
+		},
+		"invalid_password": {
+			ArgData:   mockUserSignInInvalidPassword,
+			Error: models.ErrInvalidPassword,
+		},
+	}
+
+	for name, test := range cases {
+		t.Run(name, func(t *testing.T) {
+			user, _, err := useCase.SignIn(test.ArgData)
+			require.Equal(t, test.Error, err)
+
+			if err == nil {
+				assert.Equal(t, test.ExpectedResUser, user)
+			}
+		})
+	}
+	mockUserRepo.AssertExpectations(t)
+	mockAuthRepo.AssertExpectations(t)
+}
+
+func TestUsecaseDeleteCookie(t *testing.T) {
+	var cookie models.Cookie
+
+	err := faker.FakeData(&cookie)
+	assert.NoError(t, err)
+
+	mockAuthRepo := new(authMocks.RepositoryI)
+	mockUserRepo := new(userMocks.RepositoryI)
+
+	mockAuthRepo.On("GetCookie", cookie.SessionToken).Return(strconv.Itoa(cookie.UserId), nil)
+	mockAuthRepo.On("DeleteCookie", cookie.SessionToken).Return(nil)
+
+	useCase := authUsecase.New(mockAuthRepo, mockUserRepo)
+
+	cases := map[string]TestCaseDeleteCookie {
+		"success": {
+			ArgData:   cookie.SessionToken,
+			Error: nil,
+		},
+	}
+
+	for name, test := range cases {
+		t.Run(name, func(t *testing.T) {
+			err := useCase.DeleteCookie(test.ArgData)
+			require.Equal(t, test.Error, err)
+		})
+	}
+	mockAuthRepo.AssertExpectations(t)
+	mockUserRepo.AssertExpectations(t)
+}
+
+func TestUsecaseAuth(t *testing.T) {
+	var cookie models.Cookie
+	err := faker.FakeData(&cookie)
+	assert.NoError(t, err)
+
+	mockAuthRepo := new(authMocks.RepositoryI)
+	mockUserRepo := new(userMocks.RepositoryI)
+
+	var user models.User
+	err = faker.FakeData(&user)
+	assert.NoError(t, err)
+
+	user.Id = cookie.UserId
+
+	mockAuthRepo.On("GetCookie", cookie.SessionToken).Return(strconv.Itoa(cookie.UserId), nil)
+	mockUserRepo.On("SelectUserById", cookie.UserId).Return(&user, nil)
+
+	user.Password = ""
+
+	useCase := authUsecase.New(mockAuthRepo, mockUserRepo)
+
+	cases := map[string]TestCaseAuth {
+		"success": {
+			ArgData:   cookie.SessionToken,
+			Expected: user,
+			Error: nil,
+		},
+	}
+
+	for name, test := range cases {
+		t.Run(name, func(t *testing.T) {
+			gotUser, err := useCase.Auth(test.ArgData)
+			require.Equal(t, test.Error, err)
+			if err == nil {
+				assert.Equal(t, &test.Expected, gotUser)
+			}
+		})
+	}
+	mockAuthRepo.AssertExpectations(t)
+	mockUserRepo.AssertExpectations(t)
+}
 

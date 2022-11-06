@@ -9,5 +9,7 @@ var (
 	ErrConflictEmail = errors.New("email already exists")
 	ErrBadRequest = errors.New("bad request")
 	ErrConflictFriend = errors.New("friend already exists")
+	ErrUnauthorized = errors.New("no cookie")
+	ErrInternalServerError = errors.New("internal server error")
 )
 

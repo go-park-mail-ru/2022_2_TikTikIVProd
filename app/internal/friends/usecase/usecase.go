@@ -11,6 +11,7 @@ import (
 type UseCaseI interface {
 	AddFriend(friends models.Friends) (error)
 	DeleteFriend(friends models.Friends) (error)
+	SelectFriends(id int) ([]models.User, error)
 }
 
 type useCase struct {
@@ -85,3 +86,18 @@ func (uc *useCase) DeleteFriend(friends models.Friends) error {
 
 	return nil
 }
+
+func (uc *useCase) SelectFriends(id int) ([]models.User, error) {
+	_, err := uc.userRepository.SelectUserById(id)
+	if err != nil {
+		return nil, errors.Wrap(err, "user repository error")
+	}
+
+	friends, err := uc.friendsRepository.SelectFriends(id)
+	if err != nil {
+		return nil, errors.Wrap(err, "friends repository error")
+	}
+
+	return friends, nil
+}
+

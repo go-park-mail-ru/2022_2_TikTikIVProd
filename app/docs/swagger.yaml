@@ -3,16 +3,6 @@ definitions:
     properties:
       message: {}
     type: object
-  models.Friends:
-    properties:
-      id_friend:
-        type: integer
-      id_user:
-        type: integer
-    required:
-    - id_friend
-    - id_user
-    type: object
   models.Image:
     properties:
       id:
@@ -20,7 +10,11 @@ definitions:
     type: object
   models.Post:
     properties:
+      avatar_id:
+        readOnly: true
+        type: integer
       create_date:
+        readOnly: true
         type: string
       id:
         type: integer
@@ -31,14 +25,15 @@ definitions:
       message:
         type: string
       user_first_name:
+        readOnly: true
         type: string
       user_id:
         type: integer
       user_last_name:
+        readOnly: true
         type: string
     required:
     - message
-    - user_id
     type: object
   models.User:
     properties:
@@ -108,7 +103,7 @@ paths:
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "405":
-          description: invalid http method
+          description: Method Not Allowed
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "500":
@@ -116,6 +111,27 @@ paths:
           schema:
             $ref: '#/definitions/echo.HTTPError'
       summary: Auth
+      tags:
+      - auth
+  /create_csrf:
+    post:
+      description: Get CSRF token
+      responses:
+        "204":
+          description: success create csrf, body is empty
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: CreateCSRF
       tags:
       - auth
   /feed:
@@ -135,6 +151,14 @@ paths:
                     $ref: '#/definitions/models.Post'
                   type: array
               type: object
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
         "405":
           description: invalid http method
           schema:
@@ -146,18 +170,65 @@ paths:
       summary: Feed
       tags:
       - posts
-  /friends/add:
-    post:
-      consumes:
+  /friends/{user_id}:
+    get:
+      description: get user's friends
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
       - application/json
+      responses:
+        "200":
+          description: success get profile
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  items:
+                    $ref: '#/definitions/models.User'
+                  type: array
+              type: object
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: user doesn't exist
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: SelectFriends
+      tags:
+      - friends
+  /friends/add/{friend_id}:
+    post:
       description: add friend
       parameters:
-      - description: friends info
-        in: body
-        name: friends
+      - description: Friend ID
+        in: path
+        name: friend_id
         required: true
-        schema:
-          $ref: '#/definitions/models.Friends'
+        type: integer
       produces:
       - application/json
       responses:
@@ -167,12 +238,20 @@ paths:
           description: bad request
           schema:
             $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
         "404":
           description: friend or user doesn't exist
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "405":
-          description: invalid http method
+          description: Method Not Allowed
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "409":
@@ -186,18 +265,13 @@ paths:
       summary: AddFriend
       tags:
       - friends
-  /friends/delete/{id_user}/{id_friend}:
+  /friends/delete/{friend_id}:
     delete:
       description: delete friend
       parameters:
-      - description: User ID
-        in: path
-        name: id_user
-        required: true
-        type: integer
       - description: Friend ID
         in: path
-        name: id_friend
+        name: friend_id
         required: true
         type: integer
       produces:
@@ -209,12 +283,20 @@ paths:
           description: bad request
           schema:
             $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
         "404":
           description: friend/user/friendship doesn't exist
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "405":
-          description: invalid http method
+          description: Method Not Allowed
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "500":
@@ -238,6 +320,14 @@ paths:
       responses:
         "200":
           description: success get image
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
         "405":
           description: invalid http method
           schema:
@@ -265,6 +355,14 @@ paths:
       responses:
         "200":
           description: success upload image
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
         "405":
           description: invalid http method
           schema:
@@ -277,7 +375,7 @@ paths:
       tags:
       - image
   /logout:
-    delete:
+    post:
       description: user logout
       produces:
       - application/json
@@ -292,8 +390,16 @@ paths:
           description: no cookie
           schema:
             $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
         "405":
-          description: invalid http method
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
           schema:
             $ref: '#/definitions/echo.HTTPError'
       summary: Logout
@@ -313,6 +419,14 @@ paths:
       responses:
         "204":
           description: No Content
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
         "405":
           description: invalid http method
           schema:
@@ -346,6 +460,14 @@ paths:
                 body:
                   $ref: '#/definitions/models.Post'
               type: object
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
         "405":
           description: invalid http method
           schema:
@@ -381,6 +503,14 @@ paths:
                 body:
                   $ref: '#/definitions/models.Post'
               type: object
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
         "405":
           description: invalid http method
           schema:
@@ -392,7 +522,7 @@ paths:
       summary: Create a post
       tags:
       - posts
-  /post/update:
+  /post/edit:
     post:
       consumes:
       - application/json
@@ -416,6 +546,14 @@ paths:
                 body:
                   $ref: '#/definitions/models.Post'
               type: object
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
         "405":
           description: invalid http method
           schema:
@@ -464,7 +602,7 @@ paths:
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "405":
-          description: invalid http method
+          description: Method Not Allowed
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "500":
@@ -480,7 +618,7 @@ paths:
       - application/json
       description: user sign up
       parameters:
-      - description: user info
+      - description: user data
         in: body
         name: user
         required: true
@@ -503,7 +641,7 @@ paths:
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "405":
-          description: invalid http method
+          description: Method Not Allowed
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "409":
@@ -530,7 +668,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: success
+          description: success get profile
           schema:
             allOf:
             - $ref: '#/definitions/pkg.Response'
@@ -542,12 +680,20 @@ paths:
           description: bad request
           schema:
             $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
         "404":
           description: can't find user with such id
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "405":
-          description: invalid http method
+          description: Method Not Allowed
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "500":
@@ -580,6 +726,14 @@ paths:
                     $ref: '#/definitions/models.Post'
                   type: array
               type: object
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
         "404":
           description: Post not found
           schema:
@@ -595,4 +749,48 @@ paths:
       summary: Get users posts
       tags:
       - posts
+  /users/update:
+    put:
+      consumes:
+      - application/json
+      description: update user's profile
+      parameters:
+      - description: user data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: success update
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: can't find user with such id
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: UpdateUser
+      tags:
+      - users
 swagger: "2.0"

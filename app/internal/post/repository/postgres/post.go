@@ -71,12 +71,12 @@ func NewPostRepository(db *gorm.DB) repository.RepositoryI {
 func (dbPost *postRepository) UpdatePost(p *models.Post) error {
 	post := toPostgresPost(p)
 
-	tx := dbPost.db.Save(post)
+	tx := dbPost.db.Omit("id").Updates(post)
 	if tx.Error != nil {
 		return errors.Wrap(tx.Error, "postRepository.UpdatePost error while insert post")
 	}
 
-	tx = dbPost.db.Where("user_post_id = ?", p.ID).Delete(&PostImagesRelation{})
+	tx = dbPost.db.Where(&PostImagesRelation{PostID: p.ID}).Delete(&PostImagesRelation{})
 	if tx.Error != nil {
 		return errors.Wrap(tx.Error, "postRepository.UpdatePost error while delete relation")
 	}
@@ -99,12 +99,13 @@ func (dbPost *postRepository) UpdatePost(p *models.Post) error {
 func (dbPost *postRepository) CreatePost(p *models.Post) error {
 	post := toPostgresPost(p)
 
-	tx := dbPost.db.Table("user_posts").Create(post)
+	tx := dbPost.db.Create(post)
 	if tx.Error != nil {
 		return errors.Wrap(tx.Error, "postRepository.CreatePost error while insert post")
 	}
 
 	p.ID = post.ID
+	p.CreateDate = time.Now()
 
 	postImages := make([]PostImagesRelation, 0, 10)
 	for _, elem := range p.Images {
@@ -124,7 +125,7 @@ func (dbPost *postRepository) CreatePost(p *models.Post) error {
 
 func (dbPost *postRepository) GetPostById(id int) (*models.Post, error) {
 	var post Post
-	tx := dbPost.db.Table("user_posts").First(&post, id)
+	tx := dbPost.db.First(&post, id)
 
 	if tx.Error != nil {
 		return nil, errors.Wrap(tx.Error, "postRepository.GetPostById error") // TODO not found
@@ -134,7 +135,7 @@ func (dbPost *postRepository) GetPostById(id int) (*models.Post, error) {
 }
 
 func (dbPost *postRepository) DeletePostById(id int) error {
-	tx := dbPost.db.Table("user_posts").Delete(&Post{}, id)
+	tx := dbPost.db.Delete(&Post{}, id)
 
 	if tx.Error != nil {
 		return errors.Wrap(tx.Error, "postRepository.DeletePostById error") // TODO
@@ -156,7 +157,7 @@ func (dbPost *postRepository) GetAllPosts() ([]*models.Post, error) {
 
 func (dbPost *postRepository) GetUserPosts(userId int) ([]*models.Post, error) {
 	posts := make([]*Post, 0, 10)
-	tx := dbPost.db.Where("").Find(&posts)
+	tx := dbPost.db.Where(&Post{UserID: userId}).Find(&posts)
 
 	if tx.Error != nil {
 		return nil, errors.Wrap(tx.Error, "postRepository.GetAllPosts error") // TODO

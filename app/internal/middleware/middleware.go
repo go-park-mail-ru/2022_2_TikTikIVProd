@@ -4,129 +4,88 @@ import (
 	"net/http"
 
 	authUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/usecase"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg/csrf"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
+	"github.com/pkg/errors"
 )
+
+const session_name = "session_token"
 
 type Middleware struct {
 	authUC authUsecase.UseCaseI
 }
 
-func NewMiddleware(au authUsecase.UseCaseI) *Middleware {
-	return &Middleware{authUC: au}
+func NewMiddleware(authUC authUsecase.UseCaseI) *Middleware {
+	return &Middleware{authUC: authUC}
 }
 
 func (m *Middleware) Auth(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		cookie, err := c.Cookie("session_token")
+		if c.Request().URL.Path == "/signup" || c.Request().URL.Path == "/signin" ||
+															c.Request().URL.Path == "/auth" {
+			return next(c)
+		}
+
+		cookie, err := c.Cookie(session_name)
 		if err == http.ErrNoCookie {
+			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
 		} else if err != nil {
+			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
-		_, err = m.authUC.Auth(cookie.Value)
+		user, err := m.authUC.Auth(cookie.Value)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+			causeErr := errors.Cause(err)
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusUnauthorized, causeErr.Error())
+		}
+
+		c.Set("user_id", user.Id)
+
+		return next(c)
+	}
+}
+
+func (m *Middleware) CSRF(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		if c.Request().URL.Path == "/create_csrf" || c.Request().URL.Path == "/signup" ||
+					c.Request().URL.Path == "/signin" || c.Request().URL.Path == "/auth" ||
+													c.Request().Method == http.MethodGet {
+			return next(c)
+		}
+		
+		token := c.Request().Header.Get(echo.HeaderXCSRFToken)
+		if token == "" {
+			err := errors.New("empty csrf token")
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusForbidden, err.Error())
+		}
+
+		sess, err := session.Get(session_name, c)
+		if err != nil {
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest)
+		} else if sess.IsNew {
+			c.Logger().Error(models.ErrUnauthorized)
+			return echo.NewHTTPError(http.StatusUnauthorized, models.ErrUnauthorized)
+		}
+
+		isTokenValid, err := csrf.CheckCSRF(sess.ID, token)
+		if err != nil {
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusForbidden, err.Error())
+		}
+		if !isTokenValid {
+			err := errors.New("invalid csrf")
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusForbidden, err.Error())
 		}
 
 		return next(c)
 	}
 }
 
-// func (m *Middleware) AccessLog(next echo.HandlerFunc) echo.HandlerFunc {
-// 	return func(ctx echo.Context) error {
-// 		start := time.Now()
-// 		logger.Logrus.Logger.SetFormatter(&logrus.JSONFormatter{
-// 			TimestampFormat:   "",
-// 			DisableTimestamp:  false,
-// 			DisableHTMLEscape: false,
-// 			DataKey:           "now",
-// 			FieldMap:          nil,
-// 			CallerPrettyfier:  nil,
-// 			PrettyPrint:       true,
-// 		})
-// 		logger.Logrus.WithFields(logrus.Fields{
-// 			"method":      ctx.Request().Method,
-// 			"remote_addr": ctx.Request().RemoteAddr,
-// 			"work_time":   time.Since(start),
-// 		}).Debug(ctx.Request().URL.Path)
-// 		return next(ctx)
-// 	}
-// }
-
-
-
-
-
-
-// type (
-// 	Stats struct {
-// 		Uptime       time.Time      `json:"uptime"`
-// 		RequestCount uint64         `json:"requestCount"`
-// 		Statuses     map[string]int `json:"statuses"`
-// 		mutex        sync.RWMutex
-// 	}
-// )
-
-// func NewStats() *Stats {
-// 	return &Stats{
-// 		Uptime:   time.Now(),
-// 		Statuses: map[string]int{},
-// 	}
-// }
-
-// // Process is the middleware function.
-// func (s *Stats) Process(next echo.HandlerFunc) echo.HandlerFunc {
-// 	return func(c echo.Context) error {
-// 		if err := next(c); err != nil {
-// 			c.Error(err)
-// 		}
-// 		s.mutex.Lock()
-// 		defer s.mutex.Unlock()
-// 		s.RequestCount++
-// 		status := strconv.Itoa(c.Response().Status)
-// 		s.Statuses[status]++
-// 		return nil
-// 	}
-// }
-
-// // Handle is the endpoint to get stats.
-// func (s *Stats) Handle(c echo.Context) error {
-// 	s.mutex.RLock()
-// 	defer s.mutex.RUnlock()
-// 	return c.JSON(http.StatusOK, s)
-// }
-
-// // ServerHeader middleware adds a `Server` header to the response.
-// func ServerHeader(next echo.HandlerFunc) echo.HandlerFunc {
-// 	return func(c echo.Context) error {
-// 		c.Response().Header().Set(echo.HeaderServer, "Echo/3.0")
-// 		return next(c)
-// 	}
-// }
-
-// func main() {
-// 	e := echo.New()
-
-// 	// Debug mode
-// 	e.Debug = true
-
-// 	//-------------------
-// 	// Custom middleware
-// 	//-------------------
-// 	// Stats
-// 	s := NewStats()
-// 	e.Use(s.Process)
-// 	e.GET("/stats", s.Handle) // Endpoint to get stats
-
-// 	// Server header
-// 	e.Use(ServerHeader)
-
-// 	// Handler
-// 	e.GET("/", func(c echo.Context) error {
-// 		return c.String(http.StatusOK, "Hello, World!")
-// 	})
-
-// 	// Start server
-// 	e.Logger.Fatal(e.Start(":1323"))
-// }

@@ -58,13 +58,45 @@ const docTemplate = `{
                         }
                     },
                     "405": {
-                        "description": "invalid http method",
+                        "description": "Method Not Allowed",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
                     "500": {
                         "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/create_csrf": {
+            "post": {
+                "description": "Get CSRF token",
+                "tags": [
+                    "auth"
+                ],
+                "summary": "CreateCSRF",
+                "responses": {
+                    "204": {
+                        "description": "success create csrf, body is empty"
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "no cookie",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
                         }
@@ -104,6 +136,18 @@ const docTemplate = `{
                             ]
                         }
                     },
+                    "401": {
+                        "description": "no cookie",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "403": {
+                        "description": "invalid csrf",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
                     "405": {
                         "description": "invalid http method",
                         "schema": {
@@ -119,12 +163,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/friends/add": {
+        "/friends/add/{friend_id}": {
             "post": {
                 "description": "add friend",
-                "consumes": [
-                    "application/json"
-                ],
                 "produces": [
                     "application/json"
                 ],
@@ -134,13 +175,11 @@ const docTemplate = `{
                 "summary": "AddFriend",
                 "parameters": [
                     {
-                        "description": "friends info",
-                        "name": "friends",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.Friends"
-                        }
+                        "type": "integer",
+                        "description": "Friend ID",
+                        "name": "friend_id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -153,6 +192,18 @@ const docTemplate = `{
                             "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
+                    "401": {
+                        "description": "no cookie",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "403": {
+                        "description": "invalid csrf",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
                     "404": {
                         "description": "friend or user doesn't exist",
                         "schema": {
@@ -160,7 +211,7 @@ const docTemplate = `{
                         }
                     },
                     "405": {
-                        "description": "invalid http method",
+                        "description": "Method Not Allowed",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
                         }
@@ -180,7 +231,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/friends/delete/{id_user}/{id_friend}": {
+        "/friends/delete/{friend_id}": {
             "delete": {
                 "description": "delete friend",
                 "produces": [
@@ -193,15 +244,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "User ID",
-                        "name": "id_user",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
                         "description": "Friend ID",
-                        "name": "id_friend",
+                        "name": "friend_id",
                         "in": "path",
                         "required": true
                     }
@@ -216,6 +260,18 @@ const docTemplate = `{
                             "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
+                    "401": {
+                        "description": "no cookie",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "403": {
+                        "description": "invalid csrf",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
                     "404": {
                         "description": "friend/user/friendship doesn't exist",
                         "schema": {
@@ -223,7 +279,87 @@ const docTemplate = `{
                         }
                     },
                     "405": {
-                        "description": "invalid http method",
+                        "description": "Method Not Allowed",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/friends/{user_id}": {
+            "get": {
+                "description": "get user's friends",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "friends"
+                ],
+                "summary": "SelectFriends",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success get profile",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/pkg.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "body": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.User"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "no cookie",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "403": {
+                        "description": "invalid csrf",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "user doesn't exist",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "405": {
+                        "description": "Method Not Allowed",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
                         }
@@ -263,6 +399,18 @@ const docTemplate = `{
                     "200": {
                         "description": "success upload image"
                     },
+                    "401": {
+                        "description": "no cookie",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "403": {
+                        "description": "invalid csrf",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
                     "405": {
                         "description": "invalid http method",
                         "schema": {
@@ -301,6 +449,18 @@ const docTemplate = `{
                     "200": {
                         "description": "success get image"
                     },
+                    "401": {
+                        "description": "no cookie",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "403": {
+                        "description": "invalid csrf",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
                     "405": {
                         "description": "invalid http method",
                         "schema": {
@@ -317,7 +477,7 @@ const docTemplate = `{
             }
         },
         "/logout": {
-            "delete": {
+            "post": {
                 "description": "user logout",
                 "produces": [
                     "application/json"
@@ -342,8 +502,20 @@ const docTemplate = `{
                             "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
+                    "403": {
+                        "description": "invalid csrf",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
                     "405": {
-                        "description": "invalid http method",
+                        "description": "Method Not Allowed",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
                         }
@@ -394,6 +566,18 @@ const docTemplate = `{
                             ]
                         }
                     },
+                    "401": {
+                        "description": "no cookie",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "403": {
+                        "description": "invalid csrf",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
                     "405": {
                         "description": "invalid http method",
                         "schema": {
@@ -409,7 +593,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/post/update": {
+        "/post/edit": {
             "post": {
                 "description": "Update a post",
                 "consumes": [
@@ -450,6 +634,18 @@ const docTemplate = `{
                                     }
                                 }
                             ]
+                        }
+                    },
+                    "401": {
+                        "description": "no cookie",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "403": {
+                        "description": "invalid csrf",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
                     "405": {
@@ -508,6 +704,18 @@ const docTemplate = `{
                             ]
                         }
                     },
+                    "401": {
+                        "description": "no cookie",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "403": {
+                        "description": "invalid csrf",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
                     "405": {
                         "description": "invalid http method",
                         "schema": {
@@ -543,6 +751,18 @@ const docTemplate = `{
                 "responses": {
                     "204": {
                         "description": "No Content"
+                    },
+                    "401": {
+                        "description": "no cookie",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "403": {
+                        "description": "invalid csrf",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
                     },
                     "405": {
                         "description": "invalid http method",
@@ -621,7 +841,7 @@ const docTemplate = `{
                         }
                     },
                     "405": {
-                        "description": "invalid http method",
+                        "description": "Method Not Allowed",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
                         }
@@ -650,7 +870,7 @@ const docTemplate = `{
                 "summary": "SignUp",
                 "parameters": [
                     {
-                        "description": "user info",
+                        "description": "user data",
                         "name": "user",
                         "in": "body",
                         "required": true,
@@ -685,13 +905,80 @@ const docTemplate = `{
                         }
                     },
                     "405": {
-                        "description": "invalid http method",
+                        "description": "Method Not Allowed",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
                     "409": {
                         "description": "user with this email already exists",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/update": {
+            "put": {
+                "description": "update user's profile",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "UpdateUser",
+                "parameters": [
+                    {
+                        "description": "user data",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "success update"
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "no cookie",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "403": {
+                        "description": "invalid csrf",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "can't find user with such id",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "405": {
+                        "description": "Method Not Allowed",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
                         }
@@ -726,7 +1013,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "success",
+                        "description": "success get profile",
                         "schema": {
                             "allOf": [
                                 {
@@ -749,6 +1036,18 @@ const docTemplate = `{
                             "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
+                    "401": {
+                        "description": "no cookie",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "403": {
+                        "description": "invalid csrf",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
                     "404": {
                         "description": "can't find user with such id",
                         "schema": {
@@ -756,7 +1055,7 @@ const docTemplate = `{
                         }
                     },
                     "405": {
-                        "description": "invalid http method",
+                        "description": "Method Not Allowed",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
                         }
@@ -811,6 +1110,18 @@ const docTemplate = `{
                             ]
                         }
                     },
+                    "401": {
+                        "description": "no cookie",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "403": {
+                        "description": "invalid csrf",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
                     "404": {
                         "description": "Post not found",
                         "schema": {
@@ -840,21 +1151,6 @@ const docTemplate = `{
                 "message": {}
             }
         },
-        "models.Friends": {
-            "type": "object",
-            "required": [
-                "id_friend",
-                "id_user"
-            ],
-            "properties": {
-                "id_friend": {
-                    "type": "integer"
-                },
-                "id_user": {
-                    "type": "integer"
-                }
-            }
-        },
         "models.Image": {
             "type": "object",
             "properties": {
@@ -866,12 +1162,16 @@ const docTemplate = `{
         "models.Post": {
             "type": "object",
             "required": [
-                "message",
-                "user_id"
+                "message"
             ],
             "properties": {
+                "avatar_id": {
+                    "type": "integer",
+                    "readOnly": true
+                },
                 "create_date": {
-                    "type": "string"
+                    "type": "string",
+                    "readOnly": true
                 },
                 "id": {
                     "type": "integer"
@@ -886,13 +1186,15 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user_first_name": {
-                    "type": "string"
+                    "type": "string",
+                    "readOnly": true
                 },
                 "user_id": {
                     "type": "integer"
                 },
                 "user_last_name": {
-                    "type": "string"
+                    "type": "string",
+                    "readOnly": true
                 }
             }
         },

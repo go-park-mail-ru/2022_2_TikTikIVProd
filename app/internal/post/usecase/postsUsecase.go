@@ -14,7 +14,7 @@ type PostUseCaseI interface {
 	CreatePost(p *models.Post) error
 	UpdatePost(p *models.Post) error
 	GetAllPosts() ([]*models.Post, error)
-	DeletePost(id int) error
+	DeletePost(id int, userId int) error
 }
 
 type postsUsecase struct {
@@ -47,7 +47,7 @@ func (p *postsUsecase) GetPostById(id int) (*models.Post, error) {
 	return resPost, nil
 }
 
-func (p *postsUsecase) DeletePost(id int) error {
+func (p *postsUsecase) DeletePost(id int, userId int) error {
 	existedPost, err := p.postsRepo.GetPostById(id)
 	if err != nil {
 		return err //TODO наверху обработать эту ошибку(схема с файлом)
@@ -55,6 +55,10 @@ func (p *postsUsecase) DeletePost(id int) error {
 
 	if existedPost == nil {
 		return errors.New("Post not found") // TODO
+	}
+
+	if existedPost.UserID != userId {
+		return errors.New("Permission denied")
 	}
 
 	err = p.postsRepo.DeletePostById(id)
@@ -73,11 +77,40 @@ func (p *postsUsecase) CreatePost(post *models.Post) error {
 		return errors.Wrap(err, "Error in func postsUsecase.CreatePost")
 	}
 
+	user, err := p.userRepo.SelectUserById(post.UserID)
+
+	if err != nil {
+		return errors.Wrap(err, "Error in func postsUsecase.CreatePost")
+	}
+
+	post.UserFirstName = user.FirstName
+	post.UserLastName = user.LastName
+	post.AvatarID = user.Avatar
+
 	return nil
 }
 
 func (p *postsUsecase) UpdatePost(post *models.Post) error {
-	err := p.postsRepo.UpdatePost(post)
+	existedPost, err := p.postsRepo.GetPostById(post.ID)
+	if err != nil {
+		return err //TODO наверху обработать эту ошибку(схема с файлом)
+	}
+
+	if existedPost == nil {
+		return errors.New("Post not found") // TODO
+	}
+
+	if existedPost.UserID != post.UserID {
+		return errors.New("Permission denied")
+	}
+
+	err = p.postsRepo.UpdatePost(post)
+
+	if err != nil {
+		return errors.Wrap(err, "Error in func postsUsecase.UpdatePost")
+	}
+
+	err = addAuthorForPost(post, p.userRepo)
 
 	if err != nil {
 		return errors.Wrap(err, "Error in func postsUsecase.UpdatePost")
@@ -95,6 +128,7 @@ func addAuthorForPost(post *models.Post, repUsers userRep.RepositoryI) error {
 
 	post.UserLastName = author.LastName
 	post.UserFirstName = author.FirstName
+	post.AvatarID = author.Avatar
 
 	return nil
 }

@@ -1,14 +1,15 @@
 package usecase
 
 import (
+	"strconv"
+
 	"github.com/pkg/errors"
-	"time"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 
-	userRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository"
 	authRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/repository"
+	userRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
 )
 
@@ -32,7 +33,7 @@ func New(authRepository authRep.RepositoryI, userRepository userRep.RepositoryI)
 }
 
 func (uc *useCase) DeleteCookie(value string) error {
-	_, err := uc.authRepository.SelectCookie(value)
+	_, err := uc.authRepository.GetCookie(value)
 	if err != nil {
 		return errors.Wrap(err, "auth repository error")
 	}
@@ -46,6 +47,10 @@ func (uc *useCase) DeleteCookie(value string) error {
 }
 
 func (uc *useCase) SignIn(user models.UserSignIn) (*models.User, *models.Cookie, error) {
+	if user.Password == "" || user.Email == "" {
+		return nil, nil, models.ErrBadRequest
+	}
+
 	u, err := uc.userRepository.SelectUserByEmail(user.Email)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "user repository error")
@@ -63,7 +68,7 @@ func (uc *useCase) SignIn(user models.UserSignIn) (*models.User, *models.Cookie,
 	cookie := models.Cookie{
 		UserId:       u.Id,
 		SessionToken: uuid.NewString(),
-		Expires:      time.Now().AddDate(1, 0, 0)}
+		MaxAge:      3600 * 24 * 365}
 
 	err = uc.authRepository.CreateCookie(&cookie)
 	if err != nil {
@@ -74,9 +79,11 @@ func (uc *useCase) SignIn(user models.UserSignIn) (*models.User, *models.Cookie,
 }
 
 func (uc *useCase) SignUp(user *models.User) (*models.Cookie, error) {
-	if user.NickName == "" || user.Password == "" || user.Email == "" || user.FirstName == "" || user.LastName == "" {
+	if user.NickName == "" || user.Password == "" || user.Email == "" || user.FirstName == "" ||
+		user.LastName == "" {
 		return nil, models.ErrBadRequest
 	}
+
 	_, err := uc.userRepository.SelectUserByNickName(user.NickName)
 	if err != nil && !errors.Is(err, models.ErrNotFound) {
 		return nil, errors.Wrap(err, "user repository error")
@@ -107,7 +114,7 @@ func (uc *useCase) SignUp(user *models.User) (*models.Cookie, error) {
 	cookie := models.Cookie{
 		UserId:       user.Id,
 		SessionToken: uuid.NewString(),
-		Expires:      time.Now().AddDate(1, 0, 0)}
+		MaxAge:      3600 * 24 * 365}
 
 	err = uc.authRepository.CreateCookie(&cookie)
 	if err != nil {
@@ -118,12 +125,17 @@ func (uc *useCase) SignUp(user *models.User) (*models.Cookie, error) {
 }
 
 func (uc *useCase) Auth(cookie string) (*models.User, error) {
-	gotCookie, err := uc.authRepository.SelectCookie(cookie)
+	userIdStr, err := uc.authRepository.GetCookie(cookie)
 	if err != nil {
 		return nil, errors.Wrap(err, "auth repository error")
 	}
 
-	gotUser, err := uc.userRepository.SelectUserById(gotCookie.UserId)
+	userId, err := strconv.Atoi(userIdStr)
+	if err != nil {
+		return nil, errors.Wrap(err, "auth repository error")
+	}
+
+	gotUser, err := uc.userRepository.SelectUserById(userId)
 	if err != nil {
 		return nil, errors.Wrap(err, "user repository error")
 	}
@@ -131,4 +143,3 @@ func (uc *useCase) Auth(cookie string) (*models.User, error) {
 
 	return gotUser, nil
 }
-
