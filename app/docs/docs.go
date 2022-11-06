@@ -593,7 +593,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/post/update": {
+        "/post/edit": {
             "post": {
                 "description": "Update a post",
                 "consumes": [
@@ -1162,15 +1162,16 @@ const docTemplate = `{
         "models.Post": {
             "type": "object",
             "required": [
-                "message",
-                "user_id"
+                "message"
             ],
             "properties": {
                 "avatar_id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "readOnly": true
                 },
                 "create_date": {
-                    "type": "string"
+                    "type": "string",
+                    "readOnly": true
                 },
                 "id": {
                     "type": "integer"
@@ -1185,13 +1186,15 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user_first_name": {
-                    "type": "string"
+                    "type": "string",
+                    "readOnly": true
                 },
                 "user_id": {
                     "type": "integer"
                 },
                 "user_last_name": {
-                    "type": "string"
+                    "type": "string",
+                    "readOnly": true
                 }
             }
         },
