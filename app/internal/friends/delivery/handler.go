@@ -22,6 +22,7 @@ type Delivery struct {
 // @Description  add friend
 // @Tags     friends
 // @Produce  application/json
+// @Param friend_id path int true "Friend ID"
 // @Success  201 "friend added"
 // @Failure 405 {object} echo.HTTPError "Method Not Allowed"
 // @Failure 400 {object} echo.HTTPError "bad request"
@@ -78,8 +79,7 @@ func (del *Delivery) AddFriend(c echo.Context) error {
 // @Description  delete friend
 // @Tags     friends
 // @Produce  application/json
-// @Param id_user path int true "User ID"
-// @Param id_friend path int true "Friend ID"
+// @Param friend_id path int true "Friend ID"
 // @Success  204 "friend deleted, body is empty"
 // @Failure 405 {object} echo.HTTPError "Method Not Allowed"
 // @Failure 400 {object} echo.HTTPError "bad request"
@@ -141,7 +141,7 @@ func isRequestValid(user interface{}) (bool, error) {
 // @Description  get user's friends
 // @Tags     friends
 // @Produce  application/json
-// @Param id path int true "User ID"
+// @Param user_id path int true "User ID"
 // @Success  200 {object} pkg.Response{body=[]models.User} "success get profile"
 // @Failure 405 {object} echo.HTTPError "Method Not Allowed"
 // @Failure 400 {object} echo.HTTPError "bad request"
