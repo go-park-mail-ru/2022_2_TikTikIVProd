@@ -1,2 +1,2 @@
 #!/bin/bash
-rm -rf *.png
+rm -rf images/*.png

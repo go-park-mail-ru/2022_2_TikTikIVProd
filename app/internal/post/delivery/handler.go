@@ -4,8 +4,8 @@ import (
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg"
 	"github.com/labstack/echo/v4"
-	"gopkg.in/go-playground/validator.v9"
 	"github.com/microcosm-cc/bluemonday"
+	"gopkg.in/go-playground/validator.v9"
 	"net/http"
 	"strconv"
 
@@ -94,6 +94,13 @@ func (delivery *delivery) CreatePost(c echo.Context) error {
 
 	requestSanitizePost(&post)
 
+	userId, ok := c.Get("user_id").(int)
+	if !ok {
+		c.Logger().Error(models.ErrInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
+	}
+
+	post.UserID = userId
 	err = delivery.pUsecase.CreatePost(&post)
 
 	if err != nil {
@@ -124,7 +131,7 @@ func requestSanitizePost(post *models.Post) {
 // @Failure 500 {object} echo.HTTPError "internal server error"
 // @Failure 401 {object} echo.HTTPError "no cookie"
 // @Failure 403 {object} echo.HTTPError "invalid csrf"
-// @Router   /post/update [post]
+// @Router   /post/edit [post]
 func (delivery *delivery) UpdatePost(c echo.Context) error {
 	var post models.Post
 	err := c.Bind(&post)
@@ -141,6 +148,13 @@ func (delivery *delivery) UpdatePost(c echo.Context) error {
 
 	requestSanitizePost(&post)
 
+	userId, ok := c.Get("user_id").(int)
+	if !ok {
+		c.Logger().Error(models.ErrInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
+	}
+
+	post.UserID = userId
 	err = delivery.pUsecase.UpdatePost(&post)
 
 	if err != nil {
@@ -166,12 +180,18 @@ func (delivery *delivery) UpdatePost(c echo.Context) error {
 func (delivery *delivery) DeletePost(c echo.Context) error {
 	idP, err := strconv.Atoi(c.Param("id"))
 
+	userId, ok := c.Get("user_id").(int)
+	if !ok {
+		c.Logger().Error(models.ErrInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
+	}
+
 	if err != nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusNotFound, "Post not found") //TODO переделать на ошибки в файле
 	}
 
-	err = delivery.pUsecase.DeletePost(idP)
+	err = delivery.pUsecase.DeletePost(idP, userId)
 
 	if err != nil {
 		c.Logger().Error(err)

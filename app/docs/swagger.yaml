@@ -11,8 +11,10 @@ definitions:
   models.Post:
     properties:
       avatar_id:
+        readOnly: true
         type: integer
       create_date:
+        readOnly: true
         type: string
       id:
         type: integer
@@ -23,14 +25,15 @@ definitions:
       message:
         type: string
       user_first_name:
+        readOnly: true
         type: string
       user_id:
         type: integer
       user_last_name:
+        readOnly: true
         type: string
     required:
     - message
-    - user_id
     type: object
   models.User:
     properties:
@@ -519,7 +522,7 @@ paths:
       summary: Create a post
       tags:
       - posts
-  /post/update:
+  /post/edit:
     post:
       consumes:
       - application/json

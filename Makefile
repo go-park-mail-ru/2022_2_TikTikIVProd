@@ -24,4 +24,10 @@ fill_tables:
 drop_tables:
 	psql postgresql://postgres:postgres@localhost:13080/postgres -f SQL/drop_all.sql
 
+fill_images:
+	./images/download.sh
+
+drop_images:
+	./images/delete.sh
+
 
