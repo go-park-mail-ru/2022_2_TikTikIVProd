@@ -12,13 +12,13 @@ type RepositoryI struct {
 	mock.Mock
 }
 
-// CreateCookie provides a mock function with given fields: c
-func (_m *RepositoryI) CreateCookie(c *models.Cookie) error {
-	ret := _m.Called(c)
+// CreateCookie provides a mock function with given fields: cookie
+func (_m *RepositoryI) CreateCookie(cookie *models.Cookie) error {
+	ret := _m.Called(cookie)
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(*models.Cookie) error); ok {
-		r0 = rf(c)
+		r0 = rf(cookie)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -40,17 +40,15 @@ func (_m *RepositoryI) DeleteCookie(value string) error {
 	return r0
 }
 
-// SelectCookie provides a mock function with given fields: value
-func (_m *RepositoryI) SelectCookie(value string) (*models.Cookie, error) {
+// GetCookie provides a mock function with given fields: value
+func (_m *RepositoryI) GetCookie(value string) (string, error) {
 	ret := _m.Called(value)
 
-	var r0 *models.Cookie
-	if rf, ok := ret.Get(0).(func(string) *models.Cookie); ok {
+	var r0 string
+	if rf, ok := ret.Get(0).(func(string) string); ok {
 		r0 = rf(value)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*models.Cookie)
-		}
+		r0 = ret.Get(0).(string)
 	}
 
 	var r1 error

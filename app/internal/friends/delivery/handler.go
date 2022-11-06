@@ -2,53 +2,56 @@ package delivery
 
 import (
 	"net/http"
+	"strconv"
+
 	"github.com/pkg/errors"
 
 	friendUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/usecase"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg"
 	"github.com/labstack/echo/v4"
 	"gopkg.in/go-playground/validator.v9"
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/middleware"
 )
 
-// type DeliveryI interface {
-// 	AddFriend(c echo.Context) error
-// 	DeleteFriend(c echo.Context) error
-// }
-
-type delivery struct {
-	uc friendUsecase.UseCaseI
+type Delivery struct {
+	FriendsUC friendUsecase.UseCaseI
 }
 
 // AddFriend godoc
 // @Summary      AddFriend
 // @Description  add friend
 // @Tags     friends
-// @Accept	 application/json
 // @Produce  application/json
-// @Param    friends body models.Friends true "friends info"
 // @Success  201 "friend added"
 // @Failure 405 {object} echo.HTTPError "Method Not Allowed"
 // @Failure 400 {object} echo.HTTPError "bad request"
 // @Failure 404 {object} echo.HTTPError "friend or user doesn't exist"
 // @Failure 500 {object} echo.HTTPError "internal server error"
 // @Failure 409 {object} echo.HTTPError "friend already exists"
-// @Router   /friends/add [post]
-func (del *delivery) AddFriend(c echo.Context) error {
-	c.Response().Header().Set(echo.HeaderAccessControlAllowMethods, echo.POST)
-
+// @Failure 401 {object} echo.HTTPError "no cookie"
+// @Failure 403 {object} echo.HTTPError "invalid csrf"
+// @Router   /friends/add/{friend_id} [post]
+func (del *Delivery) AddFriend(c echo.Context) error {
 	var friends models.Friends
 	err := c.Bind(&friends); if err != nil {
 		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusBadRequest, "bad request")
+		return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
 	}
 
 	if ok, err := isRequestValid(&friends); !ok {
 		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusBadRequest, "bad request")
+		return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
 	}
 
-	err = del.uc.AddFriend(friends)
+	userId, ok := c.Get("user_id").(int)
+	if !ok {
+		c.Logger().Error(models.ErrInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
+	}
+
+	friends.Id1 = userId
+
+	err = del.FriendsUC.AddFriend(friends)
 	if err != nil {
 		causeErr := errors.Cause(err)
 		switch {
@@ -63,7 +66,7 @@ func (del *delivery) AddFriend(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
 		default:
 			c.Logger().Error(err)
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, causeErr.Error())
 		}
 	}
 
@@ -82,22 +85,30 @@ func (del *delivery) AddFriend(c echo.Context) error {
 // @Failure 400 {object} echo.HTTPError "bad request"
 // @Failure 500 {object} echo.HTTPError "internal server error"
 // @Failure 404 {object} echo.HTTPError "friend/user/friendship doesn't exist"
-// @Router   /friends/delete/{id_user}/{id_friend} [delete]
-func (del *delivery) DeleteFriend(c echo.Context) error {
-	c.Response().Header().Set(echo.HeaderAccessControlAllowMethods, echo.DELETE)
-
+// @Failure 401 {object} echo.HTTPError "no cookie"
+// @Failure 403 {object} echo.HTTPError "invalid csrf"
+// @Router   /friends/delete/{friend_id} [delete]
+func (del *Delivery) DeleteFriend(c echo.Context) error {
 	var friends models.Friends
 	err := c.Bind(&friends); if err != nil {
 		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusBadRequest, "bad request")
+		return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
 	}
 
 	if ok, err := isRequestValid(&friends); !ok {
 		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusBadRequest, "bad request")
+		return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
 	}
 
-	err = del.uc.DeleteFriend(friends)
+	userId, ok := c.Get("user_id").(int)
+	if !ok {
+		c.Logger().Error(models.ErrInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
+	}
+
+	friends.Id1 = userId
+
+	err = del.FriendsUC.DeleteFriend(friends)
 	if err != nil {
 		causeErr := errors.Cause(err)
 		switch {
@@ -109,7 +120,7 @@ func (del *delivery) DeleteFriend(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
 		default:
 			c.Logger().Error(err)
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, causeErr.Error())
 		}
 	}
 
@@ -125,11 +136,54 @@ func isRequestValid(user interface{}) (bool, error) {
 	return true, nil
 }
 
-func NewDelivery(e *echo.Echo, uc friendUsecase.UseCaseI, authMid *middleware.Middleware) {
-	handler := &delivery{
-		uc: uc,
+// SelectFriends godoc
+// @Summary      SelectFriends
+// @Description  get user's friends
+// @Tags     friends
+// @Produce  application/json
+// @Param id path int true "User ID"
+// @Success  200 {object} pkg.Response{body=[]models.User} "success get profile"
+// @Failure 405 {object} echo.HTTPError "Method Not Allowed"
+// @Failure 400 {object} echo.HTTPError "bad request"
+// @Failure 404 {object} echo.HTTPError "user doesn't exist"
+// @Failure 401 {object} echo.HTTPError "no cookie"
+// @Failure 403 {object} echo.HTTPError "invalid csrf"
+// @Failure 500 {object} echo.HTTPError "internal server error"
+// @Router   /friends/{user_id} [get]
+func (del *Delivery) SelectFriends(c echo.Context) error {
+	id, err := strconv.Atoi(c.Param("user_id"))
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
 	}
 
-	e.POST("/friends/add", handler.AddFriend, authMid.Auth)
-	e.DELETE("/friends/delete/:id_user/:id_friend", handler.DeleteFriend, authMid.Auth)
+	friends, err := del.FriendsUC.SelectFriends(id)
+	if err != nil {
+		causeErr := errors.Cause(err)
+		switch {
+		case errors.Is(causeErr, models.ErrNotFound):
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusNotFound, models.ErrNotFound.Error())
+		case errors.Is(causeErr, models.ErrBadRequest):
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
+		default:
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusInternalServerError, causeErr.Error())
+		}
+	}
+
+	return c.JSON(http.StatusOK, pkg.Response{Body: friends})
 }
+
+
+func NewDelivery(e *echo.Echo, uc friendUsecase.UseCaseI) {
+	handler := &Delivery{
+		FriendsUC: uc,
+	}
+
+	e.POST("/friends/add/:friend_id", handler.AddFriend)
+	e.DELETE("/friends/delete/:friend_id", handler.DeleteFriend)
+	e.GET("/friends/:user_id", handler.SelectFriends)
+}
+

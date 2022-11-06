@@ -56,7 +56,7 @@ func (dbUsers *dataBase) SelectUserByEmail(email string) (*models.User, error) {
 	return &user, nil
 }
 
-func (dbUsers *dataBase) CreateUser(user *models.User) (error) {
+func (dbUsers *dataBase) CreateUser(user *models.User) error {
 	tx := dbUsers.db.Omit("avatar_img_id").Create(user)
 	if tx.Error != nil {
 		return errors.Wrap(tx.Error, "database error (table users)")
@@ -64,3 +64,13 @@ func (dbUsers *dataBase) CreateUser(user *models.User) (error) {
 
 	return nil
 }
+
+func (dbUsers *dataBase) UpdateUser(user models.User) error {
+	tx := dbUsers.db.Omit("id").Updates(user)
+	if tx.Error != nil {
+		return errors.Wrap(tx.Error, "database error (table users)")
+	}
+
+	return nil
+}
+

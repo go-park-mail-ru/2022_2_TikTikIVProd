@@ -11,26 +11,104 @@ import (
 	authDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/delivery"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/usecase/mocks"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
-
-	//"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
-type TestCase struct {
-	JsonUser string
+type TestCaseSignUp struct {
+	ArgData string
+	ExpectedResponse string
 	Error error
 	StatusCode int
 }
 
-func TestSignUp(t *testing.T) {
-	var mockUser models.User
+type TestCase struct {
+	ArgData string
+	Error error
+	StatusCode int
+}
 
+func TestDeliverySignUp(t *testing.T) {
+	var mockUser models.User
 	err := faker.FakeData(&mockUser)
 	assert.NoError(t, err)
 
+	var mockCookie models.Cookie
+	err = faker.FakeData(&mockCookie)
+	assert.NoError(t, err)
+
 	jsonUser, err := json.Marshal(mockUser)
+	assert.NoError(t, err)
+
+	mockUCase := new(mocks.UseCaseI)
+
+	mockUCase.On("SignUp", &mockUser).Return(&mockCookie, nil).Run(func(args mock.Arguments) {
+		arg := args.Get(0).(*models.User)
+		arg.Id = mockCookie.UserId
+	})
+
+	handler := authDelivery.Delivery{
+		AuthUC: mockUCase,
+	}
+
+	userResponse := mockUser
+	userResponse.Id = mockCookie.UserId
+	response := pkg.Response {
+		Body: userResponse,
+	}
+	jsonResponse, err := json.Marshal(response)
+	assert.NoError(t, err)
+
+	e := echo.New()
+
+	cases := map[string]TestCaseSignUp {
+		"success": {
+			ArgData:   string(jsonUser),
+			ExpectedResponse: string(jsonResponse) + "\n",
+			Error: nil,
+			StatusCode: http.StatusCreated,
+		},
+		"bad_request": {
+			ArgData:   "aaa",
+			Error: &echo.HTTPError{
+				Code: http.StatusBadRequest,
+				Message: models.ErrBadRequest.Error(),
+			},
+		},
+	}
+
+	for name, test := range cases {
+		t.Run(name, func(t *testing.T) {
+			req := httptest.NewRequest(echo.POST, "/signup", strings.NewReader(test.ArgData))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.SetPath("/signup")
+
+			err = handler.SignUp(c)
+			require.Equal(t, test.Error, err)
+
+			if err == nil {
+				assert.Equal(t, test.StatusCode, rec.Code)
+				assert.Equal(t, test.ExpectedResponse, rec.Body.String())
+			}
+		})
+	}
+
+	mockUCase.AssertExpectations(t)
+}
+
+func TestDeliverySignIn(t *testing.T) {
+	var mockUserSignIn models.UserSignIn
+
+	err := faker.FakeData(&mockUserSignIn)
+	assert.NoError(t, err)
+
+	jsonUser, err := json.Marshal(mockUserSignIn)
 	assert.NoError(t, err)
 
 	mockUCase := new(mocks.UseCaseI)
@@ -40,7 +118,12 @@ func TestSignUp(t *testing.T) {
 	err = faker.FakeData(&mockCookie)
 	assert.NoError(t, err)
 
-	mockUCase.On("SignUp", &mockUser).Return(&mockCookie, nil)
+	var mockUser models.User
+
+	err = faker.FakeData(&mockUser)
+	assert.NoError(t, err)
+
+	mockUCase.On("SignIn", mockUserSignIn).Return(&mockUser, &mockCookie, nil)
 
 	handler := authDelivery.Delivery{
 		AuthUC: mockUCase,
@@ -48,241 +131,219 @@ func TestSignUp(t *testing.T) {
 
 	e := echo.New()
 
-	cases := []TestCase{
-		{
-			JsonUser:   string(jsonUser),
+	cases := map[string]TestCase {
+		"success": {
+			ArgData:   string(jsonUser),
 			Error: nil,
-			StatusCode: http.StatusCreated,
+			StatusCode: http.StatusOK,
 		},
-		{
-			JsonUser:   "aaa",
+		"bad_request": {
+			ArgData:   "aaa",
 			Error: &echo.HTTPError{
 				Code: http.StatusBadRequest,
-				Message: "bad request",
+				Message: models.ErrBadRequest.Error(),
 			},
-			StatusCode: http.StatusBadRequest,
 		},
 	}
-	for _, item := range cases {
-		req := httptest.NewRequest(echo.POST, "/signup", strings.NewReader(item.JsonUser))
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
-		c.SetPath("/signup")
+	for name, test := range cases {
+		t.Run(name, func(t *testing.T) {
+			req := httptest.NewRequest(echo.POST, "/signin", strings.NewReader(test.ArgData))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
-		err = handler.SignUp(c)
-		//e.DefaultHTTPErrorHandler)
-		require.Equal(t, item.Error, err)
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.SetPath("/signin")
 
-		// if err == nil {
+			err = handler.SignIn(c)
+			require.Equal(t, test.Error, err)
 
-		// }
+			if err == nil {
+				assert.Equal(t, test.StatusCode, rec.Code)
+			}
+		})
+	}
 
-		assert.Equal(t, item.StatusCode, rec.Code)
-		mockUCase.AssertExpectations(t)
-	}	
+	mockUCase.AssertExpectations(t)
 }
 
+func TestDeliveryLogout(t *testing.T) {
+	var valueCookie string
+	err := faker.FakeData(&valueCookie)
+	assert.NoError(t, err)
 
-//assert.Equal(t, userJSON, rec.Body.String())
+	mockUCase := new(mocks.UseCaseI)
 
+	mockUCase.On("DeleteCookie", valueCookie).Return(nil)
 
+	handler := authDelivery.Delivery{
+		AuthUC: mockUCase,
+	}
 
+	cookie := &http.Cookie{
+		Name:     "session_token",
+		Value:    valueCookie,
+		HttpOnly: true,
+	}
 
+	e := echo.New()
 
+	cases := map[string]TestCase {
+		"success": {
+			Error: nil,
+			StatusCode: http.StatusNoContent,
+		},
+		"unauthorized": {
+			Error: &echo.HTTPError{
+				Code: http.StatusUnauthorized,
+				Message: http.ErrNoCookie.Error(),
+			},
+		},
+	}
 
+	for name, test := range cases {
+		t.Run(name, func(t *testing.T) {
+			req := httptest.NewRequest(echo.POST, "/logout", strings.NewReader(test.ArgData))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
+			if name == "success" {
+				req.AddCookie(cookie)
+			}
+			
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.SetPath("/logout")
 
+			err := handler.Logout(c)
+			require.Equal(t, test.Error, err)
 
+			if err == nil {
+				assert.Equal(t, test.StatusCode, rec.Code)
+			}
+		})
+	}
 
+	mockUCase.AssertExpectations(t)
+}
 
+func TestDeliveryAuth(t *testing.T) {
+	var valueCookie string
+	err := faker.FakeData(&valueCookie)
+	assert.NoError(t, err)
 
-// func TestSignUp(t *testing.T) {
-// 	var mockUser models.User
+	var user models.User
+	err = faker.FakeData(&user)
+	assert.NoError(t, err)
 
-// 	err := faker.FakeData(&mockUser)
-// 	assert.NoError(t, err)
+	mockUCase := new(mocks.UseCaseI)
 
-// 	jsonUser, err := json.Marshal(mockUser)
-// 	assert.NoError(t, err)
+	mockUCase.On("Auth", valueCookie).Return(&user, nil)
 
-// 	mockUCase := new(mocks.UseCaseI)
+	handler := authDelivery.Delivery{
+		AuthUC: mockUCase,
+	}
 
-// 	var mockCookie models.Cookie
+	cookie := &http.Cookie{
+		Name:     "session_token",
+		Value:    valueCookie,
+		HttpOnly: true,
+	}
 
-// 	err = faker.FakeData(&mockCookie)
-// 	assert.NoError(t, err)
+	e := echo.New()
 
-// 	mockUCase.On("SignUp", &mockUser).Return(&mockCookie, nil)
+	cases := map[string]TestCase {
+		"success": {
+			Error: nil,
+			StatusCode: http.StatusOK,
+		},
+		"unauthorized": {
+			Error: &echo.HTTPError{
+				Code: http.StatusUnauthorized,
+				Message: http.ErrNoCookie.Error(),
+			},
+		},
+	}
 
-// 	handler := authDelivery.Delivery{
-// 		AuthUC: mockUCase,
-// 	}
+	for name, test := range cases {
+		t.Run(name, func(t *testing.T) {
+			req := httptest.NewRequest(echo.POST, "/auth", strings.NewReader(test.ArgData))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
-// 	e := echo.New()
+			if name == "success" {
+				req.AddCookie(cookie)
+			}
+			
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.SetPath("/auth")
 
-// 	cases := map[string]TestCase {
-// 		"success": {
-// 			JsonUser:   string(jsonUser),
-// 			Error: nil,
-// 			StatusCode: http.StatusCreated,
-// 		},
-// 		"bad_request": {
-// 			JsonUser:   "aaa",
-// 			Error: &echo.HTTPError{
-// 				Code: http.StatusBadRequest,
-// 				Message: "bad request",
-// 			},
-// 			StatusCode: http.StatusBadRequest,
-// 		},
-// 	}
+			err = handler.Auth(c)
+			require.Equal(t, test.Error, err)
 
-// 	for name, test := range cases {
-// 		t.Run(name, func(t *testing.T) {
-// 			req := httptest.NewRequest(echo.POST, "/signup", strings.NewReader(test.JsonUser))
-// 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			if err == nil {
+				assert.Equal(t, test.StatusCode, rec.Code)
+			}
+		})
+	}
 
-// 			rec := httptest.NewRecorder()
-// 			c := e.NewContext(req, rec)
-// 			c.SetPath("/signup")
+	mockUCase.AssertExpectations(t)
+}
 
-// 			err = handler.SignUp(c)
-// 			require.Equal(t, test.Error, err)
+func TestDeliveryCreateCSRF(t *testing.T) {
+	var valueCookie string
+	err := faker.FakeData(&valueCookie)
+	assert.NoError(t, err)
 
-// 			assert.Equal(t, test.StatusCode, rec.Code)
-// 			mockUCase.AssertExpectations(t)
-// 		})
-// 	}	
+	mockUCase := new(mocks.UseCaseI)
 
+	handler := authDelivery.Delivery{
+		AuthUC: mockUCase,
+	}
 
+	cookie := &http.Cookie{
+		Name:     "session_token",
+		Value:    valueCookie,
+		HttpOnly: true,
+	}
 
+	e := echo.New()
 
+	cases := map[string]TestCase {
+		"success": {
+			Error: nil,
+			StatusCode: http.StatusNoContent,
+		},
+		"unauthorized": {
+			Error: &echo.HTTPError{
+				Code: http.StatusUnauthorized,
+				Message: http.ErrNoCookie.Error(),
+			},
+		},
+	}
 
+	for name, test := range cases {
+		t.Run(name, func(t *testing.T) {
+			req := httptest.NewRequest(echo.POST, "/create_csrf", strings.NewReader(test.ArgData))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
+			if name == "success" {
+				req.AddCookie(cookie)
+			}
+			
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.SetPath("/create_csrf")
 
+			err := handler.CreateCSRF(c)
+			require.Equal(t, test.Error, err)
 
+			if err == nil {
+				assert.Equal(t, test.StatusCode, rec.Code)
+				assert.NotEqual(t, c.Response().Header().Get(echo.HeaderXCSRFToken), "")
+			}
+		})
+	}
 
-
-// import (
-// 	"net/http"
-// 	"net/http/httptest"
-// 	"strings"
-// 	"testing"
-
-// 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository/localstorage"
-// 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/usecase"
-// )
-
-// type TestCase struct {
-// 	User       string
-// 	Method string
-// 	StatusCode int
-// }
-
-// func TestDelivery_signUp(t *testing.T) {
-// 	cases := []TestCase{
-// 		{
-// 			User:   `{"first_name":"Nastya", "last_name":"Kuznetsova", "nick_name":"kuzkus", "email":"aaa@gmail.com", "password":"password1"}`,
-// 			Method: "POST",
-// 			StatusCode: http.StatusCreated,
-// 		},
-// 		{
-// 			User:       `{""}`,
-// 			Method: "POST",
-// 			StatusCode: http.StatusBadRequest,
-// 		},
-// 		{
-// 			User:       `{""}`,
-// 			Method: "GET",
-// 			StatusCode: http.StatusMethodNotAllowed,
-// 		},
-// 	}
-// 	for caseNum, item := range cases {
-// 		url := "/signup"
-// 		req := httptest.NewRequest(item.Method, url, strings.NewReader(item.User))
-// 		w := httptest.NewRecorder()
-
-// 		usersLocalStorage := localstorage.New()
-// 		usersUC := usecase.New(usersLocalStorage)
-// 		usersDeliver := New(usersUC)
-// 		usersDeliver.SignUp(w, req)
-
-// 		if w.Code != item.StatusCode {
-// 			t.Errorf("[%d] wrong StatusCode: got %d, expected %d",
-// 				caseNum, w.Code, item.StatusCode)
-// 		}
-// 	}
-// }
-
-// func TestDelivery_signInFailure(t *testing.T) {
-// 	cases := []TestCase{
-// 		{
-// 			User:       `{""}`,
-// 			Method: "POST",
-// 			StatusCode: http.StatusBadRequest,
-// 		},
-// 		{
-// 			User:       `{""}`,
-// 			Method: "GET",
-// 			StatusCode: http.StatusMethodNotAllowed,
-// 		},
-// 		{
-// 			User:       `{"email":"aaa@gmail.com", "password":"password1"}`,
-// 			Method: "POST",
-// 			StatusCode: http.StatusNotFound,
-// 		},
-// 	}
-// 	for caseNum, item := range cases {
-// 		url := "http://89.208.197.127:8080/signin"
-// 		req := httptest.NewRequest(item.Method, url, strings.NewReader(item.User))
-// 		w := httptest.NewRecorder()
-
-// 		usersLocalStorage := localstorage.New()
-// 		usersUC := usecase.New(usersLocalStorage)
-// 		usersDeliver := New(usersUC)
-// 		usersDeliver.SignIn(w, req)
-
-// 		if w.Code != item.StatusCode {
-// 			t.Errorf("[%d] wrong StatusCode: got %d, expected %d",
-// 				caseNum, w.Code, item.StatusCode)
-// 		}
-// 	}
-// }
-
-// func TestDelivery_LogoutFailure(t *testing.T) {
-// 	cases := []TestCase{
-// 		{
-// 			User:       `{""}`,
-// 			Method: "POST",
-// 			StatusCode: http.StatusBadRequest,
-// 		},
-// 		{
-// 			User:       `{""}`,
-// 			Method: "GET",
-// 			StatusCode: http.StatusMethodNotAllowed,
-// 		},
-// 		{
-// 			User:       `{"email":"aaa@gmail.com", "password":"password1"}`,
-// 			Method: "POST",
-// 			StatusCode: http.StatusNotFound,
-// 		},
-// 	}
-// 	for caseNum, item := range cases {
-// 		url := "http://89.208.197.127:8080/signin"
-// 		req := httptest.NewRequest(item.Method, url, strings.NewReader(item.User))
-// 		w := httptest.NewRecorder()
-
-// 		usersLocalStorage := localstorage.New()
-// 		usersUC := usecase.New(usersLocalStorage)
-// 		usersDeliver := New(usersUC)
-// 		usersDeliver.SignIn(w, req)
-
-// 		if w.Code != item.StatusCode {
-// 			t.Errorf("[%d] wrong StatusCode: got %d, expected %d",
-// 				caseNum, w.Code, item.StatusCode)
-// 		}
-// 	}
-// }
-
+	mockUCase.AssertExpectations(t)
+}
 

@@ -1,124 +1,218 @@
-package delivery
+package delivery_test
 
-// import (
-// 	"net/http"
-// 	"net/http/httptest"
-// 	"strings"
-// 	"testing"
+import (
+	"net/http"
+	"net/http/httptest"
+	"strconv"
+	"strings"
+	"testing"
 
-// 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository/localstorage"
-// 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/usecase"
-// )
+	"github.com/bxcodec/faker"
+	friendsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/delivery"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/usecase/mocks"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
+	"github.com/labstack/echo/v4"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
 
-// type TestCase struct {
-// 	User       string
-// 	Method string
-// 	StatusCode int
-// }
+type TestCase struct {
+	ArgData models.Friends
+	Error error
+	StatusCode int
+}
 
-// func TestDelivery_signUp(t *testing.T) {
-// 	cases := []TestCase{
-// 		{
-// 			User:   `{"first_name":"Nastya", "last_name":"Kuznetsova", "nick_name":"kuzkus", "email":"aaa@gmail.com", "password":"password1"}`,
-// 			Method: "POST",
-// 			StatusCode: http.StatusCreated,
-// 		},
-// 		{
-// 			User:       `{""}`,
-// 			Method: "POST",
-// 			StatusCode: http.StatusBadRequest,
-// 		},
-// 		{
-// 			User:       `{""}`,
-// 			Method: "GET",
-// 			StatusCode: http.StatusMethodNotAllowed,
-// 		},
-// 	}
-// 	for caseNum, item := range cases {
-// 		url := "http://89.208.197.127:8080/signup"
-// 		req := httptest.NewRequest(item.Method, url, strings.NewReader(item.User))
-// 		w := httptest.NewRecorder()
+type TestCaseSelectFriends struct {
+	ArgData string
+	Error error
+	StatusCode int
+}
 
-// 		usersLocalStorage := localstorage.New()
-// 		usersUC := usecase.New(usersLocalStorage)
-// 		usersDeliver := New(usersUC)
-// 		usersDeliver.SignUp(w, req)
+func TestDeliveryAddFriend(t *testing.T) {
+	mockFriendsSuccess := models.Friends {
+		Id1: 1,
+		Id2: 2,
+	}
+	mockFriendsBadRequest := models.Friends {
+		Id1: 1,
+		Id2: 0,
+	}
 
-// 		if w.Code != item.StatusCode {
-// 			t.Errorf("[%d] wrong StatusCode: got %d, expected %d",
-// 				caseNum, w.Code, item.StatusCode)
-// 		}
-// 	}
-// }
+	mockUCase := new(mocks.UseCaseI)
 
-// func TestDelivery_signInFailure(t *testing.T) {
-// 	cases := []TestCase{
-// 		{
-// 			User:       `{""}`,
-// 			Method: "POST",
-// 			StatusCode: http.StatusBadRequest,
-// 		},
-// 		{
-// 			User:       `{""}`,
-// 			Method: "GET",
-// 			StatusCode: http.StatusMethodNotAllowed,
-// 		},
-// 		{
-// 			User:       `{"email":"aaa@gmail.com", "password":"password1"}`,
-// 			Method: "POST",
-// 			StatusCode: http.StatusNotFound,
-// 		},
-// 	}
-// 	for caseNum, item := range cases {
-// 		url := "http://89.208.197.127:8080/signin"
-// 		req := httptest.NewRequest(item.Method, url, strings.NewReader(item.User))
-// 		w := httptest.NewRecorder()
+	mockUCase.On("AddFriend", mockFriendsSuccess).Return(nil)
 
-// 		usersLocalStorage := localstorage.New()
-// 		usersUC := usecase.New(usersLocalStorage)
-// 		usersDeliver := New(usersUC)
-// 		usersDeliver.SignIn(w, req)
+	handler := friendsDelivery.Delivery{
+		FriendsUC: mockUCase,
+	}
 
-// 		if w.Code != item.StatusCode {
-// 			t.Errorf("[%d] wrong StatusCode: got %d, expected %d",
-// 				caseNum, w.Code, item.StatusCode)
-// 		}
-// 	}
-// }
+	e := echo.New()
 
-// func TestDelivery_LogoutFailure(t *testing.T) {
-// 	cases := []TestCase{
-// 		{
-// 			User:       `{""}`,
-// 			Method: "POST",
-// 			StatusCode: http.StatusBadRequest,
-// 		},
-// 		{
-// 			User:       `{""}`,
-// 			Method: "GET",
-// 			StatusCode: http.StatusMethodNotAllowed,
-// 		},
-// 		{
-// 			User:       `{"email":"aaa@gmail.com", "password":"password1"}`,
-// 			Method: "POST",
-// 			StatusCode: http.StatusNotFound,
-// 		},
-// 	}
-// 	for caseNum, item := range cases {
-// 		url := "http://89.208.197.127:8080/signin"
-// 		req := httptest.NewRequest(item.Method, url, strings.NewReader(item.User))
-// 		w := httptest.NewRecorder()
+	cases := map[string]TestCase {
+		"success": {
+			ArgData:   mockFriendsSuccess,
+			Error: nil,
+			StatusCode: http.StatusCreated,
+		},
+		"bad_request": {
+			ArgData:   mockFriendsBadRequest,
+			Error: &echo.HTTPError{
+				Code: http.StatusBadRequest,
+				Message: "bad request",
+			},
+		},
+	}
 
-// 		usersLocalStorage := localstorage.New()
-// 		usersUC := usecase.New(usersLocalStorage)
-// 		usersDeliver := New(usersUC)
-// 		usersDeliver.SignIn(w, req)
+	for name, test := range cases {
+		t.Run(name, func(t *testing.T) {
+			req := httptest.NewRequest(echo.POST, "/friends/add", strings.NewReader(""))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
-// 		if w.Code != item.StatusCode {
-// 			t.Errorf("[%d] wrong StatusCode: got %d, expected %d",
-// 				caseNum, w.Code, item.StatusCode)
-// 		}
-// 	}
-// }
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.SetPath("/friends/add/:friend_id")
+			c.SetParamNames("friend_id")
+			c.SetParamValues(strconv.Itoa(test.ArgData.Id2))
+			c.Set("user_id", test.ArgData.Id1)
 
+			err := handler.AddFriend(c)
+			require.Equal(t, test.Error, err)
+
+			if err == nil {
+				assert.Equal(t, test.StatusCode, rec.Code)
+			}
+		})
+	}
+	mockUCase.AssertExpectations(t)
+}
+
+func TestDeliveryDeleteFriend(t *testing.T) {
+	mockFriendsSuccess := models.Friends {
+		Id1: 1,
+		Id2: 2,
+	}
+
+	mockFriendsBadRequest := models.Friends {
+		Id1: 1,
+		Id2: 0,
+	}
+
+	mockFriendsNotFound := models.Friends {
+		Id1: 100,
+		Id2: 101,
+	}
+
+	mockUCase := new(mocks.UseCaseI)
+
+	mockUCase.On("DeleteFriend", mockFriendsSuccess).Return(nil)
+	mockUCase.On("DeleteFriend", mockFriendsNotFound).Return(models.ErrNotFound)
+
+	handler := friendsDelivery.Delivery{
+		FriendsUC: mockUCase,
+	}
+
+	e := echo.New()
+
+	cases := map[string]TestCase {
+		"success": {
+			ArgData: mockFriendsSuccess,
+			Error: nil,
+			StatusCode: http.StatusNoContent,
+		},
+		"bad_request": {
+			ArgData: mockFriendsBadRequest,
+			Error: &echo.HTTPError{
+				Code: http.StatusBadRequest,
+				Message: models.ErrBadRequest.Error(),
+			},
+		},
+		"not_found": {
+			ArgData: mockFriendsNotFound,
+			Error: &echo.HTTPError{
+				Code: http.StatusNotFound,
+				Message: models.ErrNotFound.Error(),
+			},
+		},
+	}
+
+	for name, test := range cases {
+		t.Run(name, func(t *testing.T) {
+			req := httptest.NewRequest(echo.POST, "/friends/delete/:friend_id", strings.NewReader(""))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.SetPath("/friends/delete/:friend_id")
+			c.SetParamNames("friend_id")
+			c.SetParamValues(strconv.Itoa(test.ArgData.Id2))
+			c.Set("user_id", test.ArgData.Id1)
+
+			err := handler.DeleteFriend(c)
+			require.Equal(t, test.Error, err)
+
+			if err == nil {
+				assert.Equal(t, test.StatusCode, rec.Code)
+			}
+		})
+	}
+
+	mockUCase.AssertExpectations(t)
+}
+
+
+func TestDeliverySelectFriends(t *testing.T) {
+	var friends []models.User
+	err := faker.FakeData(&friends)
+	assert.NoError(t, err)
+
+	userIdSuccess := 1
+	userIdBadRequest := "hgcv"
+
+	mockUCase := new(mocks.UseCaseI)
+
+	mockUCase.On("SelectFriends", userIdSuccess).Return(friends, nil)
+
+	handler := friendsDelivery.Delivery{
+		FriendsUC: mockUCase,
+	}
+
+	e := echo.New()
+
+	cases := map[string]TestCaseSelectFriends {
+		"success": {
+			ArgData: strconv.Itoa(userIdSuccess),
+			Error: nil,
+			StatusCode: http.StatusOK,
+		},
+		"bad_request": {
+			ArgData: userIdBadRequest,
+			Error: &echo.HTTPError{
+				Code: http.StatusBadRequest,
+				Message: models.ErrBadRequest.Error(),
+			},
+		},
+	}
+
+	for name, test := range cases {
+		t.Run(name, func(t *testing.T) {
+			req := httptest.NewRequest(echo.POST, "/friends/:user_id", strings.NewReader(""))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.SetPath("/friends/:user_id")
+			c.SetParamNames("user_id")
+			c.SetParamValues(test.ArgData)
+
+			err := handler.SelectFriends(c)
+			require.Equal(t, test.Error, err)
+
+			if err == nil {
+				assert.Equal(t, test.StatusCode, rec.Code)
+			}
+		})
+	}
+
+	mockUCase.AssertExpectations(t)
+}
 

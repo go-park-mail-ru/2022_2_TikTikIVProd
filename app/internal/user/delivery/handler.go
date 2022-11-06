@@ -9,16 +9,13 @@ import (
 	userUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/usecase"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg"
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/middleware"
 	"github.com/labstack/echo/v4"
+	"github.com/microcosm-cc/bluemonday"
+	"gopkg.in/go-playground/validator.v9"
 )
 
-// type DeliveryI interface {
-// 	GetProfile(c echo.Context) error
-// }
-
-type delivery struct {
-	uc userUsecase.UseCaseI
+type Delivery struct {
+	UserUC userUsecase.UseCaseI
 }
 
 // GetProfile godoc
@@ -27,40 +24,111 @@ type delivery struct {
 // @Tags     users
 // @Produce  application/json
 // @Param id path int true "User ID"
-// @Success  200 {object} pkg.Response{body=models.User} "success"
+// @Success  200 {object} pkg.Response{body=models.User} "success get profile"
 // @Failure 405 {object} echo.HTTPError "Method Not Allowed"
 // @Failure 400 {object} echo.HTTPError "bad request"
 // @Failure 500 {object} echo.HTTPError "internal server error"
 // @Failure 404 {object} echo.HTTPError "can't find user with such id"
+// @Failure 401 {object} echo.HTTPError "no cookie"
+// @Failure 403 {object} echo.HTTPError "invalid csrf"
 // @Router   /users/{id} [get]
-func (del *delivery) GetProfile(c echo.Context) error {
-	c.Response().Header().Set(echo.HeaderAccessControlAllowMethods, echo.GET)
-	// c.Response().Header().Set("Access-Control-Allow-Credentials", "true")
-
-	idStr := c.Param("id")
-	id, err := strconv.Atoi(idStr)
+func (del *Delivery) GetProfile(c echo.Context) error {
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusBadRequest, "bad request")
+		return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
 	}
-	user, err := del.uc.SelectUserById(id)
+	user, err := del.UserUC.SelectUserById(id)
 	if err != nil {
+		causeErr := errors.Cause(err)
 		switch {
-		case errors.Is(errors.Cause(err), models.ErrNotFound):
+		case errors.Is(causeErr, models.ErrNotFound):
 			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusNotFound, models.ErrNotFound.Error())
 		default:
 			c.Logger().Error(err)
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, causeErr.Error())
 		}
 	}
 	return c.JSON(http.StatusOK, pkg.Response{Body: user})
 }
 
-func NewDelivery(e *echo.Echo, uc userUsecase.UseCaseI, authMid *middleware.Middleware) {
-	handler := &delivery{
-		uc: uc,
+// UpdateUser godoc
+// @Summary      UpdateUser
+// @Description  update user's profile
+// @Tags     users
+// @Accept	 application/json
+// @Produce  application/json
+// @Param user body models.User true "user data"
+// @Success  204 "success update"
+// @Failure 405 {object} echo.HTTPError "Method Not Allowed"
+// @Failure 400 {object} echo.HTTPError "bad request"
+// @Failure 500 {object} echo.HTTPError "internal server error"
+// @Failure 404 {object} echo.HTTPError "can't find user with such id"
+// @Failure 401 {object} echo.HTTPError "no cookie"
+// @Failure 403 {object} echo.HTTPError "invalid csrf"
+// @Router   /users/update [put]
+func (del *Delivery) UpdateUser(c echo.Context) error {
+	var user models.User
+	err := c.Bind(&user); if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
+	}
+	
+	if ok, err := isRequestValid(&user); !ok {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
 	}
 
-	e.GET("/users/:id", handler.GetProfile, authMid.Auth)
+	requestSanitizeUpdateUser(&user)
+
+	userId, ok := c.Get("user_id").(int)
+	if !ok {
+		c.Logger().Error(models.ErrInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
+	}
+
+	user.Id = userId
+	
+	err = del.UserUC.UpdateUser(user)
+	if err != nil {
+		causeErr := errors.Cause(err)
+		switch {
+		case errors.Is(causeErr, models.ErrNotFound):
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusNotFound, models.ErrNotFound.Error())
+		default:
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusInternalServerError, causeErr.Error())
+		}
+	}
+	return c.NoContent(http.StatusNoContent)
+}
+
+func isRequestValid(user interface{}) (bool, error) {
+	validate := validator.New()
+	err := validate.Struct(user)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func requestSanitizeUpdateUser(user *models.User) {
+	sanitizer := bluemonday.UGCPolicy()
+
+	user.FirstName = sanitizer.Sanitize(user.FirstName)
+	user.LastName = sanitizer.Sanitize(user.LastName)
+	user.NickName = sanitizer.Sanitize(user.NickName)
+	user.Email = sanitizer.Sanitize(user.Email)
+	user.Password = sanitizer.Sanitize(user.Password)
+}
+
+func NewDelivery(e *echo.Echo, uc userUsecase.UseCaseI) {
+	handler := &Delivery{
+		UserUC: uc,
+	}
+
+	e.GET("/users/:id", handler.GetProfile)
+	e.PUT("/users/update", handler.UpdateUser)
 }

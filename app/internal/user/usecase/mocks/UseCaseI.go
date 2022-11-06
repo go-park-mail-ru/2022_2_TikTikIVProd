@@ -35,6 +35,57 @@ func (_m *UseCaseI) SelectUserById(id int) (*models.User, error) {
 	return r0, r1
 }
 
+// SignIn provides a mock function with given fields: user
+func (_m *UseCaseI) SignIn(user models.UserSignIn) (*models.User, error) {
+	ret := _m.Called(user)
+
+	var r0 *models.User
+	if rf, ok := ret.Get(0).(func(models.UserSignIn) *models.User); ok {
+		r0 = rf(user)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.User)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(models.UserSignIn) error); ok {
+		r1 = rf(user)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// SignUp provides a mock function with given fields: user
+func (_m *UseCaseI) SignUp(user *models.User) error {
+	ret := _m.Called(user)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*models.User) error); ok {
+		r0 = rf(user)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// UpdateUser provides a mock function with given fields: user
+func (_m *UseCaseI) UpdateUser(user models.User) error {
+	ret := _m.Called(user)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(models.User) error); ok {
+		r0 = rf(user)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 type mockConstructorTestingTNewUseCaseI interface {
 	mock.TestingT
 	Cleanup(func())

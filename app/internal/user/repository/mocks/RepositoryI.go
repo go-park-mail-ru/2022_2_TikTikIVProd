@@ -95,6 +95,20 @@ func (_m *RepositoryI) SelectUserByNickName(name string) (*models.User, error) {
 	return r0, r1
 }
 
+// UpdateUser provides a mock function with given fields: user
+func (_m *RepositoryI) UpdateUser(user models.User) error {
+	ret := _m.Called(user)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(models.User) error); ok {
+		r0 = rf(user)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 type mockConstructorTestingTNewRepositoryI interface {
 	mock.TestingT
 	Cleanup(func())

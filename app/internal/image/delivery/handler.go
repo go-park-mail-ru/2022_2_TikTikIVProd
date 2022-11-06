@@ -4,7 +4,6 @@ import (
 	imgUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/usecase"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg"
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/middleware"
 	"github.com/labstack/echo/v4"
 	"io"
 	"net/http"
@@ -29,6 +28,8 @@ type delivery struct {
 // @Produce  image/png
 // @Success  200 "success get image"
 // @Failure 405 {object} echo.HTTPError "invalid http method"
+// @Failure 401 {object} echo.HTTPError "no cookie"
+// @Failure 403 {object} echo.HTTPError "invalid csrf"
 // @Failure 500 {object} echo.HTTPError "internal server error"
 // @Router   /image/{id} [get]
 func (delivery *delivery) GetImageByID(c echo.Context) error {
@@ -64,6 +65,8 @@ func (delivery *delivery) GetImageByID(c echo.Context) error {
 // @Produce  application/json
 // @Success  200 "success upload image"
 // @Failure 405 {object} echo.HTTPError "invalid http method"
+// @Failure 401 {object} echo.HTTPError "no cookie"
+// @Failure 403 {object} echo.HTTPError "invalid csrf"
 // @Failure 500 {object} echo.HTTPError "internal server error"
 // @Router   /image/upload [post]
 func (delivery *delivery) UploadImage(c echo.Context) error {
@@ -101,11 +104,11 @@ func (delivery *delivery) UploadImage(c echo.Context) error {
 	return c.JSON(http.StatusOK, pkg.Response{Body: image})
 }
 
-func NewDelivery(e *echo.Echo, iu imgUsecase.ImageUseCaseI, authMid *middleware.Middleware) {
+func NewDelivery(e *echo.Echo, iu imgUsecase.ImageUseCaseI) {
 	handler := &delivery{
 		imgUsecase: iu,
 	}
 
-	e.POST("/image/upload", handler.UploadImage, authMid.Auth)
-	e.GET("/image/:id", handler.GetImageByID, authMid.Auth)
+	e.POST("/image/upload", handler.UploadImage)
+	e.GET("/image/:id", handler.GetImageByID)
 }
