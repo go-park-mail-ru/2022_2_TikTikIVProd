@@ -1,24 +1,17 @@
 package main
 
 import (
-	"github.com/labstack/echo/v4"
-	echoMiddleware "github.com/labstack/echo/v4/middleware"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-	"github.com/labstack/gommon/log"
 	"github.com/go-redis/redis"
-
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
-	"github.com/sirupsen/logrus"
+	"github.com/labstack/gommon/log"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/cmd/server"
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/middleware"
+	_authDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/delivery"
 	authRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/repository/redis"
 	authUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/usecase"
-	_authDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/delivery"
 	_friendsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/delivery"
 	friendsRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/repository/postgres"
 	friendsUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/usecase"
@@ -32,7 +25,6 @@ import (
 	_usersDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/delivery"
 	usersRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository/postgres"
 	usersUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/usecase"
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg/logger"
 )
 
 // @title WS Swagger API
@@ -52,7 +44,7 @@ func main() {
 	}
 
 	redisClient := redis.NewClient(&redis.Options{
-		Addr:     "redis:6379",
+		Addr:       "redis:6379",
 		MaxRetries: 10,
 	})
 
@@ -77,7 +69,7 @@ func main() {
 	e := echo.New()
 
 	e.Logger.SetHeader(`time=${time_rfc3339} level=${level} prefix=${prefix} ` +
-					   `file=${short_file} line=${line} message:`)
+		`file=${short_file} line=${line} message:`)
 	e.Logger.SetLevel(log.INFO)
 
 	e.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
@@ -85,7 +77,7 @@ func main() {
 		AllowHeaders:     []string{"*"},
 		AllowCredentials: true,
 	}))
-	
+
 	e.Use(echoMiddleware.LoggerWithConfig(echoMiddleware.LoggerConfig{
 		Format: `time=${time_custom} remote_ip=${remote_ip} ` +
 			`host=${host} method=${method} uri=${uri} user_agent=${user_agent} ` +
@@ -111,4 +103,3 @@ func main() {
 		e.Logger.Fatal(err)
 	}
 }
-
