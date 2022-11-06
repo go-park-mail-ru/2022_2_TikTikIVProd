@@ -1,16 +1,12 @@
 package main
 
 import (
-<<<<<<< HEAD
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"github.com/labstack/gommon/log"
 	"github.com/go-redis/redis"
-=======
-	"log"
->>>>>>> go_to_echo
 
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
@@ -19,13 +15,8 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/cmd/server"
-<<<<<<< HEAD
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/middleware"
 	authRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/repository/redis"
-=======
-	_authDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/delivery"
-	authRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/repository/postgres"
->>>>>>> go_to_echo
 	authUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/usecase"
 	_authDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/delivery"
 	_friendsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/delivery"
