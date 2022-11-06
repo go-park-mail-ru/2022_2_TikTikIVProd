@@ -49,7 +49,7 @@
                         }
                     },
                     "405": {
-                        "description": "invalid http method",
+                        "description": "Method Not Allowed",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
                         }
@@ -151,7 +151,7 @@
                         }
                     },
                     "405": {
-                        "description": "invalid http method",
+                        "description": "Method Not Allowed",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
                         }
@@ -214,7 +214,7 @@
                         }
                     },
                     "405": {
-                        "description": "invalid http method",
+                        "description": "Method Not Allowed",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
                         }
@@ -334,7 +334,7 @@
                         }
                     },
                     "405": {
-                        "description": "invalid http method",
+                        "description": "Method Not Allowed",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
                         }
@@ -612,7 +612,7 @@
                         }
                     },
                     "405": {
-                        "description": "invalid http method",
+                        "description": "Method Not Allowed",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
                         }
@@ -676,7 +676,7 @@
                         }
                     },
                     "405": {
-                        "description": "invalid http method",
+                        "description": "Method Not Allowed",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
                         }
@@ -747,7 +747,7 @@
                         }
                     },
                     "405": {
-                        "description": "invalid http method",
+                        "description": "Method Not Allowed",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
                         }
@@ -861,6 +861,9 @@
                 "user_id"
             ],
             "properties": {
+                "avatar_id": {
+                    "type": "integer"
+                },
                 "create_date": {
                     "type": "string"
                 },

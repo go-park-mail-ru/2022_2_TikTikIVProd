@@ -1,16 +1,31 @@
 package main
 
 import (
+<<<<<<< HEAD
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"github.com/labstack/gommon/log"
 	"github.com/go-redis/redis"
+=======
+	"log"
+>>>>>>> go_to_echo
+
+	"github.com/labstack/echo/v4"
+	echoMiddleware "github.com/labstack/echo/v4/middleware"
+	"github.com/sirupsen/logrus"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/cmd/server"
+<<<<<<< HEAD
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/middleware"
 	authRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/repository/redis"
+=======
+	_authDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/delivery"
+	authRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/repository/postgres"
+>>>>>>> go_to_echo
 	authUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/usecase"
 	_authDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/delivery"
 	_friendsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/delivery"
@@ -19,24 +34,26 @@ import (
 	_imageDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/delivery"
 	imagesRepository "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/repository/postgres"
 	imageUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/usecase"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/middleware"
 	_postsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/delivery"
 	postsRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/repository/postgres"
 	postsUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/usecase"
 	_usersDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/delivery"
 	usersRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository/postgres"
 	usersUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/usecase"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg/logger"
 )
 
 // @title WS Swagger API
 // @version 1.0
 // @host 89.208.197.127:8080
 
-// var testCfg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
+//var testCfg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
 
-var prod_cfg = postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}
+var prodCfg = postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}
 
 func main() {
-	db, err := gorm.Open(postgres.New(prod_cfg),
+	db, err := gorm.Open(postgres.New(prodCfg),
 		&gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
@@ -73,8 +90,8 @@ func main() {
 	e.Logger.SetLevel(log.INFO)
 
 	e.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
-		AllowOrigins: []string{"http://localhost"},
-		AllowHeaders: []string{"*"},
+		AllowOrigins:     []string{"*"},
+		AllowHeaders:     []string{"*"},
 		AllowCredentials: true,
 	}))
 	

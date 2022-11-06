@@ -20,6 +20,8 @@ definitions:
     type: object
   models.Post:
     properties:
+      avatar_id:
+        type: integer
       create_date:
         type: string
       id:
@@ -108,7 +110,7 @@ paths:
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "405":
-          description: invalid http method
+          description: Method Not Allowed
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "500":
@@ -172,7 +174,7 @@ paths:
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "405":
-          description: invalid http method
+          description: Method Not Allowed
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "409":
@@ -214,7 +216,7 @@ paths:
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "405":
-          description: invalid http method
+          description: Method Not Allowed
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "500":
@@ -293,7 +295,7 @@ paths:
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "405":
-          description: invalid http method
+          description: Method Not Allowed
           schema:
             $ref: '#/definitions/echo.HTTPError'
       summary: Logout
@@ -464,7 +466,7 @@ paths:
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "405":
-          description: invalid http method
+          description: Method Not Allowed
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "500":
@@ -503,7 +505,7 @@ paths:
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "405":
-          description: invalid http method
+          description: Method Not Allowed
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "409":
@@ -547,7 +549,7 @@ paths:
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "405":
-          description: invalid http method
+          description: Method Not Allowed
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "500":
