@@ -5,7 +5,7 @@ import (
 )
 
 type RepositoryI interface {
-	CreateCookie(c *models.Cookie) error
-	SelectCookie(value string) (*models.Cookie, error)
+	CreateCookie(cookie *models.Cookie) error
+	GetCookie(value string) (string, error)
 	DeleteCookie(value string) error
 }

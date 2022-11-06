@@ -4,16 +4,15 @@ import (
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
 	"gorm.io/driver/postgres"
-	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"log"
+	"github.com/labstack/gommon/log"
+	"github.com/go-redis/redis"
 
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/cmd/server"
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg/logger"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/middleware"
-	_authDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/delivery"
-	authRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/repository/postgres"
+	authRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/repository/redis"
 	authUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/usecase"
+	_authDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/delivery"
 	_friendsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/delivery"
 	friendsRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/repository/postgres"
 	friendsUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/usecase"
@@ -39,59 +38,68 @@ var testCfg = postgres.Config{DSN: "host=localhost user=postgres password=postgr
 func main() {
 	db, err := gorm.Open(postgres.New(testCfg),
 		&gorm.Config{})
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
 
+	redisClient := redis.NewClient(&redis.Options{
+		Addr:     ":6379",
+	})
+
+	err = redisClient.Ping().Err()
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 
 	postDB := postsRep.NewPostRepository(db)
+	authDB := authRep.New(redisClient)
 	usersDB := usersRep.New(db)
-	authDB := authRep.New(db)
 	friendsDB := friendsRep.New(db)
 	imageDB := imagesRepository.NewImageRepository(db)
 
 	postsUC := postsUsecase.NewPostUsecase(postDB, imageDB, usersDB)
-	usersUC := usersUseCase.New(usersDB)
 	authUC := authUseCase.New(authDB, usersDB)
+	usersUC := usersUseCase.New(usersDB)
 	friendsUC := friendsUseCase.New(friendsDB, usersDB)
 	imageUC := imageUsecase.NewImageUsecase(imageDB)
 
 	e := echo.New()
-	authMiddleware := middleware.NewMiddleware(authUC)
-	// e.Use(middleware.Auth)
 
-	log := logger.New()
-	e.Use(echoMiddleware.RequestLoggerWithConfig(echoMiddleware.RequestLoggerConfig{
-		LogURI:    true,
-		LogStatus: true,
-		LogValuesFunc: func(c echo.Context, values echoMiddleware.RequestLoggerValues) error {
-			log.Logrus.WithFields(logrus.Fields{
-				"URI":   values.URI,
-				"method": c.Request().Method,
-				"status": values.Status,
-			}).Info("request")
-			return nil
-		},
-	}))
+	e.Logger.SetHeader(`time=${time_rfc3339} level=${level} prefix=${prefix} ` +
+					   `file=${short_file} line=${line} message:`)
+	e.Logger.SetLevel(log.INFO)
 
-	e.Use(echoMiddleware.Recover())
-	e.Use(echoMiddleware.Secure())
 	e.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
 		AllowOrigins: []string{"http://localhost"},
 		AllowHeaders: []string{"*"},
 		AllowCredentials: true,
 	}))
-	// e.Use(echoMiddleware.CSRF())
+	
+	e.Use(echoMiddleware.LoggerWithConfig(echoMiddleware.LoggerConfig{
+		Format: `time=${time_custom} remote_ip=${remote_ip} ` +
+			`host=${host} method=${method} uri=${uri} user_agent=${user_agent} ` +
+			`status=${status} error="${error}" ` +
+			`bytes_in=${bytes_in} bytes_out=${bytes_out}` + "\n",
+		CustomTimeFormat: "2006-01-02 15:04:05",
+	}))
 
-	_postsDelivery.NewDelivery(e, postsUC, authMiddleware)
-	_usersDelivery.NewDelivery(e, usersUC, authMiddleware)
-	_imageDelivery.NewDelivery(e, imageUC, authMiddleware)
-	_authDelivery.NewDelivery(e, authUC, authMiddleware)
-	_friendsDelivery.NewDelivery(e, friendsUC, authMiddleware)
+	e.Use(echoMiddleware.Recover())
+
+	authMiddleware := middleware.NewMiddleware(authUC)
+	e.Use(authMiddleware.Auth)
+	//e.Use(authMiddleware.CSRF)
+
+	_postsDelivery.NewDelivery(e, postsUC)
+	_authDelivery.NewDelivery(e, authUC)
+	_usersDelivery.NewDelivery(e, usersUC)
+	_imageDelivery.NewDelivery(e, imageUC)
+	_friendsDelivery.NewDelivery(e, friendsUC)
 
 	s := server.NewServer(e)
 	if err := s.Start(); err != nil {
 		e.Logger.Fatal(err)
 	}
 }
+
