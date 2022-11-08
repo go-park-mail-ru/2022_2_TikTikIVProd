@@ -25,6 +25,9 @@ import (
 	_usersDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/delivery"
 	usersRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository/postgres"
 	usersUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/usecase"
+	_chatDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/delivery"
+	chatRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/repository/postgres"
+	chatUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/usecase"
 )
 
 // @title WS Swagger API
@@ -57,12 +60,14 @@ func main() {
 	usersDB := usersRep.New(db)
 	friendsDB := friendsRep.New(db)
 	imageDB := imagesRepository.NewImageRepository(db)
+	chatDB := chatRep.NewChatRepository(db)
 
 	postsUC := postsUsecase.NewPostUsecase(postDB, imageDB, usersDB)
 	authUC := authUseCase.New(authDB, usersDB)
 	usersUC := usersUseCase.New(usersDB)
 	friendsUC := friendsUseCase.New(friendsDB, usersDB)
 	imageUC := imageUsecase.NewImageUsecase(imageDB)
+	chatUC := chatUseCase.New(chatDB)
 
 	e := echo.New()
 
@@ -88,13 +93,14 @@ func main() {
 
 	authMiddleware := middleware.NewMiddleware(authUC)
 	e.Use(authMiddleware.Auth)
-	e.Use(authMiddleware.CSRF)
+	//e.Use(authMiddleware.CSRF)
 
 	_postsDelivery.NewDelivery(e, postsUC)
 	_authDelivery.NewDelivery(e, authUC)
 	_usersDelivery.NewDelivery(e, usersUC)
 	_imageDelivery.NewDelivery(e, imageUC)
 	_friendsDelivery.NewDelivery(e, friendsUC)
+	_chatDelivery.NewDelivery(e, chatUC)
 
 	s := server.NewServer(e)
 	if err := s.Start(); err != nil {

@@ -3,9 +3,41 @@ definitions:
     properties:
       message: {}
     type: object
+  models.Dialog:
+    properties:
+      dialog_id:
+        readOnly: true
+        type: integer
+      messages:
+        items:
+          $ref: '#/definitions/models.Message'
+        readOnly: true
+        type: array
+      userId1:
+        type: integer
+      userId2:
+        type: integer
+    type: object
   models.Image:
     properties:
       id:
+        type: integer
+    type: object
+  models.Message:
+    properties:
+      body:
+        type: string
+      created_at:
+        type: string
+      dialog_id:
+        type: integer
+      id:
+        readOnly: true
+        type: integer
+      receiver_id:
+        type: integer
+      sender_id:
+        readOnly: true
         type: integer
     type: object
   models.Post:
@@ -113,6 +145,129 @@ paths:
       summary: Auth
       tags:
       - auth
+  /chat:
+    get:
+      description: get all dialogs
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get dialogs
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  items:
+                    $ref: '#/definitions/models.Dialog'
+                  type: array
+              type: object
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: GetAllDialogs
+      tags:
+      - chat
+  /chat/{id}:
+    get:
+      description: get dialog
+      parameters:
+      - description: Chat ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get dialog
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  $ref: '#/definitions/models.Dialog'
+              type: object
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: can't find chat with such id
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: GetDialog
+      tags:
+      - chat
+  /chat/send_message:
+    post:
+      consumes:
+      - application/json
+      description: send message
+      parameters:
+      - description: message data
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/models.Message'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success send message
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  $ref: '#/definitions/models.Message'
+              type: object
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: can't find item with such id
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: SendMessage
+      tags:
+      - chat
   /create_csrf:
     post:
       description: Get CSRF token
@@ -255,6 +410,50 @@ paths:
           schema:
             $ref: '#/definitions/echo.HTTPError'
       summary: AddFriend
+      tags:
+      - friends
+  /friends/check/{friend_id}:
+    get:
+      description: check friend
+      parameters:
+      - description: Friend ID
+        in: path
+        name: friend_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get profile
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  type: boolean
+              type: object
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: item doesn't exist
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: CheckIsFriend
       tags:
       - friends
   /friends/delete/{friend_id}:

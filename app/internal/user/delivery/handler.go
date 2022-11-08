@@ -64,8 +64,9 @@ func (del *Delivery) GetProfile(c echo.Context) error {
 func (del *Delivery) GetUsers(c echo.Context) error {
 	users, err := del.UserUC.SelectUsers()
 	if err != nil {
+		causeErr := errors.Cause(err)
 		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, causeErr.Error())
 	}
 	return c.JSON(http.StatusOK, pkg.Response{Body: users})
 }

@@ -47,10 +47,6 @@ func (uc *useCase) DeleteCookie(value string) error {
 }
 
 func (uc *useCase) SignIn(user models.UserSignIn) (*models.User, *models.Cookie, error) {
-	if user.Password == "" || user.Email == "" {
-		return nil, nil, models.ErrBadRequest
-	}
-
 	u, err := uc.userRepository.SelectUserByEmail(user.Email)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "user repository error")
@@ -79,11 +75,6 @@ func (uc *useCase) SignIn(user models.UserSignIn) (*models.User, *models.Cookie,
 }
 
 func (uc *useCase) SignUp(user *models.User) (*models.Cookie, error) {
-	if user.NickName == "" || user.Password == "" || user.Email == "" || user.FirstName == "" ||
-		user.LastName == "" {
-		return nil, models.ErrBadRequest
-	}
-
 	_, err := uc.userRepository.SelectUserByNickName(user.NickName)
 	if err != nil && !errors.Is(err, models.ErrNotFound) {
 		return nil, errors.Wrap(err, "user repository error")
