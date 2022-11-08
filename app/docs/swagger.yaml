@@ -155,10 +155,6 @@ paths:
           description: no cookie
           schema:
             $ref: '#/definitions/echo.HTTPError'
-        "403":
-          description: invalid csrf
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
         "405":
           description: invalid http method
           schema:
@@ -199,10 +195,6 @@ paths:
             $ref: '#/definitions/echo.HTTPError'
         "401":
           description: no cookie
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "403":
-          description: invalid csrf
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "404":
@@ -322,10 +314,6 @@ paths:
           description: success get image
         "401":
           description: no cookie
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "403":
-          description: invalid csrf
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "405":
@@ -462,10 +450,6 @@ paths:
               type: object
         "401":
           description: no cookie
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "403":
-          description: invalid csrf
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "405":
@@ -655,6 +639,38 @@ paths:
       summary: SignUp
       tags:
       - auth
+  /users:
+    get:
+      description: get all users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get users
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  items:
+                    $ref: '#/definitions/models.User'
+                  type: array
+              type: object
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: GetUsers
+      tags:
+      - users
   /users/{id}:
     get:
       description: get user's profile
@@ -682,10 +698,6 @@ paths:
             $ref: '#/definitions/echo.HTTPError'
         "401":
           description: no cookie
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "403":
-          description: invalid csrf
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "404":
@@ -728,10 +740,6 @@ paths:
               type: object
         "401":
           description: no cookie
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "403":
-          description: invalid csrf
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "404":

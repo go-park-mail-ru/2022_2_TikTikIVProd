@@ -11,5 +11,7 @@ var (
 	ErrConflictFriend = errors.New("friend already exists")
 	ErrUnauthorized = errors.New("no cookie")
 	ErrInternalServerError = errors.New("internal server error")
+	ErrEmptyCsrf = errors.New("empty csrf token")
+	ErrInvalidCsrf = errors.New("invalid csrf")
 )
 

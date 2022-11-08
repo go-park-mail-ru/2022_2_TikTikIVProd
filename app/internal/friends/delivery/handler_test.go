@@ -38,7 +38,7 @@ func TestDeliveryAddFriend(t *testing.T) {
 		Id2: 0,
 	}
 
-	mockUCase := new(mocks.UseCaseI)
+	mockUCase := mocks.NewUseCaseI(t)
 
 	mockUCase.On("AddFriend", mockFriendsSuccess).Return(nil)
 
@@ -102,7 +102,7 @@ func TestDeliveryDeleteFriend(t *testing.T) {
 		Id2: 101,
 	}
 
-	mockUCase := new(mocks.UseCaseI)
+	mockUCase := mocks.NewUseCaseI(t)
 
 	mockUCase.On("DeleteFriend", mockFriendsSuccess).Return(nil)
 	mockUCase.On("DeleteFriend", mockFriendsNotFound).Return(models.ErrNotFound)
@@ -161,14 +161,14 @@ func TestDeliveryDeleteFriend(t *testing.T) {
 
 
 func TestDeliverySelectFriends(t *testing.T) {
-	var friends []models.User
+	friends := make([]models.User, 0, 10)
 	err := faker.FakeData(&friends)
 	assert.NoError(t, err)
 
 	userIdSuccess := 1
 	userIdBadRequest := "hgcv"
 
-	mockUCase := new(mocks.UseCaseI)
+	mockUCase := mocks.NewUseCaseI(t)
 
 	mockUCase.On("SelectFriends", userIdSuccess).Return(friends, nil)
 

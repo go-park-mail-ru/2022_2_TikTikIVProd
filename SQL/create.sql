@@ -14,25 +14,17 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TABLE IF NOT EXISTS friends (
-	id1 INT REFERENCES users(id),
-	id2 INT REFERENCES users(id),
-	UNIQUE (id1, id2)
+	id1 INT REFERENCES users(id) on delete cascade,
+	id2 INT REFERENCES users(id) on delete cascade,
+	PRIMARY KEY (id1, id2)
 );
-
-CREATE TABLE IF NOT EXISTS cookies (
-	value varchar(64) PRIMARY KEY,
-	user_id INT REFERENCES users(id),
-	expires DATE
-);
-
 
 CREATE TABLE IF NOT EXISTS user_posts (
 	id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-	user_id INT REFERENCES users(id) NOT NULL,
+	user_id INT REFERENCES users(id) NOT NULL on delete cascade,
 	message TEXT NOT NULL,
 	create_date DATE NOT NULL
 );
-
 
 CREATE TABLE IF NOT EXISTS user_posts_images (
 	user_post_id INT REFERENCES user_posts(id) on delete cascade,

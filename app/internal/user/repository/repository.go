@@ -10,4 +10,5 @@ type RepositoryI interface {
 	CreateUser(u *models.User) error
 	SelectUserById(id int) (*models.User, error)
 	UpdateUser(user models.User) error
+	SelectAllUsers() ([]models.User, error)
 }

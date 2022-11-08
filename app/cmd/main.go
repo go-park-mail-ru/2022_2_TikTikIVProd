@@ -31,27 +31,25 @@ import (
 // @version 1.0
 // @host 89.208.197.127:8080
 
-//var testCfg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
+var testCfg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
 
-var prodCfg = postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}
+//var prodCfg = postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}
 
 func main() {
-	db, err := gorm.Open(postgres.New(prodCfg),
+	db, err := gorm.Open(postgres.New(testCfg),
 		&gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
-		return
 	}
 
 	redisClient := redis.NewClient(&redis.Options{
-		Addr:       "redis:6379",
+		Addr:       ":6379",
 		MaxRetries: 10,
 	})
 
 	err = redisClient.Ping().Err()
 	if err != nil {
 		log.Fatal(err)
-		return
 	}
 
 	postDB := postsRep.NewPostRepository(db)
@@ -74,7 +72,7 @@ func main() {
 
 	e.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
 		AllowOrigins:     []string{"http://89.208.197.127"},
-		AllowHeaders:     []string{"Content-Type"},
+		AllowHeaders:     []string{"Content-Type", "X-CSRF-Token"},
 		AllowCredentials: true,
 	}))
 

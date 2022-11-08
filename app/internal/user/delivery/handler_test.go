@@ -23,6 +23,11 @@ type TestCaseGetProfile struct {
 	StatusCode int
 }
 
+type TestCaseGetUsers struct {
+	Error error
+	StatusCode int
+}
+
 type TestCaseUpdateUser struct {
 	ArgDataBody string
 	ArgDataContext int
@@ -37,7 +42,7 @@ func TestDeliveryGetProfile(t *testing.T) {
 
 	userIdBadRequest := "hgcv"
 
-	mockUCase := new(mocks.UseCaseI)
+	mockUCase := mocks.NewUseCaseI(t)
 
 	mockUCase.On("SelectUserById", user.Id).Return(&user, nil)
 
@@ -95,7 +100,7 @@ func TestDeliveryUpdateUser(t *testing.T) {
 
 	mockUser.Id = 1
 
-	mockUCase := new(mocks.UseCaseI)
+	mockUCase := mocks.NewUseCaseI(t)
 
 	mockUCase.On("UpdateUser", mockUser).Return(nil)
 
@@ -143,77 +148,44 @@ func TestDeliveryUpdateUser(t *testing.T) {
 	mockUCase.AssertExpectations(t)
 }
 
+func TestDeliveryGetUsers(t *testing.T) {
+	users := make([]models.User, 0, 10)
+	err := faker.FakeData(&users)
+	assert.NoError(t, err)
 
+	mockUCase := mocks.NewUseCaseI(t)
 
-// func TestDeliverySignUp(t *testing.T) {
-// 	var mockUser models.User
-// 	err := faker.FakeData(&mockUser)
-// 	assert.NoError(t, err)
+	mockUCase.On("SelectUsers").Return(users, nil)
 
-// 	var mockCookie models.Cookie
-// 	err = faker.FakeData(&mockCookie)
-// 	assert.NoError(t, err)
+	handler := userDelivery.Delivery{
+		UserUC: mockUCase,
+	}
 
-// 	jsonUser, err := json.Marshal(mockUser)
-// 	assert.NoError(t, err)
+	e := echo.New()
 
-// 	mockUCase := new(mocks.UseCaseI)
+	cases := map[string]TestCaseGetProfile {
+		"success": {
+			Error: nil,
+			StatusCode: http.StatusOK,
+		},
+	}
 
-// 	mockUCase.On("SignUp", &mockUser).Return(&mockCookie, nil).Run(func(args mock.Arguments) {
-// 		arg := args.Get(0).(*models.User)
-// 		arg.Id = mockCookie.UserId
-// 	})
+	for name, test := range cases {
+		t.Run(name, func(t *testing.T) {
+			req := httptest.NewRequest(echo.POST, "/users", strings.NewReader(""))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.SetPath("/users")
 
-// 	handler := authDelivery.Delivery{
-// 		AuthUC: mockUCase,
-// 	}
+			err := handler.GetUsers(c)
+			require.Equal(t, test.Error, err)
+			assert.Equal(t, test.StatusCode, rec.Code)
+		})
+	}
 
-// 	userResponse := mockUser
-// 	userResponse.Id = mockCookie.UserId
-// 	response := pkg.Response {
-// 		Body: userResponse,
-// 	}
-// 	jsonResponse, err := json.Marshal(response)
-// 	assert.NoError(t, err)
-
-// 	e := echo.New()
-
-// 	cases := map[string]TestCaseSignUp {
-// 		"success": {
-// 			ArgData:   string(jsonUser),
-// 			ExpectedResponse: string(jsonResponse) + "\n",
-// 			Error: nil,
-// 			StatusCode: http.StatusCreated,
-// 		},
-// 		"bad_request": {
-// 			ArgData:   "aaa",
-// 			Error: &echo.HTTPError{
-// 				Code: http.StatusBadRequest,
-// 				Message: models.ErrBadRequest.Error(),
-// 			},
-// 		},
-// 	}
-
-// 	for name, test := range cases {
-// 		t.Run(name, func(t *testing.T) {
-// 			req := httptest.NewRequest(echo.POST, "/signup", strings.NewReader(test.ArgData))
-// 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-
-// 			rec := httptest.NewRecorder()
-// 			c := e.NewContext(req, rec)
-// 			c.SetPath("/signup")
-
-// 			err = handler.SignUp(c)
-// 			require.Equal(t, test.Error, err)
-
-// 			if err == nil {
-// 				assert.Equal(t, test.StatusCode, rec.Code)
-// 				assert.Equal(t, test.ExpectedResponse, rec.Body.String())
-// 			}
-// 		})
-// 	}
-
-// 	mockUCase.AssertExpectations(t)
-// }
+	mockUCase.AssertExpectations(t)
+}
 
 

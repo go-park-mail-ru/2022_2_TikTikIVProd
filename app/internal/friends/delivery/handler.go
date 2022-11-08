@@ -147,7 +147,6 @@ func isRequestValid(user interface{}) (bool, error) {
 // @Failure 400 {object} echo.HTTPError "bad request"
 // @Failure 404 {object} echo.HTTPError "user doesn't exist"
 // @Failure 401 {object} echo.HTTPError "no cookie"
-// @Failure 403 {object} echo.HTTPError "invalid csrf"
 // @Failure 500 {object} echo.HTTPError "internal server error"
 // @Router   /friends/{user_id} [get]
 func (del *Delivery) SelectFriends(c echo.Context) error {

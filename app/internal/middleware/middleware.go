@@ -6,22 +6,21 @@ import (
 	authUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/usecase"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg/csrf"
-	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
 )
 
 const session_name = "session_token"
 
-type Middleware struct {
+type middleware struct {
 	authUC authUsecase.UseCaseI
 }
 
-func NewMiddleware(authUC authUsecase.UseCaseI) *Middleware {
-	return &Middleware{authUC: authUC}
+func NewMiddleware(authUC authUsecase.UseCaseI) *middleware {
+	return &middleware{authUC: authUC}
 }
 
-func (m *Middleware) Auth(next echo.HandlerFunc) echo.HandlerFunc {
+func (m *middleware) Auth(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		if c.Request().URL.Path == "/signup" || c.Request().URL.Path == "/signin" ||
 															c.Request().URL.Path == "/auth" {
@@ -50,7 +49,7 @@ func (m *Middleware) Auth(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func (m *Middleware) CSRF(next echo.HandlerFunc) echo.HandlerFunc {
+func (m *middleware) CSRF(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		if c.Request().URL.Path == "/create_csrf" || c.Request().URL.Path == "/signup" ||
 					c.Request().URL.Path == "/signin" || c.Request().URL.Path == "/auth" ||
@@ -60,29 +59,27 @@ func (m *Middleware) CSRF(next echo.HandlerFunc) echo.HandlerFunc {
 		
 		token := c.Request().Header.Get(echo.HeaderXCSRFToken)
 		if token == "" {
-			err := errors.New("empty csrf token")
-			c.Logger().Error(err)
-			return echo.NewHTTPError(http.StatusForbidden, err.Error())
+			c.Logger().Error(models.ErrEmptyCsrf)
+			return echo.NewHTTPError(http.StatusForbidden, models.ErrEmptyCsrf.Error())
 		}
 
-		sess, err := session.Get(session_name, c)
-		if err != nil {
+		cookie, err := c.Cookie(session_name)
+		if err == http.ErrNoCookie {
 			c.Logger().Error(err)
-			return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest)
-		} else if sess.IsNew {
-			c.Logger().Error(models.ErrUnauthorized)
-			return echo.NewHTTPError(http.StatusUnauthorized, models.ErrUnauthorized)
+			return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+		} else if err != nil {
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
-		isTokenValid, err := csrf.CheckCSRF(sess.ID, token)
+		isTokenValid, err := csrf.CheckCSRF(cookie.Value, token)
 		if err != nil {
 			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusForbidden, err.Error())
 		}
 		if !isTokenValid {
-			err := errors.New("invalid csrf")
-			c.Logger().Error(err)
-			return echo.NewHTTPError(http.StatusForbidden, err.Error())
+			c.Logger().Error(models.ErrInvalidCsrf)
+			return echo.NewHTTPError(http.StatusForbidden, models.ErrInvalidCsrf.Error())
 		}
 
 		return next(c)

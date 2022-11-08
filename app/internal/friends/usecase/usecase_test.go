@@ -1,209 +1,173 @@
 package usecase_test
 
-// import (
-// 	"encoding/json"
-// 	"net/http"
-// 	"net/http/httptest"
-// 	"strings"
-// 	"testing"
+import (
+	"testing"
 
-// 	"github.com/bxcodec/faker"
-// 	authDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/delivery"
-// 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/usecase/mocks"
-// 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
-// 	"github.com/labstack/echo/v4"
-// 	"github.com/stretchr/testify/assert"
-// 	"github.com/stretchr/testify/require"
-// )
+	"github.com/bxcodec/faker"
+	friendsMocks "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/repository/mocks"
+	friendsUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/usecase"
+	userMocks "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository/mocks"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
 
-// type TestCase struct {
-// 	Data string
-// 	Error error
-// 	StatusCode int
-// }
+type TestCaseAddFriend struct {
+	ArgData models.Friends
+	Error error
+}
 
-// func TestSignUp(t *testing.T) {
-// 	var mockUser models.User
+type TestCaseDeleteFriend struct {
+	ArgData models.Friends
+	Error error
+}
 
-// 	err := faker.FakeData(&mockUser)
-// 	assert.NoError(t, err)
+type TestCaseSelectFriends struct {
+	ArgData int
+	ExpectedRes []models.User
+	Error error
+}
 
-// 	jsonUser, err := json.Marshal(mockUser)
-// 	assert.NoError(t, err)
+func TestUsecaseAddFriend(t *testing.T) {
+	mockFriendsSuccess := models.Friends {
+		Id1: 1,
+		Id2: 2,
+	}
 
-// 	mockUCase := new(mocks.UseCaseI)
+	mockFriendsConflict := models.Friends {
+		Id1: 3,
+		Id2: 4,
+	}
 
-// 	var mockCookie models.Cookie
+	mockFriendsBadRequest := models.Friends {
+		Id1: 5,
+		Id2: 5,
+	}
 
-// 	err = faker.FakeData(&mockCookie)
-// 	assert.NoError(t, err)
+	mockFriendsRepo := friendsMocks.NewRepositoryI(t)
+	mockUserRepo := userMocks.NewRepositoryI(t)
 
-// 	mockUCase.On("SignUp", &mockUser).Return(&mockCookie, nil)
+	mockUserRepo.On("SelectUserById", mockFriendsSuccess.Id2).Return(nil, nil)
+	mockFriendsRepo.On("CheckFriends", mockFriendsSuccess).Return(false, nil)
+	mockFriendsRepo.On("AddFriend", mockFriendsSuccess).Return(nil)
 
-// 	handler := authDelivery.Delivery{
-// 		AuthUC: mockUCase,
-// 	}
+	mockUserRepo.On("SelectUserById", mockFriendsConflict.Id2).Return(nil, nil)
+	mockFriendsRepo.On("CheckFriends", mockFriendsConflict).Return(true, nil)
 
-// 	e := echo.New()
+	useCase := friendsUsecase.New(mockFriendsRepo, mockUserRepo)
 
-// 	cases := map[string]TestCase {
-// 		"success": {
-// 			Data:   string(jsonUser),
-// 			Error: nil,
-// 			StatusCode: http.StatusCreated,
-// 		},
-// 		"bad_request": {
-// 			Data:   "aaa",
-// 			Error: &echo.HTTPError{
-// 				Code: http.StatusBadRequest,
-// 				Message: "bad request",
-// 			},
-// 		},
-// 	}
+	cases := map[string]TestCaseAddFriend {
+		"success": {
+			ArgData:   mockFriendsSuccess,
+			Error: nil,
+		},
+		"conflict": {
+			ArgData:   mockFriendsConflict,
+			Error: models.ErrConflictFriend,
+		},
+		"bad_request": {
+			ArgData:   mockFriendsBadRequest,
+			Error: models.ErrBadRequest,
+		},
+	}
 
-// 	for name, test := range cases {
-// 		t.Run(name, func(t *testing.T) {
-// 			req := httptest.NewRequest(echo.POST, "/signup", strings.NewReader(test.Data))
-// 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	for name, test := range cases {
+		t.Run(name, func(t *testing.T) {
+			err := useCase.AddFriend(test.ArgData)
+			require.Equal(t, test.Error, err)
+		})
+	}
+	mockUserRepo.AssertExpectations(t)
+	mockFriendsRepo.AssertExpectations(t)
+}
 
-// 			rec := httptest.NewRecorder()
-// 			c := e.NewContext(req, rec)
-// 			c.SetPath("/signup")
+func TestUsecaseDeleteFriend(t *testing.T) {
+	mockFriendsSuccess := models.Friends {
+		Id1: 1,
+		Id2: 2,
+	}
 
-// 			err = handler.SignUp(c)
-// 			require.Equal(t, test.Error, err)
+	mockFriendsNotFound := models.Friends {
+		Id1: 3,
+		Id2: 4,
+	}
 
-// 			if err == nil {
-// 				assert.Equal(t, test.StatusCode, rec.Code)
-// 			}
+	mockFriendsBadRequest := models.Friends {
+		Id1: 5,
+		Id2: 5,
+	}
 
-// 			mockUCase.AssertExpectations(t)
-// 		})
-// 	}
-// }
+	mockFriendsRepo := friendsMocks.NewRepositoryI(t)
+	mockUserRepo := userMocks.NewRepositoryI(t)
 
-// func TestSignIn(t *testing.T) {
-// 	var mockUserSignIn models.UserSignIn
+	mockUserRepo.On("SelectUserById", mockFriendsSuccess.Id2).Return(nil, nil)
+	mockFriendsRepo.On("CheckFriends", mockFriendsSuccess).Return(true, nil)
+	mockFriendsRepo.On("DeleteFriend", mockFriendsSuccess).Return(nil)
 
-// 	err := faker.FakeData(&mockUserSignIn)
-// 	assert.NoError(t, err)
+	mockUserRepo.On("SelectUserById", mockFriendsNotFound.Id2).Return(nil, nil)
+	mockFriendsRepo.On("CheckFriends", mockFriendsNotFound).Return(false, nil)
 
-// 	jsonUser, err := json.Marshal(mockUserSignIn)
-// 	assert.NoError(t, err)
+	useCase := friendsUsecase.New(mockFriendsRepo, mockUserRepo)
 
-// 	mockUCase := new(mocks.UseCaseI)
+	cases := map[string]TestCaseDeleteFriend {
+		"success": {
+			ArgData:   mockFriendsSuccess,
+			Error: nil,
+		},
+		"not_found": {
+			ArgData:   mockFriendsNotFound,
+			Error: models.ErrNotFound,
+		},
+		"bad_request": {
+			ArgData:   mockFriendsBadRequest,
+			Error: models.ErrBadRequest,
+		},
+	}
 
-// 	var mockCookie models.Cookie
+	for name, test := range cases {
+		t.Run(name, func(t *testing.T) {
+			err := useCase.DeleteFriend(test.ArgData)
+			require.Equal(t, test.Error, err)
+		})
+	}
+	mockUserRepo.AssertExpectations(t)
+	mockFriendsRepo.AssertExpectations(t)
+}
 
-// 	err = faker.FakeData(&mockCookie)
-// 	assert.NoError(t, err)
+func TestUsecaseSelectFriends(t *testing.T) {
+	mockFriends := make([]models.User, 0, 10)
+	err := faker.FakeData(&mockFriends)
+	assert.NoError(t, err)
 
-// 	var mockUser models.User
+	userId := 1
 
-// 	err = faker.FakeData(&mockUser)
-// 	assert.NoError(t, err)
+	mockFriendsRepo := friendsMocks.NewRepositoryI(t)
+	mockUserRepo := userMocks.NewRepositoryI(t)
 
-// 	mockUCase.On("SignIn", mockUserSignIn).Return(&mockUser, &mockCookie, nil)
+	mockUserRepo.On("SelectUserById", userId).Return(nil, nil)
+	mockFriendsRepo.On("SelectFriends", userId).Return(mockFriends, nil)
 
-// 	handler := authDelivery.Delivery{
-// 		AuthUC: mockUCase,
-// 	}
+	useCase := friendsUsecase.New(mockFriendsRepo, mockUserRepo)
 
-// 	e := echo.New()
+	cases := map[string]TestCaseSelectFriends {
+		"success": {
+			ArgData:   userId,
+			ExpectedRes: mockFriends,
+			Error: nil,
+		},
+	}
 
-// 	cases := map[string]TestCase {
-// 		"success": {
-// 			Data:   string(jsonUser),
-// 			Error: nil,
-// 			StatusCode: http.StatusOK,
-// 		},
-// 		"bad_request": {
-// 			Data:   "aaa",
-// 			Error: &echo.HTTPError{
-// 				Code: http.StatusBadRequest,
-// 				Message: "bad request",
-// 			},
-// 		},
-// 	}
+	for name, test := range cases {
+		t.Run(name, func(t *testing.T) {
+			friends, err := useCase.SelectFriends(test.ArgData)
+			require.Equal(t, test.Error, err)
 
-// 	for name, test := range cases {
-// 		t.Run(name, func(t *testing.T) {
-// 			req := httptest.NewRequest(echo.POST, "/signin", strings.NewReader(test.Data))
-// 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-
-// 			rec := httptest.NewRecorder()
-// 			c := e.NewContext(req, rec)
-// 			c.SetPath("/signin")
-
-// 			err = handler.SignIn(c)
-// 			require.Equal(t, test.Error, err)
-
-// 			if err == nil {
-// 				assert.Equal(t, test.StatusCode, rec.Code)
-// 			}
-
-// 			mockUCase.AssertExpectations(t)
-// 		})
-// 	}
-// }
-
-// func TestLogout(t *testing.T) {
-// 	var valueCookie string
-
-// 	err := faker.FakeData(&valueCookie)
-// 	assert.NoError(t, err)
-
-// 	mockUCase := new(mocks.UseCaseI)
-
-// 	mockUCase.On("DeleteCookie", valueCookie).Return(nil)
-
-// 	handler := authDelivery.Delivery{
-// 		AuthUC: mockUCase,
-// 	}
-
-// 	cookie := &http.Cookie{
-// 		Name:     "session_token",
-// 		Value:    valueCookie,
-// 		HttpOnly: true,
-// 	}
-
-// 	e := echo.New()
-
-// 	cases := map[string]TestCase {
-// 		"success": {
-// 			Error: nil,
-// 			StatusCode: http.StatusNoContent,
-// 		},
-// 		"unauthorized": {
-// 			Error: &echo.HTTPError{
-// 				Code: http.StatusUnauthorized,
-// 				Message: http.ErrNoCookie.Error(),
-// 			},
-// 		},
-// 	}
-
-// 	for name, test := range cases {
-// 		t.Run(name, func(t *testing.T) {
-// 			req := httptest.NewRequest(echo.POST, "/logout", strings.NewReader(test.Data))
-// 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-
-// 			if name == "success" {
-// 				req.AddCookie(cookie)
-// 			}
-			
-// 			rec := httptest.NewRecorder()
-// 			c := e.NewContext(req, rec)
-// 			c.SetPath("/logout")
-
-// 			err = handler.Logout(c)
-// 			require.Equal(t, test.Error, err)
-
-// 			if err == nil {
-// 				assert.Equal(t, test.StatusCode, rec.Code)
-// 			}
-
-// 			mockUCase.AssertExpectations(t)
-// 		})
-// 	}
-// }
+			if err == nil {
+				assert.Equal(t, test.ExpectedRes, friends)
+			}
+		})
+	}
+	mockUserRepo.AssertExpectations(t)
+	mockFriendsRepo.AssertExpectations(t)
+}
 

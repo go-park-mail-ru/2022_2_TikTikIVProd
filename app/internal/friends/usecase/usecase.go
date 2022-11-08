@@ -27,18 +27,13 @@ func New(fRep friendsRep.RepositoryI, uRep usersRep.RepositoryI) UseCaseI {
 }
 
 func (uc *useCase) AddFriend(friends models.Friends) error {
-	_, err := uc.userRepository.SelectUserById(friends.Id1)
-	if err != nil {
-		return errors.Wrap(err, "user repository error")
-	}
-
-	_, err = uc.userRepository.SelectUserById(friends.Id2)
-	if err != nil {
-		return errors.Wrap(err, "user repository error")
-	}
-
 	if friends.Id1 == friends.Id2 {
 		return models.ErrBadRequest
+	}
+
+	_, err := uc.userRepository.SelectUserById(friends.Id2)
+	if err != nil {
+		return errors.Wrap(err, "user repository error")
 	}
 
 	friendExists, err := uc.friendsRepository.CheckFriends(friends)
@@ -57,18 +52,13 @@ func (uc *useCase) AddFriend(friends models.Friends) error {
 }
 
 func (uc *useCase) DeleteFriend(friends models.Friends) error {
-	_, err := uc.userRepository.SelectUserById(friends.Id1)
-	if err != nil {
-		return errors.Wrap(err, "user repository error")
-	}
-
-	_, err = uc.userRepository.SelectUserById(friends.Id2)
-	if err != nil {
-		return errors.Wrap(err, "user repository error")
-	}
-
 	if friends.Id1 == friends.Id2 {
 		return models.ErrBadRequest
+	}
+	
+	_, err := uc.userRepository.SelectUserById(friends.Id2)
+	if err != nil {
+		return errors.Wrap(err, "user repository error")
 	}
 
 	friendExists, err := uc.friendsRepository.CheckFriends(friends)

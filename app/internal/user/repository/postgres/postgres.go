@@ -74,3 +74,13 @@ func (dbUsers *dataBase) UpdateUser(user models.User) error {
 	return nil
 }
 
+func (dbUsers *dataBase) SelectAllUsers() ([]models.User, error) {
+	users := make([]models.User, 0, 10)
+	tx := dbUsers.db.Find(&users)
+	if tx.Error != nil {
+		return nil, errors.Wrap(tx.Error, "database error (table users)")
+	}
+
+	return users, nil
+}
+
