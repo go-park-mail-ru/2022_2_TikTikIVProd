@@ -175,6 +175,56 @@ func (del *Delivery) SelectFriends(c echo.Context) error {
 	return c.JSON(http.StatusOK, pkg.Response{Body: friends})
 }
 
+// CheckIsFriend godoc
+// @Summary      CheckIsFriend
+// @Description  check friend
+// @Tags     friends
+// @Produce  application/json
+// @Param friend_id path int true "Friend ID"
+// @Success  200 {object} pkg.Response{body=bool} "success get profile"
+// @Failure 405 {object} echo.HTTPError "Method Not Allowed"
+// @Failure 400 {object} echo.HTTPError "bad request"
+// @Failure 404 {object} echo.HTTPError "item doesn't exist"
+// @Failure 401 {object} echo.HTTPError "no cookie"
+// @Failure 500 {object} echo.HTTPError "internal server error"
+// @Router   /friends/check/{friend_id} [get]
+func (del *Delivery) CheckIsFriend(c echo.Context) error {
+	friendId, err := strconv.Atoi(c.Param("friend_id"))
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
+	}
+
+	userId, ok := c.Get("user_id").(int)
+	if !ok {
+		c.Logger().Error(models.ErrInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
+	}
+
+	friends := models.Friends {
+		Id1: userId,
+		Id2: friendId,
+	}
+
+	isFriend, err := del.FriendsUC.CheckIsFriend(friends)
+	if err != nil {
+		causeErr := errors.Cause(err)
+		switch {
+		case errors.Is(causeErr, models.ErrNotFound):
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusNotFound, models.ErrNotFound.Error())
+		case errors.Is(causeErr, models.ErrBadRequest):
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
+		default:
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusInternalServerError, causeErr.Error())
+		}
+	}
+
+	return c.JSON(http.StatusOK, pkg.Response{Body: isFriend})
+}
+
 
 func NewDelivery(e *echo.Echo, uc friendUsecase.UseCaseI) {
 	handler := &Delivery{
@@ -184,5 +234,6 @@ func NewDelivery(e *echo.Echo, uc friendUsecase.UseCaseI) {
 	e.POST("/friends/add/:friend_id", handler.AddFriend)
 	e.DELETE("/friends/delete/:friend_id", handler.DeleteFriend)
 	e.GET("/friends/:user_id", handler.SelectFriends)
+	e.GET("/friends/check/:friend_id", handler.CheckIsFriend)
 }
 

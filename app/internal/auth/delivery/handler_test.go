@@ -36,11 +36,30 @@ func TestDeliverySignUp(t *testing.T) {
 	err := faker.FakeData(&mockUser)
 	assert.NoError(t, err)
 
+	var mockUserConflictNickName models.User
+	err = faker.FakeData(&mockUserConflictNickName)
+	assert.NoError(t, err)
+
+	var mockUserConflictEmail models.User
+	err = faker.FakeData(&mockUserConflictEmail)
+	assert.NoError(t, err)
+
+	mockUserInvalid := models.User{}
+
 	var mockCookie models.Cookie
 	err = faker.FakeData(&mockCookie)
 	assert.NoError(t, err)
 
 	jsonUser, err := json.Marshal(mockUser)
+	assert.NoError(t, err)
+
+	jsonUserInvalid, err := json.Marshal(mockUserInvalid)
+	assert.NoError(t, err)
+
+	jsonUserConflictNickName, err := json.Marshal(mockUserConflictNickName)
+	assert.NoError(t, err)
+
+	jsonUserConflictEmail, err := json.Marshal(mockUserConflictEmail)
 	assert.NoError(t, err)
 
 	mockUCase := mocks.NewUseCaseI(t)
@@ -49,6 +68,10 @@ func TestDeliverySignUp(t *testing.T) {
 		arg := args.Get(0).(*models.User)
 		arg.Id = mockCookie.UserId
 	})
+
+	mockUCase.On("SignUp", &mockUserConflictNickName).Return(nil, models.ErrConflictNickname)
+
+	mockUCase.On("SignUp", &mockUserConflictEmail).Return(nil, models.ErrConflictEmail)
 
 	handler := authDelivery.Delivery{
 		AuthUC: mockUCase,
@@ -63,6 +86,7 @@ func TestDeliverySignUp(t *testing.T) {
 	assert.NoError(t, err)
 
 	e := echo.New()
+	authDelivery.NewDelivery(e, mockUCase)
 
 	cases := map[string]TestCaseSignUp {
 		"success": {
@@ -76,6 +100,27 @@ func TestDeliverySignUp(t *testing.T) {
 			Error: &echo.HTTPError{
 				Code: http.StatusBadRequest,
 				Message: models.ErrBadRequest.Error(),
+			},
+		},
+		"invalid_request": {
+			ArgData:   string(jsonUserInvalid),
+			Error: &echo.HTTPError{
+				Code: http.StatusBadRequest,
+				Message: models.ErrBadRequest.Error(),
+			},
+		},
+		"conflict_nickname": {
+			ArgData:   string(jsonUserConflictNickName),
+			Error: &echo.HTTPError{
+				Code: http.StatusConflict,
+				Message: models.ErrConflictNickname.Error(),
+			},
+		},
+		"conflict_email": {
+			ArgData:   string(jsonUserConflictEmail),
+			Error: &echo.HTTPError{
+				Code: http.StatusConflict,
+				Message: models.ErrConflictEmail.Error(),
 			},
 		},
 	}
@@ -130,6 +175,7 @@ func TestDeliverySignIn(t *testing.T) {
 	}
 
 	e := echo.New()
+	authDelivery.NewDelivery(e, mockUCase)
 
 	cases := map[string]TestCase {
 		"success": {
@@ -187,6 +233,7 @@ func TestDeliveryLogout(t *testing.T) {
 	}
 
 	e := echo.New()
+	authDelivery.NewDelivery(e, mockUCase)
 
 	cases := map[string]TestCase {
 		"success": {
@@ -250,6 +297,7 @@ func TestDeliveryAuth(t *testing.T) {
 	}
 
 	e := echo.New()
+	authDelivery.NewDelivery(e, mockUCase)
 
 	cases := map[string]TestCase {
 		"success": {
@@ -266,7 +314,7 @@ func TestDeliveryAuth(t *testing.T) {
 
 	for name, test := range cases {
 		t.Run(name, func(t *testing.T) {
-			req := httptest.NewRequest(echo.POST, "/auth", strings.NewReader(test.ArgData))
+			req := httptest.NewRequest(echo.GET, "/auth", strings.NewReader(test.ArgData))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
 			if name == "success" {
@@ -307,6 +355,7 @@ func TestDeliveryCreateCSRF(t *testing.T) {
 	}
 
 	e := echo.New()
+	authDelivery.NewDelivery(e, mockUCase)
 
 	cases := map[string]TestCase {
 		"success": {

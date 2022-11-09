@@ -12,6 +12,7 @@ type UseCaseI interface {
 	AddFriend(friends models.Friends) (error)
 	DeleteFriend(friends models.Friends) (error)
 	SelectFriends(id int) ([]models.User, error)
+	CheckIsFriend(friends models.Friends) (bool, error)
 }
 
 type useCase struct {
@@ -48,6 +49,28 @@ func (uc *useCase) AddFriend(friends models.Friends) error {
 	if err != nil {
 		return errors.Wrap(err, "friends repository error")
 	}
+
+	// dialog := models.Dialog {
+	// 	UserId1: friends.Id1,
+	// 	UserId2: friends.Id2,
+	// }
+
+	// checkFriends := models.Friends {
+	// 	Id1: friends.Id2,
+	// 	Id2: friends.Id1,
+	// }
+
+	// friendExists, err = uc.friendsRepository.CheckFriends(checkFriends)
+	// if err != nil {
+	// 	return errors.Wrap(err, "friends repository error")
+	// }
+	// if friendExists {
+	// 	err = uc.chatRepository.CreateDialog(&dialog)
+	// 	if err != nil {
+	// 		return errors.Wrap(err, "friends repository error")
+	// 	}
+	// }
+
 	return err
 }
 
@@ -89,5 +112,23 @@ func (uc *useCase) SelectFriends(id int) ([]models.User, error) {
 	}
 
 	return friends, nil
+}
+
+func (uc *useCase) CheckIsFriend(friends models.Friends) (bool, error) {
+	if friends.Id1 == friends.Id2 {
+		return false, models.ErrBadRequest
+	}
+
+	_, err := uc.userRepository.SelectUserById(friends.Id2)
+	if err != nil {
+		return false, errors.Wrap(err, "user repository error")
+	}
+
+	friendExists, err := uc.friendsRepository.CheckFriends(friends)
+	if err != nil {
+		return false, errors.Wrap(err, "friends repository error")
+	}
+
+	return friendExists, err
 }
 

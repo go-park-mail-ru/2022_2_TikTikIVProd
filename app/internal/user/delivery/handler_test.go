@@ -51,6 +51,7 @@ func TestDeliveryGetProfile(t *testing.T) {
 	}
 
 	e := echo.New()
+	userDelivery.NewDelivery(e, mockUCase)
 
 	cases := map[string]TestCaseGetProfile {
 		"success": {
@@ -69,7 +70,7 @@ func TestDeliveryGetProfile(t *testing.T) {
 
 	for name, test := range cases {
 		t.Run(name, func(t *testing.T) {
-			req := httptest.NewRequest(echo.POST, "/users/:id", strings.NewReader(""))
+			req := httptest.NewRequest(echo.GET, "/users/:id", strings.NewReader(""))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			
 			rec := httptest.NewRecorder()
@@ -109,6 +110,7 @@ func TestDeliveryUpdateUser(t *testing.T) {
 	}
 
 	e := echo.New()
+	userDelivery.NewDelivery(e, mockUCase)
 
 	cases := map[string]TestCaseUpdateUser {
 		"success": {
@@ -128,7 +130,7 @@ func TestDeliveryUpdateUser(t *testing.T) {
 
 	for name, test := range cases {
 		t.Run(name, func(t *testing.T) {
-			req := httptest.NewRequest(echo.POST, "/users/update", strings.NewReader(test.ArgDataBody))
+			req := httptest.NewRequest(echo.PUT, "/users/update", strings.NewReader(test.ArgDataBody))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			
 			rec := httptest.NewRecorder()
@@ -162,6 +164,7 @@ func TestDeliveryGetUsers(t *testing.T) {
 	}
 
 	e := echo.New()
+	userDelivery.NewDelivery(e, mockUCase)
 
 	cases := map[string]TestCaseGetProfile {
 		"success": {
@@ -172,7 +175,7 @@ func TestDeliveryGetUsers(t *testing.T) {
 
 	for name, test := range cases {
 		t.Run(name, func(t *testing.T) {
-			req := httptest.NewRequest(echo.POST, "/users", strings.NewReader(""))
+			req := httptest.NewRequest(echo.GET, "/users", strings.NewReader(""))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			
 			rec := httptest.NewRecorder()

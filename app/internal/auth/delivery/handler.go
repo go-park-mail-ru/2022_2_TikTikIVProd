@@ -60,9 +60,6 @@ func (del *Delivery) SignUp(c echo.Context) error {
 		case errors.Is(causeErr, models.ErrConflictEmail):
 			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusConflict, models.ErrConflictEmail.Error())
-		case errors.Is(causeErr, models.ErrBadRequest):
-			c.Logger().Error(err)
-			return echo.NewHTTPError(http.StatusConflict, models.ErrBadRequest.Error())
 		default:
 			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, causeErr.Error())
