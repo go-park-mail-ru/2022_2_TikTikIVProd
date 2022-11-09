@@ -12,17 +12,8 @@ import (
 	postsUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/usecase"
 )
 
-type DeliveryI interface {
-	Feed(c echo.Context) error
-	GetPost(c echo.Context) error
-	GetUserPosts(c echo.Context) error
-	CreatePost(c echo.Context) error
-	UpdatePost(c echo.Context) error
-	DeletePost(c echo.Context) error
-}
-
-type delivery struct {
-	pUsecase postsUsecase.PostUseCaseI
+type Delivery struct {
+	PUsecase postsUsecase.PostUseCaseI
 }
 
 // GetPost godoc
@@ -37,7 +28,7 @@ type delivery struct {
 // @Failure 500 {object} echo.HTTPError "internal server error"
 // @Failure 401 {object} echo.HTTPError "no cookie"
 // @Router   /post/{id} [get]
-func (delivery *delivery) GetPost(c echo.Context) error {
+func (delivery *Delivery) GetPost(c echo.Context) error {
 	idP, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
@@ -45,7 +36,7 @@ func (delivery *delivery) GetPost(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "Post not found") //TODO переделать на ошибки в файле
 	}
 
-	post, err := delivery.pUsecase.GetPostById(idP)
+	post, err := delivery.PUsecase.GetPostById(idP)
 
 	if err != nil {
 		c.Logger().Error(err)
@@ -77,7 +68,7 @@ func isRequestValid(p *models.Post) (bool, error) {
 // @Failure 401 {object} echo.HTTPError "no cookie"
 // @Failure 403 {object} echo.HTTPError "invalid csrf"
 // @Router   /post/create [post]
-func (delivery *delivery) CreatePost(c echo.Context) error {
+func (delivery *Delivery) CreatePost(c echo.Context) error {
 	var post models.Post
 	err := c.Bind(&post)
 
@@ -100,7 +91,7 @@ func (delivery *delivery) CreatePost(c echo.Context) error {
 	}
 
 	post.UserID = userId
-	err = delivery.pUsecase.CreatePost(&post)
+	err = delivery.PUsecase.CreatePost(&post)
 
 	if err != nil {
 		c.Logger().Error(err)
@@ -131,7 +122,7 @@ func requestSanitizePost(post *models.Post) {
 // @Failure 401 {object} echo.HTTPError "no cookie"
 // @Failure 403 {object} echo.HTTPError "invalid csrf"
 // @Router   /post/edit [post]
-func (delivery *delivery) UpdatePost(c echo.Context) error {
+func (delivery *Delivery) UpdatePost(c echo.Context) error {
 	var post models.Post
 	err := c.Bind(&post)
 
@@ -154,7 +145,7 @@ func (delivery *delivery) UpdatePost(c echo.Context) error {
 	}
 
 	post.UserID = userId
-	err = delivery.pUsecase.UpdatePost(&post)
+	err = delivery.PUsecase.UpdatePost(&post)
 
 	if err != nil {
 		c.Logger().Error(err)
@@ -176,7 +167,7 @@ func (delivery *delivery) UpdatePost(c echo.Context) error {
 // @Failure 401 {object} echo.HTTPError "no cookie"
 // @Failure 403 {object} echo.HTTPError "invalid csrf"
 // @Router   /post/{id} [delete]
-func (delivery *delivery) DeletePost(c echo.Context) error {
+func (delivery *Delivery) DeletePost(c echo.Context) error {
 	idP, err := strconv.Atoi(c.Param("id"))
 
 	userId, ok := c.Get("user_id").(int)
@@ -190,7 +181,7 @@ func (delivery *delivery) DeletePost(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "Post not found") //TODO переделать на ошибки в файле
 	}
 
-	err = delivery.pUsecase.DeletePost(idP, userId)
+	err = delivery.PUsecase.DeletePost(idP, userId)
 
 	if err != nil {
 		c.Logger().Error(err)
@@ -209,8 +200,8 @@ func (delivery *delivery) DeletePost(c echo.Context) error {
 // @Failure 500 {object} echo.HTTPError "internal server error"
 // @Failure 401 {object} echo.HTTPError "no cookie"
 // @Router   /feed [get]
-func (delivery *delivery) Feed(c echo.Context) error {
-	posts, err := delivery.pUsecase.GetAllPosts()
+func (delivery *Delivery) Feed(c echo.Context) error {
+	posts, err := delivery.PUsecase.GetAllPosts()
 
 	if err != nil {
 		c.Logger().Error(err)
@@ -232,7 +223,7 @@ func (delivery *delivery) Feed(c echo.Context) error {
 // @Failure 500 {object} echo.HTTPError "internal server error"
 // @Failure 401 {object} echo.HTTPError "no cookie"
 // @Router   /users/{id}/posts [get]
-func (delivery *delivery) GetUserPosts(c echo.Context) error {
+func (delivery *Delivery) GetUserPosts(c echo.Context) error {
 	idP, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
@@ -240,7 +231,7 @@ func (delivery *delivery) GetUserPosts(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "Post not found") //TODO переделать на ошибки в файле
 	}
 
-	posts, err := delivery.pUsecase.GetUserPosts(idP)
+	posts, err := delivery.PUsecase.GetUserPosts(idP)
 
 	if err != nil {
 		c.Logger().Error(err)
@@ -251,8 +242,8 @@ func (delivery *delivery) GetUserPosts(c echo.Context) error {
 }
 
 func NewDelivery(e *echo.Echo, up postsUsecase.PostUseCaseI) {
-	handler := &delivery{
-		pUsecase: up,
+	handler := &Delivery{
+		PUsecase: up,
 	}
 
 	e.POST("/post/create", handler.CreatePost)

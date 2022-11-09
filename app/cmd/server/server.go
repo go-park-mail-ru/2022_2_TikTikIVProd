@@ -9,7 +9,6 @@ import (
 
 type Server struct {
 	http.Server
-	/*тут конфиги и логгер ещё будет*/
 }
 
 func NewServer(e *echo.Echo) *Server {

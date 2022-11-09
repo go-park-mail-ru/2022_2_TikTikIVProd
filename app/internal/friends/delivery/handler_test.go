@@ -28,6 +28,13 @@ type TestCaseSelectFriends struct {
 	StatusCode int
 }
 
+type TestCaseCheckIsFriend struct {
+	ArgFriendId string
+	ArgUserId int
+	Error error
+	StatusCode int
+}
+
 func TestDeliveryAddFriend(t *testing.T) {
 	mockFriendsSuccess := models.Friends {
 		Id1: 1,
@@ -47,6 +54,7 @@ func TestDeliveryAddFriend(t *testing.T) {
 	}
 
 	e := echo.New()
+	friendsDelivery.NewDelivery(e, mockUCase)
 
 	cases := map[string]TestCase {
 		"success": {
@@ -112,6 +120,7 @@ func TestDeliveryDeleteFriend(t *testing.T) {
 	}
 
 	e := echo.New()
+	friendsDelivery.NewDelivery(e, mockUCase)
 
 	cases := map[string]TestCase {
 		"success": {
@@ -137,7 +146,7 @@ func TestDeliveryDeleteFriend(t *testing.T) {
 
 	for name, test := range cases {
 		t.Run(name, func(t *testing.T) {
-			req := httptest.NewRequest(echo.POST, "/friends/delete/:friend_id", strings.NewReader(""))
+			req := httptest.NewRequest(echo.DELETE, "/friends/delete/:friend_id", strings.NewReader(""))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			
 			rec := httptest.NewRecorder()
@@ -177,6 +186,7 @@ func TestDeliverySelectFriends(t *testing.T) {
 	}
 
 	e := echo.New()
+	friendsDelivery.NewDelivery(e, mockUCase)
 
 	cases := map[string]TestCaseSelectFriends {
 		"success": {
@@ -195,7 +205,7 @@ func TestDeliverySelectFriends(t *testing.T) {
 
 	for name, test := range cases {
 		t.Run(name, func(t *testing.T) {
-			req := httptest.NewRequest(echo.POST, "/friends/:user_id", strings.NewReader(""))
+			req := httptest.NewRequest(echo.GET, "/friends/:user_id", strings.NewReader(""))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			
 			rec := httptest.NewRecorder()
@@ -205,6 +215,69 @@ func TestDeliverySelectFriends(t *testing.T) {
 			c.SetParamValues(test.ArgData)
 
 			err := handler.SelectFriends(c)
+			require.Equal(t, test.Error, err)
+
+			if err == nil {
+				assert.Equal(t, test.StatusCode, rec.Code)
+			}
+		})
+	}
+
+	mockUCase.AssertExpectations(t)
+}
+// /friends/check/firend_id
+func TestDeliveryCheckIsFriend(t *testing.T) {
+	friendIdSuccess := 2
+	friendIdBadRequest := "hgcv"
+
+	userId := 1
+
+	mockFriendsSuccess := models.Friends {
+		Id1: userId,
+		Id2: friendIdSuccess,
+	}
+
+	mockUCase := mocks.NewUseCaseI(t)
+
+	mockUCase.On("CheckIsFriend", mockFriendsSuccess).Return(true, nil)
+
+	handler := friendsDelivery.Delivery{
+		FriendsUC: mockUCase,
+	}
+
+	e := echo.New()
+	friendsDelivery.NewDelivery(e, mockUCase)
+
+	cases := map[string]TestCaseCheckIsFriend {
+		"success": {
+			ArgFriendId: strconv.Itoa(friendIdSuccess),
+			ArgUserId: userId,
+			Error: nil,
+			StatusCode: http.StatusOK,
+		},
+		"bad_request": {
+			ArgFriendId: friendIdBadRequest,
+			ArgUserId: userId,
+			Error: &echo.HTTPError{
+				Code: http.StatusBadRequest,
+				Message: models.ErrBadRequest.Error(),
+			},
+		},
+	}
+
+	for name, test := range cases {
+		t.Run(name, func(t *testing.T) {
+			req := httptest.NewRequest(echo.GET, "/friends/check/:friend_id", strings.NewReader(""))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.SetPath("/friends/check/:friend_id")
+			c.SetParamNames("friend_id")
+			c.SetParamValues(test.ArgFriendId)
+			c.Set("user_id", test.ArgUserId)
+
+			err := handler.CheckIsFriend(c)
 			require.Equal(t, test.Error, err)
 
 			if err == nil {

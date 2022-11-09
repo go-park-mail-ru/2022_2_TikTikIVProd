@@ -12,7 +12,6 @@ import (
 	_authDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/delivery"
 	authRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/repository/redis"
 	authUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/usecase"
-
 	_chatDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/delivery"
 	chatRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/repository/postgres"
 	chatUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/usecase"
@@ -35,21 +34,22 @@ import (
 // @version 1.0
 // @host 89.208.197.127:8080
 
-// var testCfg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
+//var testCfgPg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
 
-var prodCfg = postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}
+var prodCfgPg = postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}
+
+//var testCfgRedis = &redis.Options{Addr: ":6379"}
+
+var prodCfgRedis = &redis.Options{Addr: "redis:6379"}
 
 func main() {
-	db, err := gorm.Open(postgres.New(prodCfg),
+	db, err := gorm.Open(postgres.New(prodCfgPg),
 		&gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	redisClient := redis.NewClient(&redis.Options{
-		Addr:       "redis:6379",
-		MaxRetries: 10,
-	})
+	redisClient := redis.NewClient(prodCfgRedis)
 
 	err = redisClient.Ping().Err()
 	if err != nil {
@@ -94,7 +94,7 @@ func main() {
 
 	authMiddleware := middleware.NewMiddleware(authUC)
 	e.Use(authMiddleware.Auth)
-	//e.Use(authMiddleware.CSRF)
+	e.Use(authMiddleware.CSRF)
 
 	_postsDelivery.NewDelivery(e, postsUC)
 	_authDelivery.NewDelivery(e, authUC)
