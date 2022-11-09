@@ -78,57 +78,6 @@ func (delivery *delivery) GetAllDialogs(c echo.Context) error {
 	return c.JSON(http.StatusOK, pkg.Response{Body: dialogs})
 }
 
-// CreateDialog godoc
-// @Summary      CreateDialog
-// @Description  create dialog
-// @Tags     chat
-// @Accept	 application/json
-// @Produce  application/json
-// @Param    message body models.Message true "message data"
-// @Success  200 {object} pkg.Response{body=models.Dialog} "success send message"
-// @Failure 405 {object} echo.HTTPError "Method Not Allowed"
-// @Failure 400 {object} echo.HTTPError "bad request"
-// @Failure 500 {object} echo.HTTPError "internal server error"
-// @Failure 404 {object} echo.HTTPError "can't find item with such id"
-// @Failure 401 {object} echo.HTTPError "no cookie"
-// @Failure 403 {object} echo.HTTPError "invalid csrf"
-// @Router   /chat/create [post]
-func (delivery *delivery) CreateDialog(c echo.Context) error {
-	var dialog models.Dialog
-	err := c.Bind(&dialog)
-	if err != nil {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
-	}
-
-	if ok, err := isRequestValid(&dialog); !ok {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
-	}
-
-	userId, ok := c.Get("user_id").(int)
-	if !ok {
-		c.Logger().Error(models.ErrInternalServerError)
-		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
-	}
-
-	dialog.UserId1 = userId
-
-	err = delivery.ChatUC.CreateDialog(&dialog)
-	if err != nil {
-		causeErr := errors.Cause(err)
-		switch {
-		case errors.Is(causeErr, models.ErrNotFound):
-			c.Logger().Error(err)
-			return echo.NewHTTPError(http.StatusNotFound, models.ErrNotFound.Error())
-		default:
-			c.Logger().Error(err)
-			return echo.NewHTTPError(http.StatusInternalServerError, causeErr.Error())
-		}
-	}
-	return c.JSON(http.StatusOK, pkg.Response{Body: dialog})
-}
-
 // SendMessage godoc
 // @Summary      SendMessage
 // @Description  send message
@@ -213,7 +162,6 @@ func NewDelivery(e *echo.Echo, cu chatUsecase.UseCaseI) {
 	e.GET("/chat/:id", handler.GetDialog)
 	e.GET("/chat", handler.GetAllDialogs)
 	e.POST("/chat/send_message", handler.SendMessage)
-	e.POST("/chat/create", handler.CreateDialog)
-	e.File("/room/:roomId", "index.html")
+	e.File("/room/:roomId", "app/cmd/index.html")
 	e.GET("/ws/:roomId", handler.WsChatHandler)
 }

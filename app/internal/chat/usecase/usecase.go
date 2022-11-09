@@ -12,7 +12,6 @@ type UseCaseI interface {
 	SelectDialog(id int) (*models.Dialog, error)
 	SelectAllDialogs(userId int) ([]models.Dialog, error)
 	SendMessage(message *models.Message) error
-	CreateDialog(dialog *models.Dialog) error
 }
 
 type useCase struct {
@@ -76,15 +75,3 @@ func (uc *useCase) SendMessage(message *models.Message) error {
 
 	return nil
 }
-
-func (uc *useCase) CreateDialog(dialog *models.Dialog) error {
-	err := uc.chatRepository.CreateDialog(dialog)
-	if err != nil {
-		return errors.Wrap(err, "chat repository error")
-	}
-
-	//проверить существование UserId2
-
-	return nil
-}
-
