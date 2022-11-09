@@ -10,6 +10,7 @@ import (
 
 type UseCaseI interface {
 	SelectDialog(id int) (*models.Dialog, error)
+	SelectDialogByUsers(userId, friendId int) (*models.Dialog, error)
 	SelectAllDialogs(userId int) ([]models.Dialog, error)
 	SendMessage(message *models.Message) error
 }
@@ -31,6 +32,22 @@ func (uc *useCase) SelectDialog(id int) (*models.Dialog, error) {
 	}
 
 	messages, err := uc.chatRepository.SelectMessages(id)
+	if err != nil {
+		return nil, errors.Wrap(err, "chat repository error")
+	}
+
+	dialog.Messages = messages
+
+	return dialog, nil
+}
+
+func (uc *useCase) SelectDialogByUsers(userId, friendId int) (*models.Dialog, error) {
+	dialog, err := uc.chatRepository.SelectDialogByUsers(userId, friendId)
+	if err != nil {
+		return nil, errors.Wrap(err, "chat repository error")
+	}
+
+	messages, err := uc.chatRepository.SelectMessages(dialog.Id)
 	if err != nil {
 		return nil, errors.Wrap(err, "chat repository error")
 	}

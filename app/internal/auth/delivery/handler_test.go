@@ -200,19 +200,17 @@ func TestDeliverySignIn(t *testing.T) {
 	mockUCase := mocks.NewUseCaseI(t)
 
 	var mockCookie models.Cookie
-
 	err = faker.FakeData(&mockCookie)
 	assert.NoError(t, err)
 
 	var mockUser models.User
-
 	err = faker.FakeData(&mockUser)
 	assert.NoError(t, err)
 
 	mockUCase.On("SignIn", mockUserSignIn).Return(&mockUser, &mockCookie, nil)
-	mockUCase.On("SignIn", mockUserSignIn).Return(&mockUser, &mockCookie, nil)
-	mockUCase.On("SignIn", mockUserSignIn).Return(&mockUser, &mockCookie, nil)
-	mockUCase.On("SignIn", mockUserSignIn).Return(&mockUser, &mockCookie, nil)
+	mockUCase.On("SignIn", mockUserInvalidPassword).Return(nil, nil, models.ErrInvalidPassword)
+	mockUCase.On("SignIn", mockUserIternalErr).Return(nil, nil, models.ErrInternalServerError)
+	mockUCase.On("SignIn", mockUserNotFound).Return(nil, nil, models.ErrNotFound)
 
 	handler := authDelivery.Delivery{
 		AuthUC: mockUCase,
@@ -290,18 +288,22 @@ func TestDeliveryLogout(t *testing.T) {
 	err := faker.FakeData(&valueCookie)
 	assert.NoError(t, err)
 
+	var valueCookieNotFound string
+	err = faker.FakeData(&valueCookieNotFound)
+	assert.NoError(t, err)
+
+	var valueCookieInternalErr string
+	err = faker.FakeData(&valueCookieInternalErr)
+	assert.NoError(t, err)
+
 	mockUCase := mocks.NewUseCaseI(t)
 
 	mockUCase.On("DeleteCookie", valueCookie).Return(nil)
+	mockUCase.On("DeleteCookie", valueCookieNotFound).Return(models.ErrNotFound)
+	mockUCase.On("DeleteCookie", valueCookieInternalErr).Return(models.ErrInternalServerError)
 
 	handler := authDelivery.Delivery{
 		AuthUC: mockUCase,
-	}
-
-	cookie := &http.Cookie{
-		Name:     "session_token",
-		Value:    valueCookie,
-		HttpOnly: true,
 	}
 
 	e := echo.New()
@@ -309,6 +311,7 @@ func TestDeliveryLogout(t *testing.T) {
 
 	cases := map[string]TestCase {
 		"success": {
+			ArgData: valueCookie,
 			Error: nil,
 			StatusCode: http.StatusNoContent,
 		},
@@ -318,14 +321,34 @@ func TestDeliveryLogout(t *testing.T) {
 				Message: http.ErrNoCookie.Error(),
 			},
 		},
+		"not_found": {
+			ArgData:   valueCookieNotFound,
+			Error: &echo.HTTPError{
+				Code: http.StatusNotFound,
+				Message: models.ErrNotFound.Error(),
+			},
+		},
+		"internal_error": {
+			ArgData:   valueCookieInternalErr,
+			Error: &echo.HTTPError{
+				Code: http.StatusInternalServerError,
+				Message: models.ErrInternalServerError.Error(),
+			},
+		},
 	}
 
 	for name, test := range cases {
 		t.Run(name, func(t *testing.T) {
-			req := httptest.NewRequest(echo.POST, "/logout", strings.NewReader(test.ArgData))
+			req := httptest.NewRequest(echo.POST, "/logout", strings.NewReader(""))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
-			if name == "success" {
+			if name != "unauthorized" {
+				cookie := &http.Cookie{
+					Name:     "session_token",
+					Value:    test.ArgData,
+					HttpOnly: true,
+				}
+
 				req.AddCookie(cookie)
 			}
 			
@@ -350,6 +373,10 @@ func TestDeliveryAuth(t *testing.T) {
 	err := faker.FakeData(&valueCookie)
 	assert.NoError(t, err)
 
+	var valueCookieUnauthorized string
+	err = faker.FakeData(&valueCookieUnauthorized)
+	assert.NoError(t, err)
+
 	var user models.User
 	err = faker.FakeData(&user)
 	assert.NoError(t, err)
@@ -357,15 +384,10 @@ func TestDeliveryAuth(t *testing.T) {
 	mockUCase := mocks.NewUseCaseI(t)
 
 	mockUCase.On("Auth", valueCookie).Return(&user, nil)
+	mockUCase.On("Auth", valueCookieUnauthorized).Return(nil, models.ErrNotFound)
 
 	handler := authDelivery.Delivery{
 		AuthUC: mockUCase,
-	}
-
-	cookie := &http.Cookie{
-		Name:     "session_token",
-		Value:    valueCookie,
-		HttpOnly: true,
 	}
 
 	e := echo.New()
@@ -373,23 +395,36 @@ func TestDeliveryAuth(t *testing.T) {
 
 	cases := map[string]TestCase {
 		"success": {
+			ArgData: valueCookie,
 			Error: nil,
 			StatusCode: http.StatusOK,
 		},
-		"unauthorized": {
+		"unauthorized_no_cookie": {
 			Error: &echo.HTTPError{
 				Code: http.StatusUnauthorized,
 				Message: http.ErrNoCookie.Error(),
+			},
+		},
+		"unauthorized_no_user": {
+			ArgData: valueCookieUnauthorized,
+			Error: &echo.HTTPError{
+				Code: http.StatusUnauthorized,
+				Message: models.ErrNotFound.Error(),
 			},
 		},
 	}
 
 	for name, test := range cases {
 		t.Run(name, func(t *testing.T) {
-			req := httptest.NewRequest(echo.GET, "/auth", strings.NewReader(test.ArgData))
+			req := httptest.NewRequest(echo.GET, "/auth", strings.NewReader(""))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
-			if name == "success" {
+			if name != "unauthorized_no_cookie" {
+				cookie := &http.Cookie{
+					Name:     "session_token",
+					Value:    test.ArgData,
+					HttpOnly: true,
+				}
 				req.AddCookie(cookie)
 			}
 			

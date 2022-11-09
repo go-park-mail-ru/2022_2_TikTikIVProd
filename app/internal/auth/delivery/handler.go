@@ -211,9 +211,6 @@ func (del *Delivery) Auth(c echo.Context) error {
 	if err == http.ErrNoCookie {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
-	} else if err != nil {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	gotUser, err := del.AuthUC.Auth(cookie.Value)
