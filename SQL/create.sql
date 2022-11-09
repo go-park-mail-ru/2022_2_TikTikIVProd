@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS friends (
 
 CREATE TABLE IF NOT EXISTS user_posts (
 	id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-	user_id INT REFERENCES users(id) NOT NULL on delete cascade,
+	user_id INT REFERENCES users(id) on delete cascade,
 	message TEXT NOT NULL,
 	create_date DATE NOT NULL
 );
