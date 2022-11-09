@@ -12,10 +12,10 @@ import (
 	_authDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/delivery"
 	authRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/repository/redis"
 	authUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/usecase"
+
 	_chatDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/delivery"
 	chatRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/repository/postgres"
 	chatUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/usecase"
-
 	_friendsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/delivery"
 	friendsRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/repository/postgres"
 	friendsUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/usecase"
@@ -29,9 +29,6 @@ import (
 	_usersDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/delivery"
 	usersRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository/postgres"
 	usersUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/usecase"
-	_chatDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/delivery"
-	chatRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/repository/postgres"
-	chatUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/usecase"
 )
 
 // @title WS Swagger API

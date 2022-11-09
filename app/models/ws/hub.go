@@ -1,5 +1,7 @@
 package models
 
+import "github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
+
 type Subscription struct {
 	conn *connection
 	room int
@@ -12,7 +14,7 @@ type Hub struct {
 	rooms map[int]map[*connection]bool
 
 	// Inbound messages from the connections.
-	broadcast chan Message
+	broadcast chan models.Message
 
 	// Register requests from the connections.
 	register chan Subscription
@@ -23,7 +25,7 @@ type Hub struct {
 
 func NewHub() *Hub {
 	return &Hub{
-		broadcast:  make(chan Message),
+		broadcast:  make(chan models.Message),
 		register:   make(chan Subscription),
 		unregister: make(chan Subscription),
 		rooms:      make(map[int]map[*connection]bool),

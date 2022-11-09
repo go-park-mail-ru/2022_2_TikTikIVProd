@@ -1,6 +1,9 @@
 package models
 
 import (
+	"fmt"
+	chatUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/usecase"
+	models "github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	"log"
@@ -32,11 +35,11 @@ type connection struct {
 	ws *websocket.Conn
 
 	// Buffered channel of outbound messages.
-	send chan Message
+	send chan models.Message
 }
 
 // readPump pumps messages from the websocket connection to the Hub.
-func (s Subscription) readPump(hub *Hub) {
+func (s Subscription) readPump(hub *Hub, cu chatUseCase.UseCaseI) {
 	c := s.conn
 	defer func() {
 		hub.unregister <- s
@@ -46,26 +49,26 @@ func (s Subscription) readPump(hub *Hub) {
 	c.ws.SetReadDeadline(time.Now().Add(pongWait))
 	c.ws.SetPongHandler(func(string) error { c.ws.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 	for {
-		msg := Message{
-			DialogID:    s.room,
+		msg := models.Message{
+			DialogID:  s.room,
 			CreatedAt: time.Now(),
 		}
 
 		err := c.ws.ReadJSON(&msg)
+		fmt.Println(msg)
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
 				log.Printf("error: %v", err)
 			}
 			break
 		}
-
-		//TODO сохранение в базе
+		go cu.SendMessage(&msg)
 		hub.broadcast <- msg
 	}
 }
 
 // write writes a Message_ with the given Message_ type and payload.
-func (c *connection) write(msg Message) error {
+func (c *connection) write(msg models.Message) error {
 	c.ws.SetWriteDeadline(time.Now().Add(writeWait))
 	return c.ws.WriteJSON(msg)
 }
@@ -102,15 +105,15 @@ func (s *Subscription) writePump(hub *Hub) {
 }
 
 // serveWs handles websocket requests from the peer.
-func ServeWs(c echo.Context, roomId int, hub *Hub) {
+func ServeWs(c echo.Context, roomId int, hub *Hub, cu chatUseCase.UseCaseI) {
 	ws, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
 		log.Println(err.Error())
 		return
 	}
-	conn := &connection{send: make(chan Message, 256), ws: ws}
+	conn := &connection{send: make(chan models.Message, 256), ws: ws}
 	sub := Subscription{conn, roomId}
 	hub.register <- sub
 	go sub.writePump(hub)
-	go sub.readPump(hub)
+	go sub.readPump(hub, cu)
 }

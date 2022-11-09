@@ -24,8 +24,9 @@
                     return false;
                 }
                 conn.send(JSON.stringify({
-                    Body: msg.value,
-                    SenderID: 1
+                    body: msg.value,
+                    sender_id: 1,
+                    receiver_id: 2,
                 }));
                 msg.value = "";
                 return false;

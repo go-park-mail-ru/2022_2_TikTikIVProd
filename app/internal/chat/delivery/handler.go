@@ -6,6 +6,7 @@ import (
 
 	chatUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/usecase"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
+	ws "github.com/go-park-mail-ru/2022_2_TikTikIVProd/models/ws"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg"
 	"github.com/labstack/echo/v4"
 	"github.com/microcosm-cc/bluemonday"
@@ -15,7 +16,7 @@ import (
 
 type delivery struct {
 	ChatUC chatUsecase.UseCaseI
-	hub    *models.Hub
+	hub    *ws.Hub
 }
 
 // GetDialog godoc
@@ -139,7 +140,7 @@ func (delivery *delivery) WsChatHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "Chat not found") //TODO переделать на ошибки в файле
 	}
 
-	models.ServeWs(c, roomID, delivery.hub)
+	ws.ServeWs(c, roomID, delivery.hub, delivery.ChatUC)
 
 	return c.NoContent(http.StatusOK)
 }
@@ -160,7 +161,7 @@ func requestSanitize(message *models.Message) {
 }
 
 func NewDelivery(e *echo.Echo, cu chatUsecase.UseCaseI) {
-	hub := models.NewHub()
+	hub := ws.NewHub()
 	go hub.Run()
 	handler := &delivery{
 		ChatUC: cu,
