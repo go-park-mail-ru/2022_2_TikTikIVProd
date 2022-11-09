@@ -44,11 +44,6 @@ func TestUsecaseSignUp(t *testing.T) {
 	err := faker.FakeData(&mockUserSuccess)
 	assert.NoError(t, err)
 
-	var mockUserBadRequest models.User
-	err = faker.FakeData(&mockUserBadRequest)
-	assert.NoError(t, err)
-	mockUserBadRequest.Email = ""
-
 	var mockUserConflictNickName models.User
 	err = faker.FakeData(&mockUserConflictNickName)
 	assert.NoError(t, err)
@@ -77,10 +72,6 @@ func TestUsecaseSignUp(t *testing.T) {
 			ArgData:   &mockUserSuccess,
 			ExpectedRes: mockUserSuccess.Id,
 			Error: nil,
-		},
-		"bad_request": {
-			ArgData:   &mockUserBadRequest,
-			Error: models.ErrBadRequest,
 		},
 		"conflict_nickname": {
 			ArgData:   &mockUserConflictNickName,
@@ -115,10 +106,6 @@ func TestUsecaseSignIn(t *testing.T) {
 	mockUserSignIn.Email = mockUser.Email
 	mockUserSignIn.Password = mockUser.Password
 
-	var mockUserSignInBadRequest models.UserSignIn
-	mockUserSignInBadRequest.Email = mockUser.Email
-	mockUserSignInBadRequest.Password = ""
-
 	var mockUserSignInInvalidPassword models.UserSignIn
 	err = faker.FakeData(&mockUserSignInInvalidPassword.Email)
 	assert.NoError(t, err)
@@ -148,10 +135,6 @@ func TestUsecaseSignIn(t *testing.T) {
 			ExpectedResUser:   &expectedUser,
 			ExpectedResCookie: mockUser.Id,
 			Error: nil,
-		},
-		"bad_request": {
-			ArgData:   mockUserSignInBadRequest,
-			Error: models.ErrBadRequest,
 		},
 		"invalid_password": {
 			ArgData:   mockUserSignInInvalidPassword,

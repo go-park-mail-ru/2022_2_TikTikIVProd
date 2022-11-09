@@ -26,6 +26,27 @@ func (_m *UseCaseI) AddFriend(friends models.Friends) error {
 	return r0
 }
 
+// CheckIsFriend provides a mock function with given fields: friends
+func (_m *UseCaseI) CheckIsFriend(friends models.Friends) (bool, error) {
+	ret := _m.Called(friends)
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(models.Friends) bool); ok {
+		r0 = rf(friends)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(models.Friends) error); ok {
+		r1 = rf(friends)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // DeleteFriend provides a mock function with given fields: friends
 func (_m *UseCaseI) DeleteFriend(friends models.Friends) error {
 	ret := _m.Called(friends)

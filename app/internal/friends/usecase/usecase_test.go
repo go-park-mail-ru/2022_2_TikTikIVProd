@@ -17,6 +17,12 @@ type TestCaseAddFriend struct {
 	Error error
 }
 
+type TestCaseCheckIsFriend struct {
+	ArgData models.Friends
+	ExpectedRes bool
+	Error error
+}
+
 type TestCaseDeleteFriend struct {
 	ArgData models.Friends
 	Error error
@@ -164,6 +170,52 @@ func TestUsecaseSelectFriends(t *testing.T) {
 
 			if err == nil {
 				assert.Equal(t, test.ExpectedRes, friends)
+			}
+		})
+	}
+	mockUserRepo.AssertExpectations(t)
+	mockFriendsRepo.AssertExpectations(t)
+}
+
+func TestUsecaseCheckIsFriend(t *testing.T) {
+	mockFriendsSuccess := models.Friends {
+		Id1: 1,
+		Id2: 2,
+	}
+
+	mockFriendsBadRequest := models.Friends {
+		Id1: 5,
+		Id2: 5,
+	}
+
+	mockFriendsRepo := friendsMocks.NewRepositoryI(t)
+	mockUserRepo := userMocks.NewRepositoryI(t)
+
+	mockUserRepo.On("SelectUserById", mockFriendsSuccess.Id2).Return(nil, nil)
+	mockFriendsRepo.On("CheckFriends", mockFriendsSuccess).Return(true, nil)
+
+	useCase := friendsUsecase.New(mockFriendsRepo, mockUserRepo)
+
+	cases := map[string]TestCaseCheckIsFriend {
+		"success": {
+			ArgData:   mockFriendsSuccess,
+			ExpectedRes: true,
+			Error: nil,
+		},
+		"bad_request": {
+			ArgData:   mockFriendsBadRequest,
+			ExpectedRes: false,
+			Error: models.ErrBadRequest,
+		},
+	}
+
+	for name, test := range cases {
+		t.Run(name, func(t *testing.T) {
+			friendExists, err := useCase.CheckIsFriend(test.ArgData)
+			require.Equal(t, test.Error, err)
+
+			if err == nil {
+				assert.Equal(t, test.ExpectedRes, friendExists)
 			}
 		})
 	}
