@@ -142,7 +142,8 @@ func (delivery *delivery) WsChatHandler(c echo.Context) error {
 
 	ws.ServeWs(c, roomID, delivery.hub, delivery.ChatUC)
 
-	return c.NoContent(http.StatusOK)
+	c.Response().Header().Set(echo.HeaderUpgrade, "websocket")
+	return c.NoContent(http.StatusSwitchingProtocols)
 }
 
 func isRequestValid(message interface{}) (bool, error) {
