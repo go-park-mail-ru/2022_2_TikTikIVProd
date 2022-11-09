@@ -11,16 +11,9 @@ import (
 )
 
 const (
-	// Time allowed to write a Message_ to the peer.
 	writeWait = 10 * time.Second
-
-	// Time allowed to read the next pong Message_ from the peer.
 	pongWait = 60 * time.Second
-
-	// Send pings to peer with this period. Must be less than pongWait.
 	pingPeriod = (pongWait * 9) / 10
-
-	// Maximum Message_ size allowed from peer.
 	maxMessageSize = 512
 )
 
@@ -29,16 +22,11 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-// connection is an middleman between the websocket connection and the Hub.
 type connection struct {
-	// The websocket connection.
 	ws *websocket.Conn
-
-	// Buffered channel of outbound messages.
 	send chan models.Message
 }
 
-// readPump pumps messages from the websocket connection to the Hub.
 func (s Subscription) readPump(hub *Hub, cu chatUseCase.UseCaseI) {
 	c := s.conn
 	defer func() {
@@ -67,7 +55,6 @@ func (s Subscription) readPump(hub *Hub, cu chatUseCase.UseCaseI) {
 	}
 }
 
-// write writes a Message_ with the given Message_ type and payload.
 func (c *connection) write(msg models.Message) error {
 	c.ws.SetWriteDeadline(time.Now().Add(writeWait))
 	return c.ws.WriteJSON(msg)
@@ -78,7 +65,6 @@ func (c *connection) writeType(mt int) error {
 	return c.ws.WriteMessage(mt, []byte{})
 }
 
-// writePump pumps messages from the Hub to the websocket connection.
 func (s *Subscription) writePump(hub *Hub) {
 	c := s.conn
 	ticker := time.NewTicker(pingPeriod)
@@ -104,7 +90,6 @@ func (s *Subscription) writePump(hub *Hub) {
 	}
 }
 
-// serveWs handles websocket requests from the peer.
 func ServeWs(c echo.Context, roomId int, hub *Hub, cu chatUseCase.UseCaseI) {
 	ws, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {

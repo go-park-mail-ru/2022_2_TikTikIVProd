@@ -43,12 +43,14 @@ func TestRepositoryCreateUser(t *testing.T) {
 	err = faker.FakeData(&mockUser)
 	assert.NoError(t, err)
 
+    mockUser.Id = 1
+
     userId := 1
 
     mock.ExpectQuery(regexp.QuoteMeta(
     `INSERT INTO "users" ("first_name","last_name","nick_name","email",`+
     `"password","id") VALUES ($1,$2,$3,$4,$5,$6) RETURNING "id"`)).WithArgs(mockUser.FirstName,
-        mockUser.LastName, mockUser.NickName, mockUser.Email, mockUser.Password,mockUser.Id).
+        mockUser.LastName, mockUser.NickName, mockUser.Email, mockUser.Password, mockUser.Id).
     WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(userId))
 
     mock.ExpectCommit()

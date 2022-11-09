@@ -82,8 +82,6 @@ func (uc *useCase) SendMessage(message *models.Message) error {
 		message.DialogID = dialog.Id
 	}
 
-	//проверить существование ReceiverId
-
 	message.CreatedAt = time.Now()
 	err := uc.chatRepository.CreateMessage(message)
 	if err != nil {

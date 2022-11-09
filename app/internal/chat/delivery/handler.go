@@ -175,7 +175,7 @@ func (delivery *Delivery) WsChatHandler(c echo.Context) error {
 
 	if err != nil {
 		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusNotFound, "Chat not found") //TODO переделать на ошибки в файле
+		return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error()) //TODO переделать на ошибки в файле
 	}
 
 	ws.ServeWs(c, roomID, delivery.hub, delivery.ChatUC)
