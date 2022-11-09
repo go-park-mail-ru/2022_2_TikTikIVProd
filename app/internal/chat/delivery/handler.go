@@ -4,9 +4,11 @@ import (
 	chatUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/usecase"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models/chat/dto"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models/chat/entity"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg"
 	"github.com/labstack/echo/v4"
 	"net/http"
+	"strconv"
 )
 
 type DeliveryI interface {
@@ -15,6 +17,7 @@ type DeliveryI interface {
 
 type delivery struct {
 	cUsecase chatUsecase.ChatUsecaseI
+	hub      *entity.Hub
 }
 
 func (delivery *delivery) CreateDialog(c echo.Context) error {
@@ -51,16 +54,30 @@ func (delivery *delivery) GetDialogsInfo(c echo.Context) error {
 }
 
 func (delivery *delivery) WsChatHandler(c echo.Context) error {
-	panic("")
+	roomID, err := strconv.Atoi(c.Param("roomId"))
+
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusNotFound, "Chat not found") //TODO переделать на ошибки в файле
+	}
+
+	entity.ServeWs(c, roomID, delivery.hub)
+
+	return c.NoContent(http.StatusOK)
 }
 
 func NewDelivery(e *echo.Echo, cu chatUsecase.ChatUsecaseI) {
+	hub := entity.NewHub()
+	go hub.Run()
+
 	handler := &delivery{
 		cUsecase: cu,
+		hub:      hub,
 	}
 
 	e.POST("/chat/create", handler.CreateDialog)
 	//e.GET("/chat/dialog/:id", handler.GetDialog)
 	//e.GET("/chat/user/:id/dialogs", handler.GetDialogsInfo)
-	//e.GET("/chat/ws", handler.WsChatHandler)
+	e.File("/room/:roomId", "index.html")
+	e.GET("/ws/:roomId", handler.WsChatHandler)
 }

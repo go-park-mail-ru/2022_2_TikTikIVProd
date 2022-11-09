@@ -13,8 +13,8 @@ type CreateDialogRequest struct {
 
 func (dialog CreateDialogRequest) ToDialogEntities() *entity.Dialog {
 	return &entity.Dialog{
-		Name:      dialog.Name,
-		CreatedAt: time.Now(),
+		Name: dialog.Name,
+		//CreatedAt: time.Now(),
 	}
 }
 

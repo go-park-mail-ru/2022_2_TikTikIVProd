@@ -8,31 +8,23 @@ type Message struct {
 	ID        int
 	Body      string
 	SenderID  int
+	ChatID    int
 	CreatedAt time.Time
 }
 
 func (Message) TableName() string {
-	return "message"
+	return "Message_"
 }
 
 type Dialog struct {
 	ID int
 	//OwnerID   int //todo
-	Name      string
-	CreatedAt time.Time
+	Name string
+	//CreatedAt time.Time
 }
 
 func (Dialog) TableName() string {
 	return "chat"
-}
-
-type MessageDialogRelation struct {
-	ChatID    int
-	MessageID int
-}
-
-func (MessageDialogRelation) TableName() string {
-	return "message_chat"
 }
 
 type UserDialogRelation struct {
