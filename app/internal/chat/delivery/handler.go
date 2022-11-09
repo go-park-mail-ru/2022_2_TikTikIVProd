@@ -171,6 +171,6 @@ func NewDelivery(e *echo.Echo, cu chatUsecase.UseCaseI) {
 	e.GET("/chat/:id", handler.GetDialog)
 	e.GET("/chat", handler.GetAllDialogs)
 	e.POST("/chat/send_message", handler.SendMessage)
-	e.File("/room/:roomId", "index.html")
+	e.File("/room/:roomId", "app/cmd/index.html")
 	e.GET("/ws/:roomId", handler.WsChatHandler)
 }
