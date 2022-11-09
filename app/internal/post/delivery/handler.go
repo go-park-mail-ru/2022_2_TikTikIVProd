@@ -74,12 +74,12 @@ func (delivery *Delivery) CreatePost(c echo.Context) error {
 
 	if err != nil {
 		c.Logger().Error(err)
-		return c.JSON(http.StatusUnprocessableEntity, err.Error())
+		return echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
 	}
 
 	if ok, err := isRequestValid(&post); !ok {
 		c.Logger().Error(err)
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
 	}
 
 	requestSanitizePost(&post)
