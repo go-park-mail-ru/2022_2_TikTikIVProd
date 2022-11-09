@@ -35,19 +35,19 @@ import (
 // @version 1.0
 // @host 89.208.197.127:8080
 
-var testCfg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
+// var testCfg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
 
-//var prodCfg = postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}
+var prodCfg = postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}
 
 func main() {
-	db, err := gorm.Open(postgres.New(testCfg),
+	db, err := gorm.Open(postgres.New(prodCfg),
 		&gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	redisClient := redis.NewClient(&redis.Options{
-		Addr:       ":6379",
+		Addr:       "redis:6379",
 		MaxRetries: 10,
 	})
 
