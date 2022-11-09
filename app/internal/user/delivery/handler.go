@@ -11,7 +11,6 @@ import (
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg"
 	"github.com/labstack/echo/v4"
 	"github.com/microcosm-cc/bluemonday"
-	"gopkg.in/go-playground/validator.v9"
 )
 
 type Delivery struct {
@@ -30,7 +29,6 @@ type Delivery struct {
 // @Failure 500 {object} echo.HTTPError "internal server error"
 // @Failure 404 {object} echo.HTTPError "can't find user with such id"
 // @Failure 401 {object} echo.HTTPError "no cookie"
-// @Failure 403 {object} echo.HTTPError "invalid csrf"
 // @Router   /users/{id} [get]
 func (del *Delivery) GetProfile(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
@@ -53,6 +51,26 @@ func (del *Delivery) GetProfile(c echo.Context) error {
 	return c.JSON(http.StatusOK, pkg.Response{Body: user})
 }
 
+// GetUsers godoc
+// @Summary      GetUsers
+// @Description  get all users
+// @Tags     users
+// @Produce  application/json
+// @Success  200 {object} pkg.Response{body=[]models.User} "success get users"
+// @Failure 405 {object} echo.HTTPError "Method Not Allowed"
+// @Failure 500 {object} echo.HTTPError "internal server error"
+// @Failure 401 {object} echo.HTTPError "no cookie"
+// @Router   /users [get]
+func (del *Delivery) GetUsers(c echo.Context) error {
+	users, err := del.UserUC.SelectUsers()
+	if err != nil {
+		causeErr := errors.Cause(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, causeErr.Error())
+	}
+	return c.JSON(http.StatusOK, pkg.Response{Body: users})
+}
+
 // UpdateUser godoc
 // @Summary      UpdateUser
 // @Description  update user's profile
@@ -71,11 +89,6 @@ func (del *Delivery) GetProfile(c echo.Context) error {
 func (del *Delivery) UpdateUser(c echo.Context) error {
 	var user models.User
 	err := c.Bind(&user); if err != nil {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
-	}
-	
-	if ok, err := isRequestValid(&user); !ok {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
 	}
@@ -105,15 +118,6 @@ func (del *Delivery) UpdateUser(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
-func isRequestValid(user interface{}) (bool, error) {
-	validate := validator.New()
-	err := validate.Struct(user)
-	if err != nil {
-		return false, err
-	}
-	return true, nil
-}
-
 func requestSanitizeUpdateUser(user *models.User) {
 	sanitizer := bluemonday.UGCPolicy()
 
@@ -130,5 +134,6 @@ func NewDelivery(e *echo.Echo, uc userUsecase.UseCaseI) {
 	}
 
 	e.GET("/users/:id", handler.GetProfile)
+	e.GET("/users", handler.GetUsers)
 	e.PUT("/users/update", handler.UpdateUser)
 }

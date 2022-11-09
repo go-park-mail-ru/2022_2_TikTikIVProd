@@ -1,4 +1,4 @@
-package entity
+package models
 
 type Subscription struct {
 	conn *connection
@@ -52,7 +52,7 @@ func (h *Hub) Run() {
 				}
 			}
 		case m := <-h.broadcast:
-			connections := h.rooms[m.ChatID]
+			connections := h.rooms[m.DialogID]
 			for c := range connections {
 				select {
 				case c.send <- m:
@@ -60,7 +60,7 @@ func (h *Hub) Run() {
 					close(c.send)
 					delete(connections, c)
 					if len(connections) == 0 {
-						delete(h.rooms, m.ChatID)
+						delete(h.rooms, m.DialogID)
 					}
 				}
 			}

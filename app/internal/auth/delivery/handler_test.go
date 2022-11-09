@@ -43,7 +43,7 @@ func TestDeliverySignUp(t *testing.T) {
 	jsonUser, err := json.Marshal(mockUser)
 	assert.NoError(t, err)
 
-	mockUCase := new(mocks.UseCaseI)
+	mockUCase := mocks.NewUseCaseI(t)
 
 	mockUCase.On("SignUp", &mockUser).Return(&mockCookie, nil).Run(func(args mock.Arguments) {
 		arg := args.Get(0).(*models.User)
@@ -111,7 +111,7 @@ func TestDeliverySignIn(t *testing.T) {
 	jsonUser, err := json.Marshal(mockUserSignIn)
 	assert.NoError(t, err)
 
-	mockUCase := new(mocks.UseCaseI)
+	mockUCase := mocks.NewUseCaseI(t)
 
 	var mockCookie models.Cookie
 
@@ -172,7 +172,7 @@ func TestDeliveryLogout(t *testing.T) {
 	err := faker.FakeData(&valueCookie)
 	assert.NoError(t, err)
 
-	mockUCase := new(mocks.UseCaseI)
+	mockUCase := mocks.NewUseCaseI(t)
 
 	mockUCase.On("DeleteCookie", valueCookie).Return(nil)
 
@@ -235,7 +235,7 @@ func TestDeliveryAuth(t *testing.T) {
 	err = faker.FakeData(&user)
 	assert.NoError(t, err)
 
-	mockUCase := new(mocks.UseCaseI)
+	mockUCase := mocks.NewUseCaseI(t)
 
 	mockUCase.On("Auth", valueCookie).Return(&user, nil)
 
@@ -294,7 +294,7 @@ func TestDeliveryCreateCSRF(t *testing.T) {
 	err := faker.FakeData(&valueCookie)
 	assert.NoError(t, err)
 
-	mockUCase := new(mocks.UseCaseI)
+	mockUCase := mocks.NewUseCaseI(t)
 
 	handler := authDelivery.Delivery{
 		AuthUC: mockUCase,

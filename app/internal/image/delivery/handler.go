@@ -29,7 +29,6 @@ type delivery struct {
 // @Success  200 "success get image"
 // @Failure 405 {object} echo.HTTPError "invalid http method"
 // @Failure 401 {object} echo.HTTPError "no cookie"
-// @Failure 403 {object} echo.HTTPError "invalid csrf"
 // @Failure 500 {object} echo.HTTPError "internal server error"
 // @Router   /image/{id} [get]
 func (delivery *delivery) GetImageByID(c echo.Context) error {

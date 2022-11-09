@@ -1,11 +1,13 @@
 package repository
 
 import (
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models/chat/dto"
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models/chat/entity"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
 )
 
 type RepositoryI interface {
-	CreateDialog(req *dto.CreateDialogRequest) (*entity.Dialog, error)
-	AddUserDialogRelations(dialogId int, userIds []int) error
+	SelectDialog(id int) (*models.Dialog, error)
+	SelectMessages(id int) ([]models.Message, error)
+	CreateDialog(dialog *models.Dialog) error
+	CreateMessage(message *models.Message) error
+	SelectAllDialogs(userId int) ([]models.Dialog, error)
 }

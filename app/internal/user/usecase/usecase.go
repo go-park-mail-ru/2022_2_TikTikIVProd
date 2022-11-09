@@ -11,6 +11,7 @@ import (
 type UseCaseI interface {
 	SelectUserById(id int) (*models.User, error)
 	UpdateUser(user models.User) error
+	SelectUsers() ([]models.User, error)
 }
 
 type useCase struct {
@@ -52,5 +53,13 @@ func (uc *useCase) UpdateUser(user models.User) error {
 	}
 
 	return nil
+}
+
+func (uc *useCase) SelectUsers() ([]models.User, error) {
+	users, err := uc.userRepository.SelectAllUsers()
+	if err != nil {
+		return nil, errors.Wrap(err, "user repository error")
+	}
+	return users, nil
 }
 

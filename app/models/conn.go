@@ -1,4 +1,4 @@
-package entity
+package models
 
 import (
 	"github.com/gorilla/websocket"
@@ -47,7 +47,7 @@ func (s Subscription) readPump(hub *Hub) {
 	c.ws.SetPongHandler(func(string) error { c.ws.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 	for {
 		msg := Message{
-			ChatID:    s.room,
+			DialogID:    s.room,
 			CreatedAt: time.Now(),
 		}
 

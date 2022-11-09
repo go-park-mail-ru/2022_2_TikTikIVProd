@@ -29,6 +29,9 @@ import (
 	_usersDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/delivery"
 	usersRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository/postgres"
 	usersUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/usecase"
+	_chatDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/delivery"
+	chatRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/repository/postgres"
+	chatUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/usecase"
 )
 
 // @title WS Swagger API
@@ -44,7 +47,6 @@ func main() {
 		&gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
-		return
 	}
 
 	redisClient := redis.NewClient(&redis.Options{
@@ -55,7 +57,6 @@ func main() {
 	err = redisClient.Ping().Err()
 	if err != nil {
 		log.Fatal(err)
-		return
 	}
 
 	postDB := postsRep.NewPostRepository(db)
@@ -70,7 +71,7 @@ func main() {
 	usersUC := usersUseCase.New(usersDB)
 	friendsUC := friendsUseCase.New(friendsDB, usersDB)
 	imageUC := imageUsecase.NewImageUsecase(imageDB)
-	chatUC := chatUseCase.NewChatUsecase(chatDB)
+	chatUC := chatUseCase.New(chatDB)
 
 	e := echo.New()
 
@@ -80,7 +81,7 @@ func main() {
 
 	e.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
 		AllowOrigins:     []string{"http://89.208.197.127"},
-		AllowHeaders:     []string{"Content-Type"},
+		AllowHeaders:     []string{"Content-Type", "X-CSRF-Token"},
 		AllowCredentials: true,
 	}))
 

@@ -36,7 +36,6 @@ type delivery struct {
 // @Failure 405 {object} echo.HTTPError "invalid http method"
 // @Failure 500 {object} echo.HTTPError "internal server error"
 // @Failure 401 {object} echo.HTTPError "no cookie"
-// @Failure 403 {object} echo.HTTPError "invalid csrf"
 // @Router   /post/{id} [get]
 func (delivery *delivery) GetPost(c echo.Context) error {
 	idP, err := strconv.Atoi(c.Param("id"))
@@ -209,7 +208,6 @@ func (delivery *delivery) DeletePost(c echo.Context) error {
 // @Failure 405 {object} echo.HTTPError "invalid http method"
 // @Failure 500 {object} echo.HTTPError "internal server error"
 // @Failure 401 {object} echo.HTTPError "no cookie"
-// @Failure 403 {object} echo.HTTPError "invalid csrf"
 // @Router   /feed [get]
 func (delivery *delivery) Feed(c echo.Context) error {
 	posts, err := delivery.pUsecase.GetAllPosts()
@@ -233,7 +231,6 @@ func (delivery *delivery) Feed(c echo.Context) error {
 // @Failure 404 {object} echo.HTTPError "Post not found"
 // @Failure 500 {object} echo.HTTPError "internal server error"
 // @Failure 401 {object} echo.HTTPError "no cookie"
-// @Failure 403 {object} echo.HTTPError "invalid csrf"
 // @Router   /users/{id}/posts [get]
 func (delivery *delivery) GetUserPosts(c echo.Context) error {
 	idP, err := strconv.Atoi(c.Param("id"))

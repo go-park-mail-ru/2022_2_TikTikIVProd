@@ -57,8 +57,8 @@ func TestUsecaseSignUp(t *testing.T) {
 	err = faker.FakeData(&mockUserConflictEmail)
 	assert.NoError(t, err)
 
-	mockAuthRepo := new(authMocks.RepositoryI)
-	mockUserRepo := new(userMocks.RepositoryI)
+	mockAuthRepo := authMocks.NewRepositoryI(t)
+	mockUserRepo := userMocks.NewRepositoryI(t)
 
 	mockUserRepo.On("SelectUserByNickName", mockUserSuccess.NickName).Return(nil, models.ErrNotFound)
 	mockUserRepo.On("SelectUserByEmail", mockUserSuccess.Email).Return(nil, models.ErrNotFound)
@@ -129,8 +129,8 @@ func TestUsecaseSignIn(t *testing.T) {
 
 	mockUser.Password = string(hashedPassword)
 
-	mockAuthRepo := new(authMocks.RepositoryI)
-	mockUserRepo := new(userMocks.RepositoryI)
+	mockAuthRepo := authMocks.NewRepositoryI(t)
+	mockUserRepo := userMocks.NewRepositoryI(t)
 
 	mockUserFail := mockUser
 	mockUserRepo.On("SelectUserByEmail", mockUserSignInInvalidPassword.Email).Return(&mockUserFail, nil)
@@ -143,15 +143,15 @@ func TestUsecaseSignIn(t *testing.T) {
 	expectedUser := mockUser
 	expectedUser.Password = ""
 	cases := map[string]TestCaseSignIn {
-		"bad_request": {
-			ArgData:   mockUserSignInBadRequest,
-			Error: models.ErrBadRequest,
-		},
 		"success": {
 			ArgData:   mockUserSignIn,
 			ExpectedResUser:   &expectedUser,
 			ExpectedResCookie: mockUser.Id,
 			Error: nil,
+		},
+		"bad_request": {
+			ArgData:   mockUserSignInBadRequest,
+			Error: models.ErrBadRequest,
 		},
 		"invalid_password": {
 			ArgData:   mockUserSignInInvalidPassword,
@@ -179,8 +179,8 @@ func TestUsecaseDeleteCookie(t *testing.T) {
 	err := faker.FakeData(&cookie)
 	assert.NoError(t, err)
 
-	mockAuthRepo := new(authMocks.RepositoryI)
-	mockUserRepo := new(userMocks.RepositoryI)
+	mockAuthRepo := authMocks.NewRepositoryI(t)
+	mockUserRepo := userMocks.NewRepositoryI(t)
 
 	mockAuthRepo.On("GetCookie", cookie.SessionToken).Return(strconv.Itoa(cookie.UserId), nil)
 	mockAuthRepo.On("DeleteCookie", cookie.SessionToken).Return(nil)
@@ -209,8 +209,8 @@ func TestUsecaseAuth(t *testing.T) {
 	err := faker.FakeData(&cookie)
 	assert.NoError(t, err)
 
-	mockAuthRepo := new(authMocks.RepositoryI)
-	mockUserRepo := new(userMocks.RepositoryI)
+	mockAuthRepo := authMocks.NewRepositoryI(t)
+	mockUserRepo := userMocks.NewRepositoryI(t)
 
 	var user models.User
 	err = faker.FakeData(&user)
