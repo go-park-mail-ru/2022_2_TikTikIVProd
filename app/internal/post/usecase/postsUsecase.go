@@ -1,4 +1,4 @@
-package postsRep
+package usecase
 
 import (
 	imageRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/repository"
@@ -50,11 +50,11 @@ func (p *postsUsecase) GetPostById(id int) (*models.Post, error) {
 func (p *postsUsecase) DeletePost(id int, userId int) error {
 	existedPost, err := p.postsRepo.GetPostById(id)
 	if err != nil {
-		return err //TODO наверху обработать эту ошибку(схема с файлом)
+		return err
 	}
 
 	if existedPost == nil {
-		return errors.New("Post not found") // TODO
+		return errors.New("Post not found")
 	}
 
 	if existedPost.UserID != userId {
@@ -64,7 +64,7 @@ func (p *postsUsecase) DeletePost(id int, userId int) error {
 	err = p.postsRepo.DeletePostById(id)
 
 	if err != nil {
-		return errors.Wrap(err, "postsUsecase.DeletePost error") //TODO
+		return errors.Wrap(err, "postsUsecase.DeletePost error")
 	}
 
 	return nil
@@ -93,11 +93,11 @@ func (p *postsUsecase) CreatePost(post *models.Post) error {
 func (p *postsUsecase) UpdatePost(post *models.Post) error {
 	existedPost, err := p.postsRepo.GetPostById(post.ID)
 	if err != nil {
-		return err //TODO наверху обработать эту ошибку(схема с файлом)
+		return err
 	}
 
 	if existedPost == nil {
-		return errors.New("Post not found") // TODO
+		return errors.New("Post not found")
 	}
 
 	if existedPost.UserID != post.UserID {
