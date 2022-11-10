@@ -128,7 +128,7 @@ func (dbPost *postRepository) GetPostById(id int) (*models.Post, error) {
 	tx := dbPost.db.First(&post, id)
 
 	if tx.Error != nil {
-		return nil, errors.Wrap(tx.Error, "postRepository.GetPostById error") // TODO not found
+		return nil, errors.Wrap(tx.Error, "postRepository.GetPostById error")
 	}
 
 	return toModelPost(&post), nil
@@ -138,7 +138,7 @@ func (dbPost *postRepository) DeletePostById(id int) error {
 	tx := dbPost.db.Delete(&Post{}, id)
 
 	if tx.Error != nil {
-		return errors.Wrap(tx.Error, "postRepository.DeletePostById error") // TODO
+		return errors.Wrap(tx.Error, "postRepository.DeletePostById error")
 	}
 
 	return nil
@@ -149,7 +149,7 @@ func (dbPost *postRepository) GetAllPosts() ([]*models.Post, error) {
 	tx := dbPost.db.Table("user_posts").Find(&posts)
 
 	if tx.Error != nil {
-		return nil, errors.Wrap(tx.Error, "postRepository.GetAllPosts error") // TODO
+		return nil, errors.Wrap(tx.Error, "postRepository.GetAllPosts error")
 	}
 
 	return toModelPosts(posts), nil
@@ -160,7 +160,7 @@ func (dbPost *postRepository) GetUserPosts(userId int) ([]*models.Post, error) {
 	tx := dbPost.db.Where(&Post{UserID: userId}).Find(&posts)
 
 	if tx.Error != nil {
-		return nil, errors.Wrap(tx.Error, "postRepository.GetAllPosts error") // TODO
+		return nil, errors.Wrap(tx.Error, "postRepository.GetAllPosts error")
 	}
 
 	return toModelPosts(posts), nil

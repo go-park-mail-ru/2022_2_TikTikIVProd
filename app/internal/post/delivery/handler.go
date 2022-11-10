@@ -34,7 +34,7 @@ func (delivery *Delivery) GetPost(c echo.Context) error {
 
 	if err != nil {
 		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusNotFound, "Post not found") //TODO переделать на ошибки в файле
+		return echo.NewHTTPError(http.StatusNotFound, "Post not found")
 	}
 
 	post, err := delivery.PUsecase.GetPostById(idP)
@@ -96,7 +96,7 @@ func (delivery *Delivery) CreatePost(c echo.Context) error {
 
 	if err != nil {
 		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error") // TODO здесь тоже, нужно разграничить ошибки
+		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
 	}
 
 	return c.JSON(http.StatusOK, pkg.Response{Body: post})
@@ -150,7 +150,7 @@ func (delivery *Delivery) UpdatePost(c echo.Context) error {
 
 	if err != nil {
 		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error") // TODO здесь тоже, нужно разграничить ошибки
+		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
 	}
 
 	return c.JSON(http.StatusOK, pkg.Response{Body: post})
@@ -180,14 +180,14 @@ func (delivery *Delivery) DeletePost(c echo.Context) error {
 
 	if err != nil {
 		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusNotFound, "Post not found") //TODO переделать на ошибки в файле
+		return echo.NewHTTPError(http.StatusNotFound, "Post not found")
 	}
 
 	err = delivery.PUsecase.DeletePost(idP, userId)
 
 	if err != nil {
 		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error") // TODO здесь тоже, нужно разграничить ошибки
+		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
 	}
 	return c.NoContent(http.StatusNoContent)
 }
@@ -230,7 +230,7 @@ func (delivery *Delivery) GetUserPosts(c echo.Context) error {
 
 	if err != nil {
 		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusNotFound, "Post not found") //TODO переделать на ошибки в файле
+		return echo.NewHTTPError(http.StatusNotFound, "Post not found")
 	}
 
 	posts, err := delivery.PUsecase.GetUserPosts(idP)

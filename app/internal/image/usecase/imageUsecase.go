@@ -23,7 +23,7 @@ func NewImageUsecase(ir imageRepository.RepositoryI) ImageUseCaseI {
 }
 
 func (i *imageUsecase) GetPostImages(postID int) ([]*models.Image, error) {
-	images, err := i.imageRep.GetPostImages(postID) //TODO ошибки
+	images, err := i.imageRep.GetPostImages(postID)
 
 	if err != nil {
 		return nil, err
@@ -33,7 +33,7 @@ func (i *imageUsecase) GetPostImages(postID int) ([]*models.Image, error) {
 }
 
 func (i *imageUsecase) GetImageById(imageID int) (*models.Image, error) {
-	image, err := i.imageRep.GetImage(imageID) //TODO ошибки
+	image, err := i.imageRep.GetImage(imageID)
 
 	if err != nil {
 		return nil, errors.Wrap(err, "GetImage usecase error")

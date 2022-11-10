@@ -35,13 +35,13 @@ func (p *postsUsecase) GetPostById(id int) (*models.Post, error) {
 	resPost, err := p.postsRepo.GetPostById(id)
 
 	if err != nil {
-		return nil, errors.Wrap(err, "postsUsecase.GetPostById error while get post info") // TODO
+		return nil, errors.Wrap(err, "postsUsecase.GetPostById error while get post info")
 	}
 
 	err = addAdditionalFieldsToPost(resPost, p.userRepo, p.imageRepo)
 
 	if err != nil {
-		return nil, errors.Wrap(err, "postsUsecase.GetPostById error while get additional info") // TODO
+		return nil, errors.Wrap(err, "postsUsecase.GetPostById error while get additional info")
 	}
 
 	return resPost, nil
