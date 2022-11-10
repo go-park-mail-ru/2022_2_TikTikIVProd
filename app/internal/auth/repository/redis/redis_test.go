@@ -27,7 +27,12 @@ func TestCreateCookie(t *testing.T) {
 
 	repository := authRep.New(redisClient)
 
-	var mockCookie models.Cookie
+	mockCookie := models.Cookie {
+		SessionToken: "session_token",
+		UserId: 1,
+		MaxAge: 3600 * 24 * 365,
+	}
+	
 	err := faker.FakeData(&mockCookie)
 	assert.NoError(t, err)
 
@@ -49,14 +54,14 @@ func TestGetCookie(t *testing.T) {
 	assert.NoError(t, err)
 
 	cases := map[string]TestCaseGetCookie {
-		"not_found": {
-			ArgData:   mockCookie.SessionToken,
-			Error: models.ErrNotFound,
-		},
 		"success": {
 			ArgData:   mockCookie.SessionToken,
 			ExpectedRes: strconv.Itoa(mockCookie.UserId),
 			Error: nil,
+		},
+		"not_found": {
+			ArgData:   mockCookie.SessionToken,
+			Error: models.ErrNotFound,
 		},
 	}
 
@@ -64,6 +69,8 @@ func TestGetCookie(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			if name == "success" {
 				s.Set(test.ArgData, test.ExpectedRes)
+			} else if name == "not_found" {
+				s.Del(test.ArgData)
 			}
 			userId, err := repository.GetCookie(test.ArgData)
 			require.Equal(t, test.Error, err)

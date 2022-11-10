@@ -1,6 +1,7 @@
 package delivery
 
 import (
+	"fmt"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg"
 	"github.com/labstack/echo/v4"
@@ -133,7 +134,7 @@ func (delivery *Delivery) UpdatePost(c echo.Context) error {
 
 	if ok, err := isRequestValid(&post); !ok {
 		c.Logger().Error(err)
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
 	}
 
 	requestSanitizePost(&post)
@@ -168,6 +169,7 @@ func (delivery *Delivery) UpdatePost(c echo.Context) error {
 // @Failure 403 {object} echo.HTTPError "invalid csrf"
 // @Router   /post/{id} [delete]
 func (delivery *Delivery) DeletePost(c echo.Context) error {
+	fmt.Println("param", c.Param("id"))
 	idP, err := strconv.Atoi(c.Param("id"))
 
 	userId, ok := c.Get("user_id").(int)

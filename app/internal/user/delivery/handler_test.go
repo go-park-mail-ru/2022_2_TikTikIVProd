@@ -39,12 +39,17 @@ func TestDeliveryGetProfile(t *testing.T) {
 	var user models.User
 	err := faker.FakeData(&user)
 	assert.NoError(t, err)
+	user.Id = 1
 
 	userIdBadRequest := "hgcv"
+	userIdNotFound := 2
+	userIdInternalErr := 3
 
 	mockUCase := mocks.NewUseCaseI(t)
 
 	mockUCase.On("SelectUserById", user.Id).Return(&user, nil)
+	mockUCase.On("SelectUserById", userIdNotFound).Return(nil, models.ErrNotFound)
+	mockUCase.On("SelectUserById", userIdInternalErr).Return(nil, models.ErrInternalServerError)
 
 	handler := userDelivery.Delivery{
 		UserUC: mockUCase,
@@ -64,6 +69,20 @@ func TestDeliveryGetProfile(t *testing.T) {
 			Error: &echo.HTTPError{
 				Code: http.StatusBadRequest,
 				Message: models.ErrBadRequest.Error(),
+			},
+		},
+		"not_found": {
+			ArgData: strconv.Itoa(userIdNotFound),
+			Error: &echo.HTTPError{
+				Code: http.StatusNotFound,
+				Message: models.ErrNotFound.Error(),
+			},
+		},
+		"internal_error": {
+			ArgData: strconv.Itoa(userIdInternalErr),
+			Error: &echo.HTTPError{
+				Code: http.StatusInternalServerError,
+				Message: models.ErrInternalServerError.Error(),
 			},
 		},
 	}
@@ -95,15 +114,32 @@ func TestDeliveryUpdateUser(t *testing.T) {
 	var mockUser models.User
 	err := faker.FakeData(&mockUser)
 	assert.NoError(t, err)
+	mockUser.Id = 1
 
 	jsonUser, err := json.Marshal(mockUser)
 	assert.NoError(t, err)
 
-	mockUser.Id = 1
+	var mockUserNotFound models.User
+	err = faker.FakeData(&mockUserNotFound)
+	assert.NoError(t, err)
+	mockUser.Id = 2
+
+	jsonUserNotFound, err := json.Marshal(mockUserNotFound)
+	assert.NoError(t, err)
+
+	var mockUserInternalErr models.User
+	err = faker.FakeData(&mockUserInternalErr)
+	assert.NoError(t, err)
+	mockUser.Id = 3
+
+	jsonUserInternalErr, err := json.Marshal(mockUserInternalErr)
+	assert.NoError(t, err)
 
 	mockUCase := mocks.NewUseCaseI(t)
 
 	mockUCase.On("UpdateUser", mockUser).Return(nil)
+	mockUCase.On("UpdateUser", mockUserNotFound).Return(models.ErrNotFound)
+	mockUCase.On("UpdateUser", mockUserInternalErr).Return(models.ErrInternalServerError)
 
 	handler := userDelivery.Delivery{
 		UserUC: mockUCase,
@@ -119,11 +155,34 @@ func TestDeliveryUpdateUser(t *testing.T) {
 			Error: nil,
 			StatusCode: http.StatusNoContent,
 		},
+		"not_found": {
+			ArgDataBody: string(jsonUserNotFound),
+			ArgDataContext: mockUserNotFound.Id,
+			Error: &echo.HTTPError{
+				Code: http.StatusNotFound,
+				Message: models.ErrNotFound.Error(),
+			},
+		},
+		"internal_error": {
+			ArgDataBody: string(jsonUserInternalErr),
+			ArgDataContext: mockUserInternalErr.Id,
+			Error: &echo.HTTPError{
+				Code: http.StatusInternalServerError,
+				Message: models.ErrInternalServerError.Error(),
+			},
+		},
 		"bad_request": {
 			ArgDataBody: "sffvfb",
 			Error: &echo.HTTPError{
 				Code: http.StatusBadRequest,
 				Message: models.ErrBadRequest.Error(),
+			},
+		},
+		"invalid_context": {
+			ArgDataBody:   string(jsonUser),
+			Error: &echo.HTTPError{
+				Code: http.StatusInternalServerError,
+				Message: models.ErrInternalServerError.Error(),
 			},
 		},
 	}
@@ -136,7 +195,9 @@ func TestDeliveryUpdateUser(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 			c.SetPath("/users/update")
-			c.Set("user_id", test.ArgDataContext)
+			if name != "invalid_context" {
+				c.Set("user_id", test.ArgDataContext)
+			}
 
 			err := handler.UpdateUser(c)
 			require.Equal(t, test.Error, err)

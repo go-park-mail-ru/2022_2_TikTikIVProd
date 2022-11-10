@@ -7,19 +7,10 @@ type Subscription struct {
 	room int
 }
 
-// Hub maintains the set of active connections and broadcasts messages to the
-// connections.
 type Hub struct {
-	// Registered connections.
 	rooms map[int]map[*connection]bool
-
-	// Inbound messages from the connections.
 	broadcast chan models.Message
-
-	// Register requests from the connections.
 	register chan Subscription
-
-	// Unregister requests from connections.
 	unregister chan Subscription
 }
 

@@ -6,6 +6,7 @@ import (
 
 type RepositoryI interface {
 	SelectDialog(id int) (*models.Dialog, error)
+	SelectDialogByUsers(userId, friendId int) (*models.Dialog, error)
 	SelectMessages(id int) ([]models.Message, error)
 	CreateDialog(dialog *models.Dialog) error
 	CreateMessage(message *models.Message) error

@@ -44,6 +44,10 @@ func TestDeliverySignUp(t *testing.T) {
 	err = faker.FakeData(&mockUserConflictEmail)
 	assert.NoError(t, err)
 
+	var mockUserInternalErr models.User
+	err = faker.FakeData(&mockUserInternalErr)
+	assert.NoError(t, err)
+
 	mockUserInvalid := models.User{}
 
 	var mockCookie models.Cookie
@@ -62,6 +66,9 @@ func TestDeliverySignUp(t *testing.T) {
 	jsonUserConflictEmail, err := json.Marshal(mockUserConflictEmail)
 	assert.NoError(t, err)
 
+	jsonUserInternalErr, err := json.Marshal(mockUserInternalErr)
+	assert.NoError(t, err)
+
 	mockUCase := mocks.NewUseCaseI(t)
 
 	mockUCase.On("SignUp", &mockUser).Return(&mockCookie, nil).Run(func(args mock.Arguments) {
@@ -72,6 +79,8 @@ func TestDeliverySignUp(t *testing.T) {
 	mockUCase.On("SignUp", &mockUserConflictNickName).Return(nil, models.ErrConflictNickname)
 
 	mockUCase.On("SignUp", &mockUserConflictEmail).Return(nil, models.ErrConflictEmail)
+
+	mockUCase.On("SignUp", &mockUserInternalErr).Return(nil, models.ErrInternalServerError)
 
 	handler := authDelivery.Delivery{
 		AuthUC: mockUCase,
@@ -123,6 +132,13 @@ func TestDeliverySignUp(t *testing.T) {
 				Message: models.ErrConflictEmail.Error(),
 			},
 		},
+		"internal_error": {
+			ArgData:   string(jsonUserInternalErr),
+			Error: &echo.HTTPError{
+				Code: http.StatusInternalServerError,
+				Message: models.ErrInternalServerError.Error(),
+			},
+		},
 	}
 
 	for name, test := range cases {
@@ -149,26 +165,52 @@ func TestDeliverySignUp(t *testing.T) {
 
 func TestDeliverySignIn(t *testing.T) {
 	var mockUserSignIn models.UserSignIn
-
 	err := faker.FakeData(&mockUserSignIn)
 	assert.NoError(t, err)
 
 	jsonUser, err := json.Marshal(mockUserSignIn)
 	assert.NoError(t, err)
 
+	mockUserInvalid := models.UserSignIn{}
+
+	jsonUserInvalid, err := json.Marshal(mockUserInvalid)
+	assert.NoError(t, err)
+
+	var mockUserInvalidPassword models.UserSignIn
+	err = faker.FakeData(&mockUserInvalidPassword)
+	assert.NoError(t, err)
+
+	jsonUserInvalidPassword, err := json.Marshal(mockUserInvalidPassword)
+	assert.NoError(t, err)
+
+	var mockUserIternalErr models.UserSignIn
+	err = faker.FakeData(&mockUserIternalErr)
+	assert.NoError(t, err)
+
+	jsonUserInternalErr, err := json.Marshal(mockUserIternalErr)
+	assert.NoError(t, err)
+
+	var mockUserNotFound models.UserSignIn
+	err = faker.FakeData(&mockUserNotFound)
+	assert.NoError(t, err)
+
+	jsonUserNotFound, err := json.Marshal(mockUserNotFound)
+	assert.NoError(t, err)
+
 	mockUCase := mocks.NewUseCaseI(t)
 
 	var mockCookie models.Cookie
-
 	err = faker.FakeData(&mockCookie)
 	assert.NoError(t, err)
 
 	var mockUser models.User
-
 	err = faker.FakeData(&mockUser)
 	assert.NoError(t, err)
 
 	mockUCase.On("SignIn", mockUserSignIn).Return(&mockUser, &mockCookie, nil)
+	mockUCase.On("SignIn", mockUserInvalidPassword).Return(nil, nil, models.ErrInvalidPassword)
+	mockUCase.On("SignIn", mockUserIternalErr).Return(nil, nil, models.ErrInternalServerError)
+	mockUCase.On("SignIn", mockUserNotFound).Return(nil, nil, models.ErrNotFound)
 
 	handler := authDelivery.Delivery{
 		AuthUC: mockUCase,
@@ -188,6 +230,34 @@ func TestDeliverySignIn(t *testing.T) {
 			Error: &echo.HTTPError{
 				Code: http.StatusBadRequest,
 				Message: models.ErrBadRequest.Error(),
+			},
+		},
+		"invalid_request": {
+			ArgData:   string(jsonUserInvalid),
+			Error: &echo.HTTPError{
+				Code: http.StatusBadRequest,
+				Message: models.ErrBadRequest.Error(),
+			},
+		},
+		"not_found": {
+			ArgData:   string(jsonUserNotFound),
+			Error: &echo.HTTPError{
+				Code: http.StatusNotFound,
+				Message: models.ErrNotFound.Error(),
+			},
+		},
+		"invalid_password": {
+			ArgData:   string(jsonUserInvalidPassword),
+			Error: &echo.HTTPError{
+				Code: http.StatusUnauthorized,
+				Message: models.ErrInvalidPassword.Error(),
+			},
+		},
+		"internal_error": {
+			ArgData:   string(jsonUserInternalErr),
+			Error: &echo.HTTPError{
+				Code: http.StatusInternalServerError,
+				Message: models.ErrInternalServerError.Error(),
 			},
 		},
 	}
@@ -218,18 +288,22 @@ func TestDeliveryLogout(t *testing.T) {
 	err := faker.FakeData(&valueCookie)
 	assert.NoError(t, err)
 
+	var valueCookieNotFound string
+	err = faker.FakeData(&valueCookieNotFound)
+	assert.NoError(t, err)
+
+	var valueCookieInternalErr string
+	err = faker.FakeData(&valueCookieInternalErr)
+	assert.NoError(t, err)
+
 	mockUCase := mocks.NewUseCaseI(t)
 
 	mockUCase.On("DeleteCookie", valueCookie).Return(nil)
+	mockUCase.On("DeleteCookie", valueCookieNotFound).Return(models.ErrNotFound)
+	mockUCase.On("DeleteCookie", valueCookieInternalErr).Return(models.ErrInternalServerError)
 
 	handler := authDelivery.Delivery{
 		AuthUC: mockUCase,
-	}
-
-	cookie := &http.Cookie{
-		Name:     "session_token",
-		Value:    valueCookie,
-		HttpOnly: true,
 	}
 
 	e := echo.New()
@@ -237,6 +311,7 @@ func TestDeliveryLogout(t *testing.T) {
 
 	cases := map[string]TestCase {
 		"success": {
+			ArgData: valueCookie,
 			Error: nil,
 			StatusCode: http.StatusNoContent,
 		},
@@ -246,14 +321,34 @@ func TestDeliveryLogout(t *testing.T) {
 				Message: http.ErrNoCookie.Error(),
 			},
 		},
+		"not_found": {
+			ArgData:   valueCookieNotFound,
+			Error: &echo.HTTPError{
+				Code: http.StatusNotFound,
+				Message: models.ErrNotFound.Error(),
+			},
+		},
+		"internal_error": {
+			ArgData:   valueCookieInternalErr,
+			Error: &echo.HTTPError{
+				Code: http.StatusInternalServerError,
+				Message: models.ErrInternalServerError.Error(),
+			},
+		},
 	}
 
 	for name, test := range cases {
 		t.Run(name, func(t *testing.T) {
-			req := httptest.NewRequest(echo.POST, "/logout", strings.NewReader(test.ArgData))
+			req := httptest.NewRequest(echo.POST, "/logout", strings.NewReader(""))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
-			if name == "success" {
+			if name != "unauthorized" {
+				cookie := &http.Cookie{
+					Name:     "session_token",
+					Value:    test.ArgData,
+					HttpOnly: true,
+				}
+
 				req.AddCookie(cookie)
 			}
 			
@@ -278,6 +373,10 @@ func TestDeliveryAuth(t *testing.T) {
 	err := faker.FakeData(&valueCookie)
 	assert.NoError(t, err)
 
+	var valueCookieUnauthorized string
+	err = faker.FakeData(&valueCookieUnauthorized)
+	assert.NoError(t, err)
+
 	var user models.User
 	err = faker.FakeData(&user)
 	assert.NoError(t, err)
@@ -285,15 +384,10 @@ func TestDeliveryAuth(t *testing.T) {
 	mockUCase := mocks.NewUseCaseI(t)
 
 	mockUCase.On("Auth", valueCookie).Return(&user, nil)
+	mockUCase.On("Auth", valueCookieUnauthorized).Return(nil, models.ErrNotFound)
 
 	handler := authDelivery.Delivery{
 		AuthUC: mockUCase,
-	}
-
-	cookie := &http.Cookie{
-		Name:     "session_token",
-		Value:    valueCookie,
-		HttpOnly: true,
 	}
 
 	e := echo.New()
@@ -301,23 +395,36 @@ func TestDeliveryAuth(t *testing.T) {
 
 	cases := map[string]TestCase {
 		"success": {
+			ArgData: valueCookie,
 			Error: nil,
 			StatusCode: http.StatusOK,
 		},
-		"unauthorized": {
+		"unauthorized_no_cookie": {
 			Error: &echo.HTTPError{
 				Code: http.StatusUnauthorized,
 				Message: http.ErrNoCookie.Error(),
+			},
+		},
+		"unauthorized_no_user": {
+			ArgData: valueCookieUnauthorized,
+			Error: &echo.HTTPError{
+				Code: http.StatusUnauthorized,
+				Message: models.ErrNotFound.Error(),
 			},
 		},
 	}
 
 	for name, test := range cases {
 		t.Run(name, func(t *testing.T) {
-			req := httptest.NewRequest(echo.GET, "/auth", strings.NewReader(test.ArgData))
+			req := httptest.NewRequest(echo.GET, "/auth", strings.NewReader(""))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
-			if name == "success" {
+			if name != "unauthorized_no_cookie" {
+				cookie := &http.Cookie{
+					Name:     "session_token",
+					Value:    test.ArgData,
+					HttpOnly: true,
+				}
 				req.AddCookie(cookie)
 			}
 			

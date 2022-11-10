@@ -17,7 +17,8 @@ import (
 )
 
 type TestCase struct {
-	ArgData models.Friends
+	ArgDataUserId int
+	ArgDataFriendId string
 	Error error
 	StatusCode int
 }
@@ -28,26 +29,40 @@ type TestCaseSelectFriends struct {
 	StatusCode int
 }
 
-type TestCaseCheckIsFriend struct {
-	ArgFriendId string
-	ArgUserId int
-	Error error
-	StatusCode int
-}
 
 func TestDeliveryAddFriend(t *testing.T) {
 	mockFriendsSuccess := models.Friends {
 		Id1: 1,
 		Id2: 2,
 	}
-	mockFriendsBadRequest := models.Friends {
+	mockFriendsInvalid := models.Friends {
 		Id1: 1,
 		Id2: 0,
+	}
+	mockFriendsNotFound := models.Friends {
+		Id1: 3,
+		Id2: 4,
+	}
+	mockFriendsConflict := models.Friends {
+		Id1: 5,
+		Id2: 6,
+	}
+	mockFriendsEqual := models.Friends {
+		Id1: 5,
+		Id2: 5,
+	}
+	mockFriendsInternalErr := models.Friends {
+		Id1: 6,
+		Id2: 7,
 	}
 
 	mockUCase := mocks.NewUseCaseI(t)
 
 	mockUCase.On("AddFriend", mockFriendsSuccess).Return(nil)
+	mockUCase.On("AddFriend", mockFriendsNotFound).Return(models.ErrNotFound)
+	mockUCase.On("AddFriend", mockFriendsConflict).Return(models.ErrConflictFriend)
+	mockUCase.On("AddFriend", mockFriendsEqual).Return(models.ErrBadRequest)
+	mockUCase.On("AddFriend", mockFriendsInternalErr).Return(models.ErrInternalServerError)
 
 	handler := friendsDelivery.Delivery{
 		FriendsUC: mockUCase,
@@ -58,15 +73,64 @@ func TestDeliveryAddFriend(t *testing.T) {
 
 	cases := map[string]TestCase {
 		"success": {
-			ArgData:   mockFriendsSuccess,
+			ArgDataUserId: mockFriendsSuccess.Id1,
+			ArgDataFriendId: strconv.Itoa(mockFriendsSuccess.Id2),
 			Error: nil,
 			StatusCode: http.StatusCreated,
 		},
-		"bad_request": {
-			ArgData:   mockFriendsBadRequest,
+		"ivalid_friends": {
+			ArgDataUserId: mockFriendsInvalid.Id1,
+			ArgDataFriendId:   strconv.Itoa(mockFriendsInvalid.Id2),
 			Error: &echo.HTTPError{
 				Code: http.StatusBadRequest,
-				Message: "bad request",
+				Message: models.ErrBadRequest.Error(),
+			},
+		},
+		"bad_request": {
+			ArgDataUserId: 1,
+			ArgDataFriendId:   "aaa",
+			Error: &echo.HTTPError{
+				Code: http.StatusBadRequest,
+				Message: models.ErrBadRequest.Error(),
+			},
+		},
+		"invalid_context": {
+			ArgDataFriendId:   "2",
+			Error: &echo.HTTPError{
+				Code: http.StatusInternalServerError,
+				Message: models.ErrInternalServerError.Error(),
+			},
+		},
+		"not_found": {
+			ArgDataUserId: mockFriendsNotFound.Id1,
+			ArgDataFriendId:   strconv.Itoa(mockFriendsNotFound.Id2),
+			Error: &echo.HTTPError{
+				Code: http.StatusNotFound,
+				Message: models.ErrNotFound.Error(),
+			},
+		},
+		"conflict": {
+			ArgDataUserId: mockFriendsConflict.Id1,
+			ArgDataFriendId:   strconv.Itoa(mockFriendsConflict.Id2),
+			Error: &echo.HTTPError{
+				Code: http.StatusConflict,
+				Message: models.ErrConflictFriend.Error(),
+			},
+		},
+		"equal_id": {
+			ArgDataUserId: mockFriendsEqual.Id1,
+			ArgDataFriendId:   strconv.Itoa(mockFriendsEqual.Id2),
+			Error: &echo.HTTPError{
+				Code: http.StatusBadRequest,
+				Message: models.ErrBadRequest.Error(),
+			},
+		},
+		"internal_error": {
+			ArgDataUserId: mockFriendsInternalErr.Id1,
+			ArgDataFriendId:   strconv.Itoa(mockFriendsInternalErr.Id2),
+			Error: &echo.HTTPError{
+				Code: http.StatusInternalServerError,
+				Message: models.ErrInternalServerError.Error(),
 			},
 		},
 	}
@@ -80,8 +144,10 @@ func TestDeliveryAddFriend(t *testing.T) {
 			c := e.NewContext(req, rec)
 			c.SetPath("/friends/add/:friend_id")
 			c.SetParamNames("friend_id")
-			c.SetParamValues(strconv.Itoa(test.ArgData.Id2))
-			c.Set("user_id", test.ArgData.Id1)
+			c.SetParamValues(test.ArgDataFriendId)
+			if name != "invalid_context" {
+				c.Set("user_id", test.ArgDataUserId)
+			}
 
 			err := handler.AddFriend(c)
 			require.Equal(t, test.Error, err)
@@ -99,21 +165,29 @@ func TestDeliveryDeleteFriend(t *testing.T) {
 		Id1: 1,
 		Id2: 2,
 	}
-
-	mockFriendsBadRequest := models.Friends {
+	mockFriendsInvalid := models.Friends {
 		Id1: 1,
 		Id2: 0,
 	}
-
 	mockFriendsNotFound := models.Friends {
 		Id1: 100,
 		Id2: 101,
+	}
+	mockFriendsEqual := models.Friends {
+		Id1: 5,
+		Id2: 5,
+	}
+	mockFriendsInternalErr := models.Friends {
+		Id1: 6,
+		Id2: 7,
 	}
 
 	mockUCase := mocks.NewUseCaseI(t)
 
 	mockUCase.On("DeleteFriend", mockFriendsSuccess).Return(nil)
 	mockUCase.On("DeleteFriend", mockFriendsNotFound).Return(models.ErrNotFound)
+	mockUCase.On("DeleteFriend", mockFriendsEqual).Return(models.ErrBadRequest)
+	mockUCase.On("DeleteFriend", mockFriendsInternalErr).Return(models.ErrInternalServerError)
 
 	handler := friendsDelivery.Delivery{
 		FriendsUC: mockUCase,
@@ -124,22 +198,56 @@ func TestDeliveryDeleteFriend(t *testing.T) {
 
 	cases := map[string]TestCase {
 		"success": {
-			ArgData: mockFriendsSuccess,
+			ArgDataUserId: mockFriendsSuccess.Id1,
+			ArgDataFriendId: strconv.Itoa(mockFriendsSuccess.Id2),
 			Error: nil,
 			StatusCode: http.StatusNoContent,
 		},
-		"bad_request": {
-			ArgData: mockFriendsBadRequest,
+		"invalid_friends": {
+			ArgDataUserId: mockFriendsInvalid.Id1,
+			ArgDataFriendId: strconv.Itoa(mockFriendsInvalid.Id2),
 			Error: &echo.HTTPError{
 				Code: http.StatusBadRequest,
 				Message: models.ErrBadRequest.Error(),
 			},
 		},
 		"not_found": {
-			ArgData: mockFriendsNotFound,
+			ArgDataUserId: mockFriendsNotFound.Id1,
+			ArgDataFriendId: strconv.Itoa(mockFriendsNotFound.Id2),
 			Error: &echo.HTTPError{
 				Code: http.StatusNotFound,
 				Message: models.ErrNotFound.Error(),
+			},
+		},
+		"bad_request": {
+			ArgDataUserId: 1,
+			ArgDataFriendId: "sjhdb",
+			Error: &echo.HTTPError{
+				Code: http.StatusBadRequest,
+				Message: models.ErrBadRequest.Error(),
+			},
+		},
+		"invalid_context": {
+			ArgDataFriendId:   "2",
+			Error: &echo.HTTPError{
+				Code: http.StatusInternalServerError,
+				Message: models.ErrInternalServerError.Error(),
+			},
+		},
+		"equal_id": {
+			ArgDataUserId: mockFriendsEqual.Id1,
+			ArgDataFriendId:   strconv.Itoa(mockFriendsEqual.Id2),
+			Error: &echo.HTTPError{
+				Code: http.StatusBadRequest,
+				Message: models.ErrBadRequest.Error(),
+			},
+		},
+		"internal_error": {
+			ArgDataUserId: mockFriendsInternalErr.Id1,
+			ArgDataFriendId:   strconv.Itoa(mockFriendsInternalErr.Id2),
+			Error: &echo.HTTPError{
+				Code: http.StatusInternalServerError,
+				Message: models.ErrInternalServerError.Error(),
 			},
 		},
 	}
@@ -153,8 +261,10 @@ func TestDeliveryDeleteFriend(t *testing.T) {
 			c := e.NewContext(req, rec)
 			c.SetPath("/friends/delete/:friend_id")
 			c.SetParamNames("friend_id")
-			c.SetParamValues(strconv.Itoa(test.ArgData.Id2))
-			c.Set("user_id", test.ArgData.Id1)
+			c.SetParamValues(test.ArgDataFriendId)
+			if name != "invalid_context" {
+				c.Set("user_id", test.ArgDataUserId)
+			}
 
 			err := handler.DeleteFriend(c)
 			require.Equal(t, test.Error, err)
@@ -175,11 +285,15 @@ func TestDeliverySelectFriends(t *testing.T) {
 	assert.NoError(t, err)
 
 	userIdSuccess := 1
+	userIdInternalErr := 2
+	userIdNotFound := 3
 	userIdBadRequest := "hgcv"
 
 	mockUCase := mocks.NewUseCaseI(t)
 
 	mockUCase.On("SelectFriends", userIdSuccess).Return(friends, nil)
+	mockUCase.On("SelectFriends", userIdNotFound).Return(nil, models.ErrNotFound)
+	mockUCase.On("SelectFriends", userIdInternalErr).Return(nil, models.ErrInternalServerError)
 
 	handler := friendsDelivery.Delivery{
 		FriendsUC: mockUCase,
@@ -199,6 +313,20 @@ func TestDeliverySelectFriends(t *testing.T) {
 			Error: &echo.HTTPError{
 				Code: http.StatusBadRequest,
 				Message: models.ErrBadRequest.Error(),
+			},
+		},
+		"internal_error": {
+			ArgData: strconv.Itoa(userIdInternalErr),
+			Error: &echo.HTTPError{
+				Code: http.StatusInternalServerError,
+				Message: models.ErrInternalServerError.Error(),
+			},
+		},
+		"not_found": {
+			ArgData: strconv.Itoa(userIdNotFound),
+			Error: &echo.HTTPError{
+				Code: http.StatusNotFound,
+				Message: models.ErrNotFound.Error(),
 			},
 		},
 	}
@@ -225,7 +353,7 @@ func TestDeliverySelectFriends(t *testing.T) {
 
 	mockUCase.AssertExpectations(t)
 }
-// /friends/check/firend_id
+
 func TestDeliveryCheckIsFriend(t *testing.T) {
 	friendIdSuccess := 2
 	friendIdBadRequest := "hgcv"
@@ -236,10 +364,25 @@ func TestDeliveryCheckIsFriend(t *testing.T) {
 		Id1: userId,
 		Id2: friendIdSuccess,
 	}
+	mockFriendsNotFound := models.Friends {
+		Id1: 100,
+		Id2: 101,
+	}
+	mockFriendsEqual := models.Friends {
+		Id1: 5,
+		Id2: 5,
+	}
+	mockFriendsInternalErr := models.Friends {
+		Id1: 6,
+		Id2: 7,
+	}
 
 	mockUCase := mocks.NewUseCaseI(t)
 
 	mockUCase.On("CheckIsFriend", mockFriendsSuccess).Return(true, nil)
+	mockUCase.On("CheckIsFriend", mockFriendsNotFound).Return(false, models.ErrNotFound)
+	mockUCase.On("CheckIsFriend", mockFriendsEqual).Return(false, models.ErrBadRequest)
+	mockUCase.On("CheckIsFriend", mockFriendsInternalErr).Return(false, models.ErrInternalServerError)
 
 	handler := friendsDelivery.Delivery{
 		FriendsUC: mockUCase,
@@ -248,19 +391,50 @@ func TestDeliveryCheckIsFriend(t *testing.T) {
 	e := echo.New()
 	friendsDelivery.NewDelivery(e, mockUCase)
 
-	cases := map[string]TestCaseCheckIsFriend {
+	cases := map[string]TestCase {
 		"success": {
-			ArgFriendId: strconv.Itoa(friendIdSuccess),
-			ArgUserId: userId,
+			ArgDataFriendId: strconv.Itoa(friendIdSuccess),
+			ArgDataUserId: userId,
 			Error: nil,
 			StatusCode: http.StatusOK,
 		},
 		"bad_request": {
-			ArgFriendId: friendIdBadRequest,
-			ArgUserId: userId,
+			ArgDataFriendId: friendIdBadRequest,
+			ArgDataUserId: userId,
 			Error: &echo.HTTPError{
 				Code: http.StatusBadRequest,
 				Message: models.ErrBadRequest.Error(),
+			},
+		},
+		"invalid_context": {
+			ArgDataFriendId:   "2",
+			Error: &echo.HTTPError{
+				Code: http.StatusInternalServerError,
+				Message: models.ErrInternalServerError.Error(),
+			},
+		},
+		"equal_id": {
+			ArgDataUserId: mockFriendsEqual.Id1,
+			ArgDataFriendId:   strconv.Itoa(mockFriendsEqual.Id2),
+			Error: &echo.HTTPError{
+				Code: http.StatusBadRequest,
+				Message: models.ErrBadRequest.Error(),
+			},
+		},
+		"internal_error": {
+			ArgDataUserId: mockFriendsInternalErr.Id1,
+			ArgDataFriendId:   strconv.Itoa(mockFriendsInternalErr.Id2),
+			Error: &echo.HTTPError{
+				Code: http.StatusInternalServerError,
+				Message: models.ErrInternalServerError.Error(),
+			},
+		},
+		"not_found": {
+			ArgDataUserId: mockFriendsNotFound.Id1,
+			ArgDataFriendId: strconv.Itoa(mockFriendsNotFound.Id2),
+			Error: &echo.HTTPError{
+				Code: http.StatusNotFound,
+				Message: models.ErrNotFound.Error(),
 			},
 		},
 	}
@@ -274,8 +448,10 @@ func TestDeliveryCheckIsFriend(t *testing.T) {
 			c := e.NewContext(req, rec)
 			c.SetPath("/friends/check/:friend_id")
 			c.SetParamNames("friend_id")
-			c.SetParamValues(test.ArgFriendId)
-			c.Set("user_id", test.ArgUserId)
+			c.SetParamValues(test.ArgDataFriendId)
+			if name != "invalid_context" {
+				c.Set("user_id", test.ArgDataUserId)
+			}
 
 			err := handler.CheckIsFriend(c)
 			require.Equal(t, test.Error, err)

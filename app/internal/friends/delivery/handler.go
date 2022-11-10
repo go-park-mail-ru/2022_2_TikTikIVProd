@@ -163,9 +163,6 @@ func (del *Delivery) SelectFriends(c echo.Context) error {
 		case errors.Is(causeErr, models.ErrNotFound):
 			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusNotFound, models.ErrNotFound.Error())
-		case errors.Is(causeErr, models.ErrBadRequest):
-			c.Logger().Error(err)
-			return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
 		default:
 			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, causeErr.Error())

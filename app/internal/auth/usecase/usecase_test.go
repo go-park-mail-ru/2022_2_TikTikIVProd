@@ -9,6 +9,7 @@ import (
 	authUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/usecase"
 	userMocks "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository/mocks"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -158,8 +159,15 @@ func TestUsecaseSignIn(t *testing.T) {
 
 func TestUsecaseDeleteCookie(t *testing.T) {
 	var cookie models.Cookie
-
 	err := faker.FakeData(&cookie)
+	assert.NoError(t, err)
+
+	var cookieGetFail models.Cookie
+	err = faker.FakeData(&cookieGetFail)
+	assert.NoError(t, err)
+
+	var cookieDeleteFail models.Cookie
+	err = faker.FakeData(&cookieDeleteFail)
 	assert.NoError(t, err)
 
 	mockAuthRepo := authMocks.NewRepositoryI(t)
@@ -168,6 +176,11 @@ func TestUsecaseDeleteCookie(t *testing.T) {
 	mockAuthRepo.On("GetCookie", cookie.SessionToken).Return(strconv.Itoa(cookie.UserId), nil)
 	mockAuthRepo.On("DeleteCookie", cookie.SessionToken).Return(nil)
 
+	mockAuthRepo.On("GetCookie", cookieGetFail.SessionToken).Return("", models.ErrNotFound)
+
+	mockAuthRepo.On("GetCookie", cookieDeleteFail.SessionToken).Return(strconv.Itoa(cookieDeleteFail.UserId), nil)
+	mockAuthRepo.On("DeleteCookie", cookieDeleteFail.SessionToken).Return(models.ErrInternalServerError)
+
 	useCase := authUsecase.New(mockAuthRepo, mockUserRepo)
 
 	cases := map[string]TestCaseDeleteCookie {
@@ -175,12 +188,20 @@ func TestUsecaseDeleteCookie(t *testing.T) {
 			ArgData:   cookie.SessionToken,
 			Error: nil,
 		},
+		"fail_get": {
+			ArgData:   cookieGetFail.SessionToken,
+			Error: models.ErrNotFound,
+		},
+		"fail_delete": {
+			ArgData:   cookieDeleteFail.SessionToken,
+			Error: models.ErrInternalServerError,
+		},
 	}
 
 	for name, test := range cases {
 		t.Run(name, func(t *testing.T) {
 			err := useCase.DeleteCookie(test.ArgData)
-			require.Equal(t, test.Error, err)
+			require.Equal(t, test.Error, errors.Cause(err))
 		})
 	}
 	mockAuthRepo.AssertExpectations(t)

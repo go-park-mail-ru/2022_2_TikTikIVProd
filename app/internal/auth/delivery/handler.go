@@ -138,7 +138,6 @@ func (del *Delivery) SignIn(c echo.Context) error {
 // @Produce  application/json
 // @Success  204 "success logout, body is empty"
 // @Failure 405 {object} echo.HTTPError "Method Not Allowed"
-// @Failure 400 {object} echo.HTTPError "bad request"
 // @Failure 401 {object} echo.HTTPError "no cookie"
 // @Failure 403 {object} echo.HTTPError "invalid csrf"
 // @Failure 500 {object} echo.HTTPError "internal server error"
@@ -148,9 +147,6 @@ func (del *Delivery) Logout(c echo.Context) error {
 	if err == http.ErrNoCookie {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
-	} else if err != nil {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	err = del.AuthUC.DeleteCookie(cookie.Value)
@@ -180,7 +176,6 @@ func (del *Delivery) Logout(c echo.Context) error {
 // @Tags         auth
 // @Success      204    "success create csrf, body is empty"
 // @Failure 401 {object} echo.HTTPError "no cookie"
-// @Failure 400 {object} echo.HTTPError "bad request"
 // @Failure 500 {object}  echo.HTTPError  "Internal server error"
 // @Router /create_csrf [post]
 func (del *Delivery) CreateCSRF(c echo.Context) error {
@@ -188,9 +183,6 @@ func (del *Delivery) CreateCSRF(c echo.Context) error {
 	if err == http.ErrNoCookie {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
-	} else if err != nil {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	csrfToken, err := csrf.CreateCSRF(cookie.Value)
@@ -219,9 +211,6 @@ func (del *Delivery) Auth(c echo.Context) error {
 	if err == http.ErrNoCookie {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
-	} else if err != nil {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	gotUser, err := del.AuthUC.Auth(cookie.Value)

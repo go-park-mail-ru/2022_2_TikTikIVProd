@@ -48,6 +48,21 @@ func (dbChat *chatRepository) SelectDialog(id int) (*models.Dialog, error) {
 	return &dialog, nil
 }
 
+func (dbChat *chatRepository) SelectDialogByUsers(userId, friendId int) (*models.Dialog, error) {
+	dialog := models.Dialog{}
+
+	tx := dbChat.db.Table("chat").
+	Where("(user_id1 = ? AND user_id2 = ?) OR (user_id1 = ? AND user_id2 = ?)",
+	userId, friendId, friendId, userId).Take(&dialog)
+	if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+		return nil, models.ErrNotFound
+	} else if tx.Error != nil {
+		return nil, errors.Wrap(tx.Error, "database error (table chat)")
+	}
+
+	return &dialog, nil
+}
+
 func (dbChat *chatRepository) SelectMessages(id int) ([]models.Message, error) {
 	messages := make([]models.Message, 0, 10)
 	tx := dbChat.db.Table("message").Order("created_at").Find(&messages, "chat_id = ?", id)
