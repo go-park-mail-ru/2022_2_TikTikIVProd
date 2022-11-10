@@ -54,15 +54,29 @@ func TestDeliveryGetDialog(t *testing.T) {
 	var dialog models.Dialog
 	err := faker.FakeData(&dialog)
 	assert.NoError(t, err)
+	dialog.Id = 1
+
+	var dialogNotFound models.Dialog
+	err = faker.FakeData(&dialogNotFound)
+	assert.NoError(t, err)
+	dialogNotFound.Id = 2
+
+	var dialogInternalErr models.Dialog
+	err = faker.FakeData(&dialogInternalErr)
+	assert.NoError(t, err)
+	dialogInternalErr.Id = 3
 
 	mockUCase := mocks.NewUseCaseI(t)
 
 	mockUCase.On("SelectDialog", dialog.Id).Return(&dialog, nil)
+	mockUCase.On("SelectDialog", dialogNotFound.Id).Return(nil, models.ErrNotFound)
+	mockUCase.On("SelectDialog", dialogInternalErr.Id).Return(nil, models.ErrInternalServerError)
+
 	handler := chatDelivery.Delivery{
 		ChatUC: mockUCase,
 	}
 
-	userIdBadRequest := "jgsv"
+	dialogIdBadRequest := "jgsv"
 
 	e := echo.New()
 	chatDelivery.NewDelivery(e, mockUCase)
@@ -74,10 +88,24 @@ func TestDeliveryGetDialog(t *testing.T) {
 			StatusCode: http.StatusOK,
 		},
 		"bad_request": {
-			ArgData: userIdBadRequest,
+			ArgData: dialogIdBadRequest,
 			Error: &echo.HTTPError{
 				Code: http.StatusBadRequest,
 				Message: models.ErrBadRequest.Error(),
+			},
+		},
+		"not_found": {
+			ArgData: strconv.Itoa(dialogNotFound.Id),
+			Error: &echo.HTTPError{
+				Code: http.StatusNotFound,
+				Message: models.ErrNotFound.Error(),
+			},
+		},
+		"internal_error": {
+			ArgData: strconv.Itoa(dialogInternalErr.Id),
+			Error: &echo.HTTPError{
+				Code: http.StatusInternalServerError,
+				Message: models.ErrInternalServerError.Error(),
 			},
 		},
 	}
@@ -137,6 +165,13 @@ func TestDeliveryGetDialogByUsers(t *testing.T) {
 				Message: models.ErrBadRequest.Error(),
 			},
 		},
+		"invalid_context": {
+			ArgDataParam:   "2",
+			Error: &echo.HTTPError{
+				Code: http.StatusInternalServerError,
+				Message: models.ErrInternalServerError.Error(),
+			},
+		},
 	}
 
 	for name, test := range cases {
@@ -149,7 +184,9 @@ func TestDeliveryGetDialogByUsers(t *testing.T) {
 			c.SetPath("/chat/user/:id")
 			c.SetParamNames("id")
 			c.SetParamValues(test.ArgDataParam)
-			c.Set("user_id", test.ArgDataContext)
+			if name != "invalid_context" {
+				c.Set("user_id", test.ArgDataContext)
+			}
 
 			err := handler.GetDialogByUsers(c)
 			require.Equal(t, test.Error, err)

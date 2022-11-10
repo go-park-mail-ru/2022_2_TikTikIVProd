@@ -50,27 +50,6 @@ func (uc *useCase) AddFriend(friends models.Friends) error {
 		return errors.Wrap(err, "friends repository error")
 	}
 
-	// dialog := models.Dialog {
-	// 	UserId1: friends.Id1,
-	// 	UserId2: friends.Id2,
-	// }
-
-	// checkFriends := models.Friends {
-	// 	Id1: friends.Id2,
-	// 	Id2: friends.Id1,
-	// }
-
-	// friendExists, err = uc.friendsRepository.CheckFriends(checkFriends)
-	// if err != nil {
-	// 	return errors.Wrap(err, "friends repository error")
-	// }
-	// if friendExists {
-	// 	err = uc.chatRepository.CreateDialog(&dialog)
-	// 	if err != nil {
-	// 		return errors.Wrap(err, "friends repository error")
-	// 	}
-	// }
-
 	return err
 }
 
