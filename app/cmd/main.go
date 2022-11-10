@@ -80,6 +80,7 @@ func main() {
 		AllowOrigins:     []string{"http://89.208.197.127"},
 		AllowHeaders:     []string{"Content-Type", "X-CSRF-Token"},
 		AllowCredentials: true,
+		ExposeHeaders:    []string{"X-CSRF-Token"},
 	}))
 
 	e.Use(echoMiddleware.LoggerWithConfig(echoMiddleware.LoggerConfig{
