@@ -2,102 +2,85 @@ package postgres
 
 import (
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
+	"github.com/pkg/errors"
 
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/model"
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository"
+	userRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
 )
 
 type dataBase struct {
 	db *gorm.DB
 }
 
-func New(db *gorm.DB) repository.RepositoryI {
+func New(db *gorm.DB) userRep.RepositoryI {
 	return &dataBase{
 		db: db,
 	}
 }
 
-func (dbUsers *dataBase) SelectUserById(id int) (*model.User, error) {
-	user := model.User{}
+func (dbUsers *dataBase) SelectUserById(id int) (*models.User, error) {
+	user := models.User{}
 
-	row := dbUsers.db.Table("users").Where("id = ?", id).Row()
-	err := row.Scan(&user.Id, &user.FirstName, &user.LastName, &user.NickName, &user.Avatar, &user.Email, &user.Password)
-	if err != nil {
-		return nil, err
+	tx := dbUsers.db.Where("id = ?", id).Take(&user)
+	if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+		return nil, models.ErrNotFound
+	} else if tx.Error != nil {
+		return nil, errors.Wrap(tx.Error, "database error (table users)")
 	}
 
 	return &user, nil
 }
 
-func (dbUsers *dataBase) SelectUserByNickName(nickname string) (*model.User, error) {
-	user := model.User{}
+func (dbUsers *dataBase) SelectUserByNickName(nickname string) (*models.User, error) {
+	user := models.User{}
 
-	row := dbUsers.db.Table("users").Where("nick_name = ?", nickname).Row()
-	err := row.Scan(&user.Id, &user.FirstName, &user.LastName, &user.NickName, &user.Avatar, &user.Email, &user.Password)
-	if err != nil {
-		return nil, err
+	tx := dbUsers.db.Where("nick_name = ?", nickname).Take(&user)
+	if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+		return nil, models.ErrNotFound
+	} else if tx.Error != nil {
+		return nil, errors.Wrap(tx.Error, "database error (table users)")
 	}
 
 	return &user, nil
 }
 
-func (dbUsers *dataBase) SelectUserByEmail(email string) (*model.User, error) {
-	user := model.User{}
-	row := dbUsers.db.Table("users").Select("id, first_name, last_name," +
-		"nick_name, COALESCE(avatar_img_id, 0), email, passhash").Where("email = ?", email).Row()
-	err := row.Scan(&user.Id, &user.FirstName, &user.LastName, &user.NickName, &user.Avatar, &user.Email, &user.Password)
-	if err != nil {
-		return nil, err
+func (dbUsers *dataBase) SelectUserByEmail(email string) (*models.User, error) {
+	user := models.User{}
+	tx := dbUsers.db.Where("email = ?", email).Take(&user)
+	if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+		return nil, models.ErrNotFound
+	} else if tx.Error != nil {
+		return nil, errors.Wrap(tx.Error, "database error (table users)")
 	}
 
 	return &user, nil
 }
 
-func (dbUsers *dataBase) CreateUser(u model.User) (*model.User, error) {
-	user := model.User{}
-
-	tx := dbUsers.db.Table("users").Exec("INSERT INTO users (first_name, last_name, nick_name, email, passhash) VALUES (?, ?, ?, ?, ?) RETURNING *",
-			u.FirstName, u.LastName, u.NickName, u.Email, u.Password).Scan(&user)
+func (dbUsers *dataBase) CreateUser(user *models.User) error {
+	tx := dbUsers.db.Omit("avatar_img_id").Create(user)
 	if tx.Error != nil {
-		return nil, tx.Error
+		return errors.Wrap(tx.Error, "database error (table users)")
 	}
 
-	return &user, nil
-}
-
-func (dbUsers *dataBase) CreateCookie(c model.Cookie) (*model.Cookie, error) {
-	cookie := model.Cookie{}
-
-	row := dbUsers.db.Table("cookies").Create(&c).Clauses(clause.Returning{}).Row()
-	err := row.Scan(&cookie.SessionToken, &cookie.UserId, &cookie.Expires)
-	if err != nil {
-		return nil, err
-	}
-	
-	return &cookie, nil
-}
-
-func (dbUsers *dataBase) SelectCookie(value string) (*model.Cookie, error) {
-	cookie := model.Cookie{}
-
-	row := dbUsers.db.Table("cookies").Where("value = ?", value).Row()
-	err := row.Scan(&cookie.SessionToken, &cookie.UserId, &cookie.Expires)
-	if err != nil {
-		return nil, err
-	}
-
-	return &cookie, nil
-}
-
-func (dbUsers *dataBase) DeleteCookie(value string) (error) {
-	err := dbUsers.db.Table("cookies").Delete(&model.Cookie {
-											SessionToken: value,
-										}).Error
-	if err != nil {
-		return err
-	}
-	
 	return nil
+}
+
+func (dbUsers *dataBase) UpdateUser(user models.User) error {
+	tx := dbUsers.db.Omit("id").Updates(user)
+	if tx.Error != nil {
+		return errors.Wrap(tx.Error, "database error (table users)")
+	}
+
+	return nil
+}
+
+func (dbUsers *dataBase) SelectAllUsers() ([]models.User, error) {
+	users := make([]models.User, 0, 10)
+	tx := dbUsers.db.Find(&users)
+	if tx.Error != nil {
+		return nil, errors.Wrap(tx.Error, "database error (table users)")
+	}
+
+	return users, nil
 }
 

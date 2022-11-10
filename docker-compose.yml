@@ -1,0 +1,36 @@
+version: "3.5"
+services:
+  ws_pg:
+    image: "postgres:latest"
+    ports:
+      - "13080:5432"
+    networks:
+      - mynetwork
+    volumes:
+      - ./SQL:/docker-entrypoint-initdb.d/
+      - ./gen:/home/gen
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: postgres
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - mynetwork
+
+  server:
+    build: .
+    restart: always
+    depends_on:
+      - ws_pg
+      - redis
+    ports:
+      - "8080:8080"
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:

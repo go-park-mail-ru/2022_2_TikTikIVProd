@@ -1,5 +1,73 @@
 definitions:
-  model.User:
+  echo.HTTPError:
+    properties:
+      message: {}
+    type: object
+  models.Dialog:
+    properties:
+      dialog_id:
+        readOnly: true
+        type: integer
+      messages:
+        items:
+          $ref: '#/definitions/models.Message'
+        readOnly: true
+        type: array
+      userId1:
+        type: integer
+      userId2:
+        type: integer
+    type: object
+  models.Image:
+    properties:
+      id:
+        type: integer
+    type: object
+  models.Message:
+    properties:
+      body:
+        type: string
+      created_at:
+        type: string
+      dialog_id:
+        type: integer
+      id:
+        readOnly: true
+        type: integer
+      receiver_id:
+        type: integer
+      sender_id:
+        readOnly: true
+        type: integer
+    type: object
+  models.Post:
+    properties:
+      avatar_id:
+        readOnly: true
+        type: integer
+      create_date:
+        readOnly: true
+        type: string
+      id:
+        type: integer
+      images:
+        items:
+          $ref: '#/definitions/models.Image'
+        type: array
+      message:
+        type: string
+      user_first_name:
+        readOnly: true
+        type: string
+      user_id:
+        type: integer
+      user_last_name:
+        readOnly: true
+        type: string
+    required:
+    - message
+    type: object
+  models.User:
     properties:
       avatar:
         type: integer
@@ -8,6 +76,7 @@ definitions:
       first_name:
         type: string
       id:
+        readOnly: true
         type: integer
       last_name:
         type: string
@@ -15,18 +84,26 @@ definitions:
         type: string
       password:
         type: string
+    required:
+    - email
+    - first_name
+    - last_name
+    - nick_name
+    - password
     type: object
-  model.UserSignIn:
+  models.UserSignIn:
     properties:
       email:
         type: string
       password:
         type: string
+    required:
+    - email
+    - password
     type: object
-  pkg.Error:
+  pkg.Response:
     properties:
-      error:
-        type: string
+      body: {}
     type: object
 host: 89.208.197.127:8080
 info:
@@ -36,8 +113,6 @@ info:
 paths:
   /auth:
     get:
-      consumes:
-      - application/json
       description: check user auth
       produces:
       - application/json
@@ -45,51 +120,674 @@ paths:
         "200":
           description: success auth
           schema:
-            $ref: '#/definitions/model.User'
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  $ref: '#/definitions/models.User'
+              type: object
         "400":
           description: bad request
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "401":
           description: no cookie
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "405":
-          description: invalid http method
+          description: Method Not Allowed
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "500":
           description: internal server error
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
       summary: Auth
       tags:
-      - users
-  /logout:
+      - auth
+  /chat:
     get:
-      consumes:
-      - application/json
-      description: user logout
+      description: get all dialogs
       produces:
       - application/json
       responses:
         "200":
-          description: success logout
-        "400":
-          description: bad request
+          description: success get dialogs
           schema:
-            $ref: '#/definitions/pkg.Error'
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  items:
+                    $ref: '#/definitions/models.Dialog'
+                  type: array
+              type: object
         "401":
           description: no cookie
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: GetAllDialogs
+      tags:
+      - chat
+  /chat/{id}:
+    get:
+      description: get dialog
+      parameters:
+      - description: Chat ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get dialog
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  $ref: '#/definitions/models.Dialog'
+              type: object
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: can't find chat with such id
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: GetDialog
+      tags:
+      - chat
+  /chat/send_message:
+    post:
+      consumes:
+      - application/json
+      description: send message
+      parameters:
+      - description: message data
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/models.Message'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success send message
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  $ref: '#/definitions/models.Message'
+              type: object
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: can't find item with such id
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: SendMessage
+      tags:
+      - chat
+  /chat/user/{id}:
+    get:
+      description: get dialog
+      parameters:
+      - description: Friend ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get dialog
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  $ref: '#/definitions/models.Dialog'
+              type: object
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: can't find chat with such id
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: GetDialogByUsers
+      tags:
+      - chat
+  /create_csrf:
+    post:
+      description: Get CSRF token
+      responses:
+        "204":
+          description: success create csrf, body is empty
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: CreateCSRF
+      tags:
+      - auth
+  /feed:
+    get:
+      description: Feed
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get feed
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  items:
+                    $ref: '#/definitions/models.Post'
+                  type: array
+              type: object
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
         "405":
           description: invalid http method
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Feed
+      tags:
+      - posts
+  /friends/{user_id}:
+    get:
+      description: get user's friends
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get profile
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  items:
+                    $ref: '#/definitions/models.User'
+                  type: array
+              type: object
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: user doesn't exist
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: SelectFriends
+      tags:
+      - friends
+  /friends/add/{friend_id}:
+    post:
+      description: add friend
+      parameters:
+      - description: Friend ID
+        in: path
+        name: friend_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: friend added
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: friend or user doesn't exist
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "409":
+          description: friend already exists
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: AddFriend
+      tags:
+      - friends
+  /friends/check/{friend_id}:
+    get:
+      description: check friend
+      parameters:
+      - description: Friend ID
+        in: path
+        name: friend_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get profile
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  type: boolean
+              type: object
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: item doesn't exist
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: CheckIsFriend
+      tags:
+      - friends
+  /friends/delete/{friend_id}:
+    delete:
+      description: delete friend
+      parameters:
+      - description: Friend ID
+        in: path
+        name: friend_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: friend deleted, body is empty
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: friend/user/friendship doesn't exist
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: DeleteFriend
+      tags:
+      - friends
+  /image/{id}:
+    get:
+      description: Get image by id
+      parameters:
+      - description: image ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - image/png
+      responses:
+        "200":
+          description: success get image
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Get image by id
+      tags:
+      - image
+  /image/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload image
+      parameters:
+      - description: image file
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success upload image
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Upload image
+      tags:
+      - image
+  /logout:
+    post:
+      description: user logout
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: success logout, body is empty
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
       summary: Logout
       tags:
-      - users
+      - auth
+  /post/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a post
+      parameters:
+      - description: Post ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Delete a post
+      tags:
+      - posts
+    get:
+      consumes:
+      - application/json
+      description: Get post by id
+      parameters:
+      - description: Post ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get post
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  $ref: '#/definitions/models.Post'
+              type: object
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Show a post
+      tags:
+      - posts
+  /post/create:
+    post:
+      consumes:
+      - application/json
+      description: Create a post
+      parameters:
+      - description: post info
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/models.Post'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get post
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  $ref: '#/definitions/models.Post'
+              type: object
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Create a post
+      tags:
+      - posts
+  /post/edit:
+    post:
+      consumes:
+      - application/json
+      description: Update a post
+      parameters:
+      - description: post info
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/models.Post'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get post
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  $ref: '#/definitions/models.Post'
+              type: object
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Update a post
+      tags:
+      - posts
   /signin:
     post:
       consumes:
@@ -101,73 +799,245 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/model.UserSignIn'
+          $ref: '#/definitions/models.UserSignIn'
       produces:
       - application/json
       responses:
         "200":
           description: success sign in
           schema:
-            $ref: '#/definitions/model.User'
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  $ref: '#/definitions/models.User'
+              type: object
         "400":
           description: bad request
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "401":
           description: invalid password
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "404":
           description: user doesn't exist
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "405":
-          description: invalid http method
+          description: Method Not Allowed
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "500":
           description: internal server error
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
       summary: SignIn
       tags:
-      - users
+      - auth
   /signup:
     post:
       consumes:
       - application/json
       description: user sign up
       parameters:
-      - description: user info
+      - description: user data
         in: body
         name: user
         required: true
         schema:
-          $ref: '#/definitions/model.User'
+          $ref: '#/definitions/models.User'
       produces:
       - application/json
       responses:
         "201":
           description: user created
           schema:
-            $ref: '#/definitions/model.User'
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  $ref: '#/definitions/models.User'
+              type: object
         "400":
           description: bad request
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "405":
-          description: invalid http method
+          description: Method Not Allowed
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "409":
           description: user with this email already exists
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
         "500":
           description: internal server error
           schema:
-            $ref: '#/definitions/pkg.Error'
+            $ref: '#/definitions/echo.HTTPError'
       summary: SignUp
+      tags:
+      - auth
+  /users:
+    get:
+      description: get all users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get users
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  items:
+                    $ref: '#/definitions/models.User'
+                  type: array
+              type: object
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: GetUsers
+      tags:
+      - users
+  /users/{id}:
+    get:
+      description: get user's profile
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get profile
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  $ref: '#/definitions/models.User'
+              type: object
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: can't find user with such id
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: GetProfile
+      tags:
+      - users
+  /users/{id}/posts:
+    get:
+      description: Get all users posts
+      parameters:
+      - description: Post ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get feed
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  items:
+                    $ref: '#/definitions/models.Post'
+                  type: array
+              type: object
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Post not found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Get users posts
+      tags:
+      - posts
+  /users/update:
+    put:
+      consumes:
+      - application/json
+      description: update user's profile
+      parameters:
+      - description: user data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: success update
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: can't find user with such id
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: UpdateUser
       tags:
       - users
 swagger: "2.0"

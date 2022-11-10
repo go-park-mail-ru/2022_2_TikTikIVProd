@@ -1,38 +1,29 @@
 package pkg
 
-import (
-	"encoding/json"
-	"net/http"
-)
-
 type Response struct {
 	Body interface{} `json:"body"`
 }
 
-type Error struct {
-	Message string `json:"error"`
-}
+// func JSONresponse(r *echo.Response, code int, body interface{}) error {
+// 	//r.Header().Set("Access-Control-Allow-Credentials", "true") // TODO это в мидлвару
+// 	//r.Header().Set("Access-Control-Allow-Origin", "http://localhost")
+// 	//r.Header().Set("Access-Control-Allow-Headers", "*")
+// 	//r.Header().Set("Content-Type", "application/json")
 
-func JSONresponse(w http.ResponseWriter, code int, body interface{}) error {
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Headers", "*")
-	w.Header().Set("Content-Type", "application/json")
+// 	response, err := json.Marshal(Response{
+// 		Body: body,
+// 	})
+// 	if err != nil {
+// 		return err
+// 	}
 
-	response, err := json.Marshal(Response {
-									Body:body,
-								  })
-	if err != nil {
-		return err
-	}
+// 	r.WriteHeader(code)
+// 	r.Write(response)
+// 	return nil
+// }
 
-	w.WriteHeader(code)
-	w.Write(response)
-	return nil
-}
-
-func ErrorResponse(w http.ResponseWriter, code int, errorMessage string) error {
-	return JSONresponse(w, code, Error {
-										Message: errorMessage,
-									})
-}
+// func ErrorResponse(r *echo.Response, code int, errorMessage string) error {
+// 	return JSONresponse(r, code, Error{
+// 		Message: errorMessage,
+// 	})
+// }
