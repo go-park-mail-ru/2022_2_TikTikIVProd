@@ -3,13 +3,17 @@ package postgres
 import (
 	imageRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/repository"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
+	"github.com/pkg/errors"
 	"gorm.io/gorm"
-	"log"
 )
 
 type Image struct {
 	ID      int
 	ImgLink string
+}
+
+func (Image) TableName() string {
+	return "images"
 }
 
 type imageRepository struct {
@@ -46,14 +50,37 @@ func toModelImages(images []*Image) []*models.Image {
 	return out
 }
 
-func (dbImage *imageRepository) GetPostImages(imageId int) ([]*models.Image, error) {
+func (dbImage *imageRepository) GetPostImages(postID int) ([]*models.Image, error) {
 	var images []*Image
-	tx := dbImage.db.Table("images").Select("img_link").Joins("JOIN user_posts_images upi ON upi.img_id = images.id AND upi.user_post_id = ?", imageId).Scan(&images)
+	tx := dbImage.db.Model(Image{}).Joins("JOIN user_posts_images upi ON upi.img_id = images.id AND upi.user_post_id = ?", postID).Scan(&images)
 
-	log.Println("Fetch ")
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
 
 	return toModelImages(images), nil
+}
+
+func (dbImage *imageRepository) GetImage(imageID int) (*models.Image, error) {
+	var img Image
+	tx := dbImage.db.Table("images").First(&img, imageID)
+
+	if tx.Error != nil {
+		return nil, errors.Wrap(tx.Error, "Get image repository error")
+	}
+
+	return toModelImage(&img), nil
+}
+
+func (dbImage *imageRepository) CreateImage(image *models.Image) error {
+	img := toPostgresImage(image)
+
+	tx := dbImage.db.Create(img)
+	if tx.Error != nil {
+		return errors.Wrap(tx.Error, "imageRepository.CreateImage error while insert image")
+	}
+
+	image.ID = img.ID
+
+	return nil
 }

@@ -10,26 +10,39 @@ CREATE TABLE IF NOT EXISTS users (
 	nick_name VARCHAR(30) NOT NULL UNIQUE,
 	avatar_img_id INT REFERENCES images(id),
 	email VARCHAR(50) NOT NULL UNIQUE,
-	passhash VARCHAR(128) NOT NULL
+	password VARCHAR(128) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS cookies (
-	value varchar(64) PRIMARY KEY,
-	user_id INT REFERENCES users(id),
-	expires DATE
+CREATE TABLE IF NOT EXISTS friends (
+	id1 INT REFERENCES users(id) on delete cascade,
+	id2 INT REFERENCES users(id) on delete cascade,
+	PRIMARY KEY (id1, id2)
 );
-
 
 CREATE TABLE IF NOT EXISTS user_posts (
 	id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-	user_id INT REFERENCES users(id),
-	message TEXT,
+	user_id INT REFERENCES users(id) on delete cascade,
+	message TEXT NOT NULL,
 	create_date DATE NOT NULL
 );
 
-
 CREATE TABLE IF NOT EXISTS user_posts_images (
-	user_post_id INT REFERENCES user_posts(id),
-	img_id INT REFERENCES images(id),
+	user_post_id INT REFERENCES user_posts(id) on delete cascade,
+	img_id INT REFERENCES images(id) on delete cascade,
 	PRIMARY KEY (user_post_id, img_id)
+);
+
+CREATE TABLE IF NOT EXISTS chat (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id1 INT REFERENCES users(id),
+	user_id2 INT REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS message (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    body text DEFAULT '',
+    sender_id INT REFERENCES users(id),
+	receiver_id INT REFERENCES users(id),
+	chat_id INT REFERENCES chat(id),
+    created_at date NOT NULL
 );

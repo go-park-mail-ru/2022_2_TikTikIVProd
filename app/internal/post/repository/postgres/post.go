@@ -1,10 +1,10 @@
 package postgres
 
 import (
-	"database/sql"
+	"fmt"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/repository"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
-	"log"
+	"github.com/pkg/errors"
 	"time"
 
 	"gorm.io/gorm"
@@ -15,6 +15,19 @@ type Post struct {
 	UserID     int
 	Message    string
 	CreateDate time.Time
+}
+
+func (Post) TableName() string {
+	return "user_posts"
+}
+
+type PostImagesRelation struct {
+	PostID  int `gorm:"column:user_post_id"`
+	ImageID int `gorm:"column:img_id"`
+}
+
+func (PostImagesRelation) TableName() string {
+	return "user_posts_images"
 }
 
 func toPostgresPost(p *models.Post) *Post {
@@ -55,69 +68,100 @@ func NewPostRepository(db *gorm.DB) repository.RepositoryI {
 	}
 }
 
-func (dbPost *postRepository) CreatePost(u models.Post) (*models.Post, error) {
-	//TODO implement me
-	panic("implement me")
+func (dbPost *postRepository) UpdatePost(p *models.Post) error {
+	post := toPostgresPost(p)
+
+	tx := dbPost.db.Omit("id").Updates(post)
+	if tx.Error != nil {
+		return errors.Wrap(tx.Error, "postRepository.UpdatePost error while insert post")
+	}
+
+	tx = dbPost.db.Where(&PostImagesRelation{PostID: p.ID}).Delete(&PostImagesRelation{})
+	if tx.Error != nil {
+		return errors.Wrap(tx.Error, "postRepository.UpdatePost error while delete relation")
+	}
+
+	postImages := make([]PostImagesRelation, 0, 10)
+	for _, elem := range p.Images {
+		postImages = append(postImages, PostImagesRelation{PostID: p.ID, ImageID: elem.ID})
+	}
+
+	if len(postImages) > 0 {
+		tx = dbPost.db.Create(&postImages)
+		if tx.Error != nil {
+			return errors.Wrap(tx.Error, "postRepository.CreatePost error while insert relation")
+		}
+	}
+
+	return nil
+}
+
+func (dbPost *postRepository) CreatePost(p *models.Post) error {
+	post := toPostgresPost(p)
+
+	tx := dbPost.db.Create(post)
+	if tx.Error != nil {
+		return errors.Wrap(tx.Error, "postRepository.CreatePost error while insert post")
+	}
+
+	p.ID = post.ID
+	p.CreateDate = time.Now()
+
+	postImages := make([]PostImagesRelation, 0, 10)
+	for _, elem := range p.Images {
+		postImages = append(postImages, PostImagesRelation{PostID: p.ID, ImageID: elem.ID})
+	}
+
+	if len(postImages) > 0 {
+		tx = dbPost.db.Create(&postImages)
+		fmt.Println(postImages)
+		if tx.Error != nil {
+			return errors.Wrap(tx.Error, "postRepository.CreatePost error while insert relation")
+		}
+	}
+
+	return nil
 }
 
 func (dbPost *postRepository) GetPostById(id int) (*models.Post, error) {
-	//TODO implement me
-	panic("implement me")
-}
+	var post Post
+	tx := dbPost.db.First(&post, id)
 
-func getLinksFromRows(rows *sql.Rows) ([]string, error) {
-	var links []string
-	defer rows.Close()
-	for rows.Next() {
-		var link string
-		err := rows.Scan(&link)
-
-		if err != nil {
-			return nil, err
-		}
-
-		links = append(links, link)
+	if tx.Error != nil {
+		return nil, errors.Wrap(tx.Error, "postRepository.GetPostById error") // TODO not found
 	}
 
-	return links, nil
+	return toModelPost(&post), nil
+}
+
+func (dbPost *postRepository) DeletePostById(id int) error {
+	tx := dbPost.db.Delete(&Post{}, id)
+
+	if tx.Error != nil {
+		return errors.Wrap(tx.Error, "postRepository.DeletePostById error") // TODO
+	}
+
+	return nil
 }
 
 func (dbPost *postRepository) GetAllPosts() ([]*models.Post, error) {
-	var posts []*Post
-	tx := dbPost.db.Table("user_posts").Find(&posts) //TODO оттрекать ошибки
+	posts := make([]*Post, 0, 10)
+	tx := dbPost.db.Table("user_posts").Find(&posts)
 
 	if tx.Error != nil {
-		log.Println()
-		return nil, tx.Error
+		return nil, errors.Wrap(tx.Error, "postRepository.GetAllPosts error") // TODO
 	}
-
-	log.Println("Fetch all posts from postgres: ", posts)
 
 	return toModelPosts(posts), nil
 }
 
-//func (dbPosts *postRepository) SelectAllPosts() (*[]Post, error) {
-//	var posts []Post
-//	tx := dbPosts.db.Table("user_posts").Select("user_posts.id, user_posts.message", "user_posts.create_date", "users.first_name", "users.last_name").Joins("JOIN users ON users.id = user_posts.user_id ").Scan(&posts) //TODO оттрекать ошибки
-//
-//	if tx.Error != nil {
-//		return nil, tx.Error
-//	}
-//
-//	for i := range posts {
-//		linkRows, err := dbPosts.db.Table("images").Select("img_link").Joins("JOIN user_posts_images upi ON upi.img_id = images.id AND upi.user_post_id = ?", posts[i].ID).Rows()
-//
-//		if err != nil {
-//			return nil, err
-//		}
-//		links, err := getLinksFromRows(linkRows)
-//
-//		if err != nil {
-//			return nil, err
-//		}
-//
-//		posts[i].ImageLinks = links
-//	}
-//
-//	return &posts, nil
-//}
+func (dbPost *postRepository) GetUserPosts(userId int) ([]*models.Post, error) {
+	posts := make([]*Post, 0, 10)
+	tx := dbPost.db.Where(&Post{UserID: userId}).Find(&posts)
+
+	if tx.Error != nil {
+		return nil, errors.Wrap(tx.Error, "postRepository.GetAllPosts error") // TODO
+	}
+
+	return toModelPosts(posts), nil
+}
