@@ -15,7 +15,7 @@ services:
       POSTGRES_PASSWORD: postgres
 
   redis:
-    image: redis:latest
+    image: redis:alpine
     ports:
       - "6379:6379"
     networks:
