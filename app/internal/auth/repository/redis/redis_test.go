@@ -32,11 +32,8 @@ func TestCreateCookie(t *testing.T) {
 		UserId: 1,
 		MaxAge: 3600 * 24 * 365,
 	}
-	
-	err := faker.FakeData(&mockCookie)
-	assert.NoError(t, err)
 
-	err = repository.CreateCookie(&mockCookie)
+	err := repository.CreateCookie(&mockCookie)
 	require.NoError(t, err)
 
 	s.CheckGet(t, mockCookie.SessionToken, strconv.Itoa(mockCookie.UserId))
