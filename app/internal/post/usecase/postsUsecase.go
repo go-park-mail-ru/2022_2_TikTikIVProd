@@ -11,6 +11,7 @@ import (
 type PostUseCaseI interface {
 	GetPostById(id int) (*models.Post, error)
 	GetUserPosts(userId int) ([]*models.Post, error)
+	GetCommunityPosts(userId int) ([]*models.Post, error)
 	CreatePost(p *models.Post) error
 	UpdatePost(p *models.Post) error
 	GetAllPosts() ([]*models.Post, error)
@@ -185,6 +186,24 @@ func (p *postsUsecase) GetAllPosts() ([]*models.Post, error) {
 
 func (p *postsUsecase) GetUserPosts(userId int) ([]*models.Post, error) {
 	posts, err := p.postsRepo.GetUserPosts(userId)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "Error in func postsUsecase.GetUserPosts")
+	}
+
+	for idx := range posts {
+		err = addAdditionalFieldsToPost(posts[idx], p.userRepo, p.imageRepo)
+
+		if err != nil {
+			return nil, errors.Wrap(err, "postsUsecase.GetUserPosts error while add additional fields")
+		}
+	}
+
+	return posts, nil
+}
+
+func (p *postsUsecase) GetCommunityPosts(communityID int) ([]*models.Post, error) {
+	posts, err := p.postsRepo.GetCommunityPosts(communityID)
 
 	if err != nil {
 		return nil, errors.Wrap(err, "Error in func postsUsecase.GetUserPosts")

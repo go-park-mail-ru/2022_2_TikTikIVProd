@@ -3,6 +3,22 @@ definitions:
     properties:
       message: {}
     type: object
+  models.Community:
+    properties:
+      avatar_id:
+        type: integer
+      create_date:
+        readOnly: true
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      owner_id:
+        type: integer
+    type: object
   models.Dialog:
     properties:
       dialog_id:
@@ -45,6 +61,8 @@ definitions:
       avatar_id:
         readOnly: true
         type: integer
+      community_id:
+        type: integer
       create_date:
         readOnly: true
         type: string
@@ -66,6 +84,19 @@ definitions:
         type: string
     required:
     - message
+    type: object
+  models.ReqCommunityCreate:
+    properties:
+      avatar_id:
+        type: integer
+      description:
+        type: string
+      name:
+        type: string
+    required:
+    - avatar_id
+    - description
+    - name
     type: object
   models.User:
     properties:
@@ -316,6 +347,230 @@ paths:
       summary: GetDialogByUsers
       tags:
       - chat
+  /communities/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a community
+      parameters:
+      - description: Community ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: can't find community with such id
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Delete a community
+      tags:
+      - communities
+    get:
+      description: Get a community info
+      parameters:
+      - description: community ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get community
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  $ref: '#/definitions/models.User'
+              type: object
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: can't find community with such id
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Get a community
+      tags:
+      - communities
+  /communities/{id}/posts:
+    get:
+      description: Get all community posts
+      parameters:
+      - description: Community ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get community posts
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  items:
+                    $ref: '#/definitions/models.Post'
+                  type: array
+              type: object
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Community not found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Get community posts
+      tags:
+      - posts
+  /communities/create:
+    post:
+      consumes:
+      - application/json
+      description: Create a community
+      parameters:
+      - description: community info
+        in: body
+        name: community
+        required: true
+        schema:
+          $ref: '#/definitions/models.ReqCommunityCreate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success create community
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  $ref: '#/definitions/models.Community'
+              type: object
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "422":
+          description: unprocessable entity
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Create a community
+      tags:
+      - communities
+  /communities/edit:
+    post:
+      consumes:
+      - application/json
+      description: Update a community
+      parameters:
+      - description: community info
+        in: body
+        name: community
+        required: true
+        schema:
+          $ref: '#/definitions/models.Community'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success update community
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  $ref: '#/definitions/models.Community'
+              type: object
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf or permission denied
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "422":
+          description: unprocessable entity
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Update a community
+      tags:
+      - communities
   /create_csrf:
     post:
       description: Get CSRF token

@@ -19,9 +19,19 @@ CREATE TABLE IF NOT EXISTS friends (
 	PRIMARY KEY (id1, id2)
 );
 
+CREATE TABLE IF NOT EXISTS communities (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    owner_id INT REFERENCES users(id),
+    avatar_img_id INT REFERENCES images(id),
+    name VARCHAR(30) NOT NULL,
+    description TEXT DEFAULT '',
+    created_at date NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS user_posts (
 	id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 	user_id INT REFERENCES users(id) on delete cascade,
+    community_id INT REFERENCES communities(id),
 	message TEXT NOT NULL,
 	create_date DATE NOT NULL
 );
@@ -46,3 +56,4 @@ CREATE TABLE IF NOT EXISTS message (
 	chat_id INT REFERENCES chat(id),
     created_at date NOT NULL
 );
+

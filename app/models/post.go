@@ -5,6 +5,7 @@ import "time"
 type Post struct {
 	ID            int       `json:"id"`
 	UserID        int       `json:"user_id"`
+	CommunityID   int       `json:"community_id,omitempty"`
 	AvatarID      int       `json:"avatar_id" readonly:"true"`
 	UserFirstName string    `json:"user_first_name" readonly:"true"`
 	UserLastName  string    `json:"user_last_name" readonly:"true"`

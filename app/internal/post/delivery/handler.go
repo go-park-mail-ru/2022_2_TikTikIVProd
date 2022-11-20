@@ -1,7 +1,6 @@
 package delivery
 
 import (
-	"fmt"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg"
 	"github.com/labstack/echo/v4"
@@ -34,7 +33,7 @@ func (delivery *Delivery) GetPost(c echo.Context) error {
 
 	if err != nil {
 		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusNotFound, "Post not found") //TODO переделать на ошибки в файле
+		return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
 	}
 
 	post, err := delivery.PUsecase.GetPostById(idP)
@@ -169,7 +168,6 @@ func (delivery *Delivery) UpdatePost(c echo.Context) error {
 // @Failure 403 {object} echo.HTTPError "invalid csrf"
 // @Router   /post/{id} [delete]
 func (delivery *Delivery) DeletePost(c echo.Context) error {
-	fmt.Println("param", c.Param("id"))
 	idP, err := strconv.Atoi(c.Param("id"))
 
 	userId, ok := c.Get("user_id").(int)
@@ -243,6 +241,36 @@ func (delivery *Delivery) GetUserPosts(c echo.Context) error {
 	return c.JSON(http.StatusOK, pkg.Response{Body: posts})
 }
 
+// GetCommunityPosts godoc
+// @Summary      Get community posts
+// @Description  Get all community posts
+// @Tags     	 posts
+// @Param id path int  true  "Community ID"
+// @Produce  application/json
+// @Success  200 {object} pkg.Response{body=[]models.Post} "success get community posts"
+// @Failure 405 {object} echo.HTTPError "invalid http method"
+// @Failure 404 {object} echo.HTTPError "Community not found"
+// @Failure 500 {object} echo.HTTPError "internal server error"
+// @Failure 401 {object} echo.HTTPError "no cookie"
+// @Router   /communities/{id}/posts [get]
+func (delivery *Delivery) GetCommunityPosts(c echo.Context) error {
+	idP, err := strconv.Atoi(c.Param("id"))
+
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusNotFound, models.ErrNotFound)
+	}
+
+	posts, err := delivery.PUsecase.GetCommunityPosts(idP)
+
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError)
+	}
+
+	return c.JSON(http.StatusOK, pkg.Response{Body: posts})
+}
+
 func NewDelivery(e *echo.Echo, up postsUsecase.PostUseCaseI) {
 	handler := &Delivery{
 		PUsecase: up,
@@ -252,6 +280,7 @@ func NewDelivery(e *echo.Echo, up postsUsecase.PostUseCaseI) {
 	e.POST("/post/edit", handler.UpdatePost)
 	e.GET("/post/:id", handler.GetPost)
 	e.GET("/users/:id/posts", handler.GetUserPosts)
+	e.GET("/communities/:id/posts", handler.GetCommunityPosts)
 	e.GET("/feed", handler.Feed)
 	e.DELETE("/post/:id", handler.DeletePost)
 }

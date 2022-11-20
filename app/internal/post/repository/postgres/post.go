@@ -11,10 +11,11 @@ import (
 )
 
 type Post struct {
-	ID         int
-	UserID     int
-	Message    string
-	CreateDate time.Time
+	ID          int
+	UserID      int
+	CommunityID int
+	Message     string
+	CreateDate  time.Time
 }
 
 func (Post) TableName() string {
@@ -32,19 +33,21 @@ func (PostImagesRelation) TableName() string {
 
 func toPostgresPost(p *models.Post) *Post {
 	return &Post{
-		ID:         p.ID,
-		UserID:     p.UserID,
-		Message:    p.Message,
-		CreateDate: p.CreateDate,
+		ID:          p.ID,
+		UserID:      p.UserID,
+		CommunityID: p.CommunityID,
+		Message:     p.Message,
+		CreateDate:  p.CreateDate,
 	}
 }
 
 func toModelPost(p *Post) *models.Post {
 	return &models.Post{
-		ID:         p.ID,
-		UserID:     p.UserID,
-		Message:    p.Message,
-		CreateDate: p.CreateDate,
+		ID:          p.ID,
+		UserID:      p.UserID,
+		CommunityID: p.CommunityID,
+		Message:     p.Message,
+		CreateDate:  p.CreateDate,
 	}
 }
 
@@ -99,7 +102,14 @@ func (dbPost *postRepository) UpdatePost(p *models.Post) error {
 func (dbPost *postRepository) CreatePost(p *models.Post) error {
 	post := toPostgresPost(p)
 
-	tx := dbPost.db.Create(post)
+	var tx *gorm.DB = nil
+
+	if p.CommunityID == 0 {
+		tx = dbPost.db.Omit("community_id").Create(post)
+	} else {
+		tx = dbPost.db.Create(post)
+	}
+
 	if tx.Error != nil {
 		return errors.Wrap(tx.Error, "postRepository.CreatePost error while insert post")
 	}
@@ -157,7 +167,18 @@ func (dbPost *postRepository) GetAllPosts() ([]*models.Post, error) {
 
 func (dbPost *postRepository) GetUserPosts(userId int) ([]*models.Post, error) {
 	posts := make([]*Post, 0, 10)
-	tx := dbPost.db.Where(&Post{UserID: userId}).Find(&posts)
+	tx := dbPost.db.Where("community_id is NULL").Where(&Post{UserID: userId}).Find(&posts)
+
+	if tx.Error != nil {
+		return nil, errors.Wrap(tx.Error, "postRepository.GetAllPosts error") // TODO
+	}
+
+	return toModelPosts(posts), nil
+}
+
+func (dbPost *postRepository) GetCommunityPosts(communityID int) ([]*models.Post, error) {
+	posts := make([]*Post, 0, 10)
+	tx := dbPost.db.Where(&Post{CommunityID: communityID}).Find(&posts)
 
 	if tx.Error != nil {
 		return nil, errors.Wrap(tx.Error, "postRepository.GetAllPosts error") // TODO

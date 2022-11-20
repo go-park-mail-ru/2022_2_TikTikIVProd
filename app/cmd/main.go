@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/middleware"
 	"github.com/go-redis/redis"
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
@@ -15,13 +16,16 @@ import (
 	_chatDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/delivery"
 	chatRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/repository/postgres"
 	chatUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/usecase"
+	_communitiesDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/communities/delivery"
+	communitiesRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/communities/repository/postgres"
+	communitiesUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/communities/usecase"
+
 	_friendsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/delivery"
 	friendsRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/repository/postgres"
 	friendsUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/usecase"
 	_imageDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/delivery"
 	imagesRepository "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/repository/postgres"
 	imageUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/usecase"
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/middleware"
 	_postsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/delivery"
 	postsRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/repository/postgres"
 	postsUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/usecase"
@@ -62,6 +66,7 @@ func main() {
 	friendsDB := friendsRep.New(db)
 	imageDB := imagesRepository.NewImageRepository(db)
 	chatDB := chatRep.NewChatRepository(db)
+	communitiesDb := communitiesRep.NewCommunitiesRepository(db)
 
 	postsUC := postsUsecase.NewPostUsecase(postDB, imageDB, usersDB)
 	authUC := authUseCase.New(authDB, usersDB)
@@ -69,6 +74,7 @@ func main() {
 	friendsUC := friendsUseCase.New(friendsDB, usersDB)
 	imageUC := imageUsecase.NewImageUsecase(imageDB)
 	chatUC := chatUseCase.New(chatDB)
+	communitiesUC := communitiesUseCase.New(communitiesDb)
 
 	e := echo.New()
 
@@ -95,7 +101,7 @@ func main() {
 
 	authMiddleware := middleware.NewMiddleware(authUC)
 	e.Use(authMiddleware.Auth)
-	e.Use(authMiddleware.CSRF)
+	//e.Use(authMiddleware.CSRF)
 
 	_postsDelivery.NewDelivery(e, postsUC)
 	_authDelivery.NewDelivery(e, authUC)
@@ -103,6 +109,7 @@ func main() {
 	_imageDelivery.NewDelivery(e, imageUC)
 	_friendsDelivery.NewDelivery(e, friendsUC)
 	_chatDelivery.NewDelivery(e, chatUC)
+	_communitiesDelivery.NewDelivery(e, communitiesUC)
 
 	s := server.NewServer(e)
 	if err := s.Start(); err != nil {
