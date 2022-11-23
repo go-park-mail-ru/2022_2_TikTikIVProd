@@ -2,8 +2,7 @@ FROM golang:1.19
 
 WORKDIR /
 
-COPY app ./app
-COPY images ./images
+COPY . ./app
 
 WORKDIR /app
 
@@ -13,6 +12,6 @@ RUN go build cmd/main.go
 
 WORKDIR /
 
-EXPOSE 8080
+EXPOSE 8081
 
 CMD [ "./app/main" ]

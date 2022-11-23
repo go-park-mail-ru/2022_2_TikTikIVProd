@@ -18,11 +18,12 @@ def gen_users():
         avatar_img_id = faker.pyint(1, COUNT_IMAGES)
         email = faker.email()
         password = "hash"
+        created_at = datetime.datetime.now()
 
-        return f"{first_name};{last_name};{nick_name};{avatar_img_id};{email};{password}"
+        return f"{first_name};{last_name};{nick_name};{avatar_img_id};{email};{password};{created_at}"
 
     with open("users.csv", "w") as f: 
-        f.write("first_name;last_name;nick_name;avatar_img_id;email;password\n")
+        f.write("first_name;last_name;nick_name;avatar_img_id;email;password;created_at\n")
         for _ in range(COUNT_USERS):
             f.write(_gen_users_string() + "\n")
 
@@ -30,19 +31,19 @@ def gen_posts():
     def _gen_post_string():
         faker = Faker()
         user_id = randint(1, COUNT_USERS)
-        message = str(faker.text()).replace('\n', ' ')
-        create_date = faker.date_this_year()
-        return f"{user_id};;{message};{create_date}"
+        description = str(faker.text()).replace('\n', ' ')
+        created_at = faker.date_this_year()
+        return f"{user_id};;{description};{created_at}"
     def _gen_post_string_communities():
         faker = Faker()
         user_id = randint(1, COUNT_USERS)
         community_id = randint(1, COUNT_COMMUNITIES)
-        message = str(faker.text()).replace('\n', ' ')
-        create_date = faker.date_this_year()
-        return f"{user_id};{community_id};{message};{create_date}"
+        description = str(faker.text()).replace('\n', ' ')
+        created_at = faker.date_this_year()
+        return f"{user_id};{community_id};{description};{created_at}"
 
     with open("user_posts.csv", "w") as f: 
-        f.write("user_id;community_id;message;create_date\n")
+        f.write("user_id;community_id;description;created_at\n")
         for i in range(COUNT_POSTS):
             if i % 2:
                 f.write(_gen_post_string() + "\n")

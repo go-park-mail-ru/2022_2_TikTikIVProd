@@ -23,13 +23,27 @@ services:
       - mynetwork
 
   server:
-    build: .
+    build: ./MainApp
     restart: always
+    volumes:
+      - ./images:/images
     depends_on:
       - ws_pg
-      - redis
+      - auth_mvs
     ports:
       - "8080:8080"
+    networks:
+      - mynetwork
+
+  auth_mvs:
+    build: ./AuthMicroservice
+    restart: always
+    volumes:
+      - ./images:/images
+    depends_on:
+      - redis
+    ports:
+      - "8081:8081"
     networks:
       - mynetwork
 

@@ -38,19 +38,19 @@ import (
 // @version 1.0
 // @host 89.208.197.127:8080
 
-var testCfgPg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
+// var testCfgPg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
 
-//var prodCfgPg = postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}
+var prodCfgPg = postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}
 
 func main() {
-	db, err := gorm.Open(postgres.New(testCfgPg),
+	db, err := gorm.Open(postgres.New(prodCfgPg),
 		&gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	grpcConnAuth, err := grpc.Dial(
-		"127.0.0.1:8081",
+		"auth_mvs:8081",
 		grpc.WithInsecure(),
 	)
 
