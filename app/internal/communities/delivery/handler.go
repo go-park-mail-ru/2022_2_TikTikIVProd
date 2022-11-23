@@ -144,6 +144,19 @@ func (delivery *Delivery) GetCommunity(c echo.Context) error {
 	return c.JSON(http.StatusOK, pkg.Response{Body: community})
 }
 
+func (delivery *Delivery) SearchCommunity(c echo.Context) error {
+	param := c.QueryParam("q")
+
+	communities, err := delivery.commUC.SearchCommunities(param)
+
+	if err != nil {
+		c.Logger().Error(err)
+		return handleError(err)
+	}
+
+	return c.JSON(http.StatusOK, pkg.Response{Body: communities})
+}
+
 // DeleteCommunity godoc
 // @Summary      Delete a community
 // @Description  Delete a community
@@ -212,5 +225,7 @@ func NewDelivery(e *echo.Echo, cu communitiesUsecase.UseCaseI) {
 	e.POST("/communities/create", handler.CreateCommunity)
 	e.POST("/communities/edit", handler.UpdateCommunity)
 	e.GET("/communities/:id", handler.GetCommunity)
+	e.GET("/communities/search", handler.SearchCommunity)
+	//e.GET("/communities", handler.GetAllCommunity) TODO
 	e.DELETE("/communities/:id", handler.DeleteCommunity)
 }

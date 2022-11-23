@@ -28,7 +28,7 @@ func toPostgresCommunity(c *models.Community) *Community {
 	}
 }
 
-func toModelPCommunity(c *Community) *models.Community {
+func toModelCommunity(c *Community) *models.Community {
 	return &models.Community{
 		ID:          c.ID,
 		OwnerID:     c.OwnerID,
@@ -37,6 +37,16 @@ func toModelPCommunity(c *Community) *models.Community {
 		Description: c.Description,
 		CreateDate:  c.CreateDate,
 	}
+}
+
+func toModelCommunities(communities []*Community) []*models.Community {
+	out := make([]*models.Community, len(communities))
+
+	for i, b := range communities {
+		out[i] = toModelCommunity(b)
+	}
+
+	return out
 }
 
 func (Community) TableName() string {
@@ -57,7 +67,20 @@ func (dbcomm *communitiesRepository) GetCommunity(id int) (*models.Community, er
 		return nil, errors.Wrap(tx.Error, "database error (table communities)")
 	}
 
-	return toModelPCommunity(&comm), nil
+	return toModelCommunity(&comm), nil
+}
+
+func (dbcomm *communitiesRepository) SearchCommunities(searchString string) ([]*models.Community, error) {
+	comms := make([]*Community, 0, 10)
+
+	tx := dbcomm.db.Where("name LIKE ?", "%"+searchString+"%").Find(&comms)
+	if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+		return nil, models.ErrNotFound
+	} else if tx.Error != nil {
+		return nil, errors.Wrap(tx.Error, "database error (table communities)")
+	}
+
+	return toModelCommunities(comms), nil
 }
 
 func (dbcomm *communitiesRepository) UpdateCommunity(comm *models.Community) error {
