@@ -16,6 +16,7 @@ services:
 
   redis:
     image: redis:latest
+    command: --requirepass "ws_redis_password"
     ports:
       - "6379:6379"
     networks:

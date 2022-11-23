@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+option go_package = ".";
+
+package auth;
+
+message Nothing {
+  bool dummy = 1;
+}
+
+message GetCookieResponse {
+    string userId = 1;
+}
+
+message ValueCookieRequest {
+    string valueCookie = 1;
+}
+
+message Cookie {
+    string sessionToken = 1;
+    uint64 userId = 2;
+    int64 maxAge = 3;
+}
+
+service Auth {
+    rpc GetCookie(ValueCookieRequest) returns (GetCookieResponse) {}
+    rpc DeleteCookie(ValueCookieRequest) returns (Nothing) {}
+    rpc CreateCookie(Cookie) returns (Nothing) {}
+}
+
