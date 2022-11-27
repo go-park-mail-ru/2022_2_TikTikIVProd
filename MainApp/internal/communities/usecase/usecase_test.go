@@ -14,7 +14,7 @@ package usecase_test
 //)
 //
 //type TestCaseSendMessage struct {
-//	ArgData models.Message
+//	ArgData models.Description
 //	ExpectedRes int
 //	Error error
 //}
@@ -140,11 +140,11 @@ package usecase_test
 //}
 //
 //func TestUsecaseSendMessage(t *testing.T) {
-//	var mockMessage models.Message
+//	var mockMessage models.Description
 //	err := faker.FakeData(&mockMessage)
 //	assert.NoError(t, err)
 //
-//	var mockMessageNewDialog models.Message
+//	var mockMessageNewDialog models.Description
 //	err = faker.FakeData(&mockMessageNewDialog)
 //	assert.NoError(t, err)
 //
@@ -153,17 +153,17 @@ package usecase_test
 //	mockDialog := models.Dialog {
 //		UserId1: mockMessageNewDialog.SenderID,
 //		UserId2: mockMessageNewDialog.ReceiverID,
-//		Messages: []models.Message{mockMessageNewDialog},
+//		Messages: []models.Description{mockMessageNewDialog},
 //	}
 //
 //	mockChatRepo := mocks.NewRepositoryI(t)
 //
 //	mockChatRepo.On("SelectDialog", mockMessage.DialogID).Return(nil, nil)
-//	mockChatRepo.On("CreateMessage", mock.AnythingOfType("*models.Message")).Return(nil)
+//	mockChatRepo.On("CreateMessage", mock.AnythingOfType("*models.Description")).Return(nil)
 //
 //	mockChatRepo.On("SelectDialog", mockMessageNewDialog.DialogID).Return(nil, models.ErrNotFound)
 //	mockChatRepo.On("CreateDialog", &mockDialog).Return(nil)
-//	mockChatRepo.On("CreateMessage", mock.AnythingOfType("*models.Message")).Return(nil)
+//	mockChatRepo.On("CreateMessage", mock.AnythingOfType("*models.Description")).Return(nil)
 //
 //	useCase := chatUsecase.New(mockChatRepo)
 //

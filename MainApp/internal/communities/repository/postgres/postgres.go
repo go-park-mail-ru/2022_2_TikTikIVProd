@@ -101,7 +101,7 @@ func (dbcomm *communitiesRepository) CreateCommunity(comm *models.Community) err
 	tx := dbcomm.db.Create(postgresComm)
 
 	if tx.Error != nil {
-		return errors.Wrap(tx.Error, "communities repository error")
+		return errors.Wrap(tx.Error, "database error (table communities)")
 	}
 
 	comm.ID = postgresComm.ID
@@ -117,6 +117,17 @@ func (dbcomm *communitiesRepository) DeleteCommunity(id uint64) error {
 	}
 
 	return nil
+}
+
+func (dbcomm *communitiesRepository) GetAllCommunities() ([]*models.Community, error) {
+	communities := make([]*Community, 0, 10)
+	tx := dbcomm.db.Find(&communities)
+
+	if tx.Error != nil {
+		return nil, errors.Wrap(tx.Error, "database error (table communities) on GetAllCommunities")
+	}
+
+	return toModelCommunities(communities), nil
 }
 
 func NewCommunitiesRepository(db *gorm.DB) repository.RepositoryI {

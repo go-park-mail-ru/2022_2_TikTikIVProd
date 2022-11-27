@@ -12,6 +12,7 @@ type UseCaseI interface {
 	SearchCommunities(searchString string) ([]*models.Community, error)
 	UpdateCommunity(p *models.Community) error
 	DeleteCommunity(id uint64, userId uint64) error
+	GetAllCommunities() ([]*models.Community, error)
 }
 
 type useCase struct {
@@ -92,6 +93,16 @@ func (u useCase) DeleteCommunity(id uint64, userId uint64) error {
 	}
 
 	return nil
+}
+
+func (u *useCase) GetAllCommunities() ([]*models.Community, error) {
+	communities, err := u.communitiesRep.GetAllCommunities()
+
+	if err != nil {
+		return nil, errors.Wrap(err, "community repository error")
+	}
+
+	return communities, nil
 }
 
 func New(rep communitiesRep.RepositoryI) UseCaseI {

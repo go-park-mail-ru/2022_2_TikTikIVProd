@@ -8,4 +8,5 @@ type RepositoryI interface {
 	CreateCommunity(comm *models.Community) error
 	SearchCommunities(searchString string) ([]*models.Community, error)
 	DeleteCommunity(id uint64) error
+	GetAllCommunities() ([]*models.Community, error)
 }

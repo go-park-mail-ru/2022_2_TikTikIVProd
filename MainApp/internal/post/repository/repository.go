@@ -10,4 +10,8 @@ type RepositoryI interface {
 	CreatePost(u *models.Post) error
 	GetAllPosts() ([]*models.Post, error)
 	DeletePostById(id uint64) error
+	LikePost(id uint64, userId uint64) error
+	UnLikePost(id uint64, userId uint64) error
+	GetCountLikesPost(id uint64) (uint64, error)
+	CheckLikePost(id uint64, userID uint64) (bool, error)
 }

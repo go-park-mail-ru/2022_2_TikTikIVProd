@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	// models "github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
+	models "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
 	mock "github.com/stretchr/testify/mock"
 )
 

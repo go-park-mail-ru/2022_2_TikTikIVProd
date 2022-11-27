@@ -128,12 +128,30 @@ def gen_communities():
         for _ in range(COUNT_COMMUNITIES):
             f.write(_gen_communities_string() + "\n")
 
+def gen_likes():
+    relations = []
+    def _gen_likes_string():
+        user_post_id = randint(1, COUNT_POSTS)
+        user_id = randint(1, COUNT_USERS)
+        if (user_post_id, user_id) not in relations:
+            relations.append((user_post_id, user_id))
+            return f"{user_post_id};{user_id}"
+        else:
+            return ""
+
+    with open("like_post.csv", "w") as f: 
+        f.write("user_post_id;user_id\n")
+        for _ in range(COUNT_POSTS * 100):
+            row = _gen_likes_string()
+            f.write(row + "\n" if row != "" else "")
+
 if __name__ == '__main__':
     gen_images()
     gen_posts()
     gen_users()
     gen_posts_images_relation()
     gen_communities()
+    gen_likes()
     
     if len(sys.argv) > 1:
         gen_messages_for_user(sys.argv[1])

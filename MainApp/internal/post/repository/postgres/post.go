@@ -14,9 +14,9 @@ import (
 type Post struct {
 	ID          uint64
 	UserID      uint64
-	Message     string
+	Description string
 	CommunityID uint64
-	CreateDate  time.Time
+	CreatedAt   time.Time
 }
 
 func (Post) TableName() string {
@@ -37,8 +37,8 @@ func toPostgresPost(p *models.Post) *Post {
 		ID:          p.ID,
 		UserID:      p.UserID,
 		CommunityID: p.CommunityID,
-		Message:     p.Message,
-		CreateDate:  p.CreateDate,
+		Description: p.Message,
+		CreatedAt:   p.CreateDate,
 	}
 }
 
@@ -47,8 +47,8 @@ func toModelPost(p *Post) *models.Post {
 		ID:          p.ID,
 		UserID:      p.UserID,
 		CommunityID: p.CommunityID,
-		Message:     p.Message,
-		CreateDate:  p.CreateDate,
+		Message:     p.Description,
+		CreateDate:  p.CreatedAt,
 	}
 }
 
@@ -155,9 +155,50 @@ func (dbPost *postRepository) DeletePostById(id uint64) error {
 	return nil
 }
 
+func (dbPost *postRepository) LikePost(id uint64, userId uint64) error {
+	tx := dbPost.db.Create(&models.LikePost{UserID: userId, PostID: id})
+
+	if tx.Error != nil {
+		return errors.Wrap(tx.Error, "database error (table like_post) on create")
+	}
+
+	return nil
+}
+
+func (dbPost *postRepository) UnLikePost(id uint64, userId uint64) error {
+	tx := dbPost.db.Where(&models.LikePost{UserID: userId, PostID: id}).Delete(&models.LikePost{})
+
+	if tx.Error != nil {
+		return errors.Wrap(tx.Error, "\"database error (table like_post) on delete")
+	}
+
+	return nil
+}
+
+func (dbPost *postRepository) GetCountLikesPost(id uint64) (uint64, error) {
+	var count int64
+	tx := dbPost.db.Model(&models.LikePost{}).Where("user_post_id = ?", id).Count(&count)
+
+	if tx.Error != nil {
+		return 0, errors.Wrap(tx.Error, "database error (table like_post) on count")
+	}
+
+	return uint64(count), nil
+}
+
+func (dbPost *postRepository) CheckLikePost(id uint64, userID uint64) (bool, error) {
+	var count int64
+	tx := dbPost.db.Model(&models.LikePost{UserID: userID, PostID: id}).Count(&count)
+
+	if tx.Error != nil {
+		return false, errors.Wrap(tx.Error, "database error (table like_post) on check")
+	}
+
+	return count > 0, nil
+}
 func (dbPost *postRepository) GetAllPosts() ([]*models.Post, error) {
 	posts := make([]*Post, 0, 10)
-	tx := dbPost.db.Table("user_posts").Find(&posts)
+	tx := dbPost.db.Order("created_at desc").Find(&posts)
 
 	if tx.Error != nil {
 		return nil, errors.Wrap(tx.Error, "postRepository.GetAllPosts error")

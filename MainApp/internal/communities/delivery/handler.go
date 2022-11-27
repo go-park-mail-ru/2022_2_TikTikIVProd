@@ -119,7 +119,7 @@ func (delivery *Delivery) UpdateCommunity(c echo.Context) error {
 // @Tags     communities
 // @Produce  application/json
 // @Param id path int true "community ID"
-// @Success  200 {object} pkg.Response{body=models.User} "success get community"
+// @Success  200 {object} pkg.Response{body=models.Community} "success get community"
 // @Failure 405 {object} echo.HTTPError "Method Not Allowed"
 // @Failure 400 {object} echo.HTTPError "bad request"
 // @Failure 500 {object} echo.HTTPError "internal server error"
@@ -144,6 +144,40 @@ func (delivery *Delivery) GetCommunity(c echo.Context) error {
 	return c.JSON(http.StatusOK, pkg.Response{Body: community})
 }
 
+// GetAllCommunities godoc
+// @Summary      Get all communities
+// @Description  Get all communities
+// @Tags     communities
+// @Produce  application/json
+// @Success  200 {object} pkg.Response{body=models.Community} "success get community"
+// @Failure 405 {object} echo.HTTPError "Method Not Allowed"
+// @Failure 400 {object} echo.HTTPError "bad request"
+// @Failure 500 {object} echo.HTTPError "internal server error"
+// @Failure 401 {object} echo.HTTPError "no cookie"
+// @Router   /communities [get]
+func (delivery *Delivery) GetAllCommunities(c echo.Context) error {
+	communities, err := delivery.commUC.GetAllCommunities()
+
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+	}
+
+	return c.JSON(http.StatusOK, pkg.Response{Body: communities})
+}
+
+// SearchCommunity godoc
+// @Summary      Search a community
+// @Description  Search a community
+// @Tags     	 communities
+// @Accept	 	 application/json
+// @Param        q    query     string  false  "name search by q"
+// @Success  200 {object} pkg.Response{body=models.Community} "success create community"
+// @Failure 405 {object} echo.HTTPError "invalid http method"
+// @Failure 500 {object} echo.HTTPError "internal server error"
+// @Failure 401 {object} echo.HTTPError "no cookie"
+// @Failure 403 {object} echo.HTTPError "invalid csrf"
+// @Router   /communities/{id} [delete]
 func (delivery *Delivery) SearchCommunity(c echo.Context) error {
 	param := c.QueryParam("q")
 
@@ -226,6 +260,6 @@ func NewDelivery(e *echo.Echo, cu communitiesUsecase.UseCaseI) {
 	e.POST("/communities/edit", handler.UpdateCommunity)
 	e.GET("/communities/:id", handler.GetCommunity)
 	e.GET("/communities/search", handler.SearchCommunity)
-	//e.GET("/communities", handler.GetAllCommunity) TODO
+	e.GET("/communities", handler.GetAllCommunities)
 	e.DELETE("/communities/:id", handler.DeleteCommunity)
 }

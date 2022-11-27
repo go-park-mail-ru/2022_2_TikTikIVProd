@@ -242,7 +242,7 @@ func TestDeliveryDeletePost(t *testing.T) {
 		//	ArgDataContext: mockPostValid.UserID,
 		//	Error: &echo.HTTPError{
 		//		Code:    http.StatusBadRequest,
-		//		Message: models.ErrBadRequest.Error(),
+		//		Description: models.ErrBadRequest.Error(),
 		//	},
 		//}
 	}

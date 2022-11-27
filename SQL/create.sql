@@ -58,3 +58,8 @@ CREATE TABLE IF NOT EXISTS message (
     created_at date NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS like_post (
+	user_post_id INT NOT NULL REFERENCES user_posts(id) ON DELETE CASCADE,
+	user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	PRIMARY KEY (user_post_id, user_id)
+);

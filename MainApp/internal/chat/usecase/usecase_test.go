@@ -13,28 +13,28 @@ import (
 )
 
 type TestCaseSendMessage struct {
-	ArgData models.Message
+	ArgData     models.Message
 	ExpectedRes int
-	Error error
+	Error       error
 }
 
 type TestCaseSelectAllDialogs struct {
-	ArgData int
+	ArgData     int
 	ExpectedRes []models.Dialog
-	Error error
+	Error       error
 }
 
 type TestCaseSelectDialog struct {
-	ArgData int
+	ArgData     int
 	ExpectedRes *models.Dialog
-	Error error
+	Error       error
 }
 
 type TestCaseSelectDialogByUsers struct {
 	ArgDataUser1 int
 	ArgDataUser2 int
-	ExpectedRes *models.Dialog
-	Error error
+	ExpectedRes  *models.Dialog
+	Error        error
 }
 
 func TestUsecaseSelectDialog(t *testing.T) {
@@ -49,11 +49,11 @@ func TestUsecaseSelectDialog(t *testing.T) {
 
 	useCase := chatUsecase.New(mockChatRepo)
 
-	cases := map[string]TestCaseSelectDialog {
+	cases := map[string]TestCaseSelectDialog{
 		"success": {
-			ArgData:   mockDialog.Id,
+			ArgData:     mockDialog.Id,
 			ExpectedRes: &mockDialog,
-			Error: nil,
+			Error:       nil,
 		},
 	}
 
@@ -82,12 +82,12 @@ func TestUsecaseSelectDialogByUsers(t *testing.T) {
 
 	useCase := chatUsecase.New(mockChatRepo)
 
-	cases := map[string]TestCaseSelectDialogByUsers {
+	cases := map[string]TestCaseSelectDialogByUsers{
 		"success": {
-			ArgDataUser1:   mockDialog.UserId1,
+			ArgDataUser1: mockDialog.UserId1,
 			ArgDataUser2: mockDialog.UserId2,
-			ExpectedRes: &mockDialog,
-			Error: nil,
+			ExpectedRes:  &mockDialog,
+			Error:        nil,
 		},
 	}
 
@@ -117,11 +117,11 @@ func TestUsecaseSelectAllDialogs(t *testing.T) {
 
 	useCase := chatUsecase.New(mockChatRepo)
 
-	cases := map[string]TestCaseSelectAllDialogs {
+	cases := map[string]TestCaseSelectAllDialogs{
 		"success": {
-			ArgData:   userId,
+			ArgData:     userId,
 			ExpectedRes: mockDialogs,
-			Error: nil,
+			Error:       nil,
 		},
 	}
 
@@ -149,33 +149,33 @@ func TestUsecaseSendMessage(t *testing.T) {
 
 	mockMessageNewDialog.DialogID = 0
 
-	mockDialog := models.Dialog {
-		UserId1: mockMessageNewDialog.SenderID,
-		UserId2: mockMessageNewDialog.ReceiverID,
+	mockDialog := models.Dialog{
+		UserId1:  mockMessageNewDialog.SenderID,
+		UserId2:  mockMessageNewDialog.ReceiverID,
 		Messages: []models.Message{mockMessageNewDialog},
 	}
 
 	mockChatRepo := mocks.NewRepositoryI(t)
 
 	mockChatRepo.On("SelectDialog", mockMessage.DialogID).Return(nil, nil)
-	mockChatRepo.On("CreateMessage", mock.AnythingOfType("*models.Message")).Return(nil)
+	mockChatRepo.On("CreateMessage", mock.AnythingOfType("*models.Description")).Return(nil)
 
 	mockChatRepo.On("SelectDialog", mockMessageNewDialog.DialogID).Return(nil, models.ErrNotFound)
 	mockChatRepo.On("CreateDialog", &mockDialog).Return(nil)
-	mockChatRepo.On("CreateMessage", mock.AnythingOfType("*models.Message")).Return(nil)
+	mockChatRepo.On("CreateMessage", mock.AnythingOfType("*models.Description")).Return(nil)
 
 	useCase := chatUsecase.New(mockChatRepo)
 
-	cases := map[string]TestCaseSendMessage {
+	cases := map[string]TestCaseSendMessage{
 		"success": {
-			ArgData: mockMessage,
+			ArgData:     mockMessage,
 			ExpectedRes: mockMessage.ID,
-			Error: nil,
+			Error:       nil,
 		},
 		"success_new_chat": {
-			ArgData: mockMessageNewDialog,
+			ArgData:     mockMessageNewDialog,
 			ExpectedRes: mockMessageNewDialog.ID,
-			Error: nil,
+			Error:       nil,
 		},
 	}
 
@@ -191,4 +191,3 @@ func TestUsecaseSendMessage(t *testing.T) {
 	}
 	mockChatRepo.AssertExpectations(t)
 }
-

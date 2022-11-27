@@ -87,7 +87,7 @@ package postgres_test
 //
 //    mock.ExpectBegin()
 //
-//	var mockMessage models.Message
+//	var mockMessage models.Description
 //	err = faker.FakeData(&mockMessage)
 //	assert.NoError(t, err)
 //
@@ -267,7 +267,7 @@ package postgres_test
 //
 //	gdb.Logger.LogMode(logger.Info)
 //
-//	mockMessages := make([]models.Message, 0, 10)
+//	mockMessages := make([]models.Description, 0, 10)
 //	err = faker.FakeData(&mockMessages)
 //	assert.NoError(t, err)
 //

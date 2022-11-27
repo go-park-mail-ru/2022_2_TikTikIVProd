@@ -349,6 +349,62 @@ const docTemplate = `{
                 }
             }
         },
+        "/communities": {
+            "get": {
+                "description": "Get all communities",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "communities"
+                ],
+                "summary": "Get all communities",
+                "responses": {
+                    "200": {
+                        "description": "success get community",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/pkg.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "body": {
+                                            "$ref": "#/definitions/models.Community"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "no cookie",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "405": {
+                        "description": "Method Not Allowed",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/communities/create": {
             "post": {
                 "description": "Create a community",
@@ -544,7 +600,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "body": {
-                                            "$ref": "#/definitions/models.User"
+                                            "$ref": "#/definitions/models.Community"
                                         }
                                     }
                                 }
@@ -1338,6 +1394,106 @@ const docTemplate = `{
                 }
             }
         },
+        "/post/like/{id}": {
+            "put": {
+                "description": "Like a post",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "Like a post",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Post ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "no cookie",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "403": {
+                        "description": "invalid csrf",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "405": {
+                        "description": "invalid http method",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/post/unlike/{id}": {
+            "put": {
+                "description": "Unlike a post",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "Unlike a post",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Post ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "no cookie",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "403": {
+                        "description": "invalid csrf",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "405": {
+                        "description": "invalid http method",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/post/{id}": {
             "get": {
                 "description": "Get post by id",
@@ -1580,7 +1736,7 @@ const docTemplate = `{
                         }
                     },
                     "409": {
-                        "description": "user with this email already exists",
+                        "description": "email already exists",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
                         }
@@ -1607,6 +1763,59 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "success get users",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/pkg.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "body": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.User"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "no cookie",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "405": {
+                        "description": "Method Not Allowed",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/search/{name}": {
+            "get": {
+                "description": "search users by name",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "SearchUsers",
+                "responses": {
+                    "200": {
+                        "description": "success search users",
                         "schema": {
                             "allOf": [
                                 {
@@ -1953,6 +2162,9 @@ const docTemplate = `{
                 "community_id": {
                     "type": "integer"
                 },
+                "count_likes": {
+                    "type": "integer"
+                },
                 "create_date": {
                     "type": "string",
                     "readOnly": true
@@ -1965,6 +2177,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/models.Image"
                     }
+                },
+                "is_liked": {
+                    "type": "boolean"
                 },
                 "message": {
                     "type": "string"
@@ -2013,6 +2228,9 @@ const docTemplate = `{
             "properties": {
                 "avatar": {
                     "type": "integer"
+                },
+                "createdAt": {
+                    "type": "string"
                 },
                 "email": {
                     "type": "string"

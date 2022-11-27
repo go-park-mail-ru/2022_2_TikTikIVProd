@@ -63,6 +63,8 @@ definitions:
         type: integer
       community_id:
         type: integer
+      count_likes:
+        type: integer
       create_date:
         readOnly: true
         type: string
@@ -72,6 +74,8 @@ definitions:
         items:
           $ref: '#/definitions/models.Image'
         type: array
+      is_liked:
+        type: boolean
       message:
         type: string
       user_first_name:
@@ -102,6 +106,8 @@ definitions:
     properties:
       avatar:
         type: integer
+      createdAt:
+        type: string
       email:
         type: string
       first_name:
@@ -347,6 +353,40 @@ paths:
       summary: GetDialogByUsers
       tags:
       - chat
+  /communities:
+    get:
+      description: Get all communities
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get community
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  $ref: '#/definitions/models.Community'
+              type: object
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Get all communities
+      tags:
+      - communities
   /communities/{id}:
     delete:
       consumes:
@@ -402,7 +442,7 @@ paths:
             - $ref: '#/definitions/pkg.Response'
             - properties:
                 body:
-                  $ref: '#/definitions/models.User'
+                  $ref: '#/definitions/models.Community'
               type: object
         "400":
           description: bad request
@@ -1043,6 +1083,72 @@ paths:
       summary: Update a post
       tags:
       - posts
+  /post/like/{id}:
+    put:
+      description: Like a post
+      parameters:
+      - description: Post ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Like a post
+      tags:
+      - posts
+  /post/unlike/{id}:
+    put:
+      description: Unlike a post
+      parameters:
+      - description: Post ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Unlike a post
+      tags:
+      - posts
   /signin:
     post:
       consumes:
@@ -1123,7 +1229,7 @@ paths:
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "409":
-          description: user with this email already exists
+          description: email already exists
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "500":
@@ -1251,6 +1357,38 @@ paths:
       summary: Get users posts
       tags:
       - posts
+  /users/search/{name}:
+    get:
+      description: search users by name
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success search users
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  items:
+                    $ref: '#/definitions/models.User'
+                  type: array
+              type: object
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: SearchUsers
+      tags:
+      - users
   /users/update:
     put:
       consumes:

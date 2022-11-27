@@ -24,6 +24,6 @@ type Response struct {
 
 // func ErrorResponse(r *echo.Response, code int, errorMessage string) error {
 // 	return JSONresponse(r, code, Error{
-// 		Message: errorMessage,
+// 		Description: errorMessage,
 // 	})
 // }

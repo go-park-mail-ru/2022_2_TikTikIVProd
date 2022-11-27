@@ -2,7 +2,6 @@ package delivery_test
 
 import (
 	"encoding/json"
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -10,9 +9,9 @@ import (
 	"testing"
 
 	"github.com/bxcodec/faker"
-	// chatDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/delivery"
-	// "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/usecase/mocks"
-	// "github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
+	chatDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/chat/delivery"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/chat/usecase/mocks"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -263,7 +262,7 @@ func TestDeliverySendMessage(t *testing.T) {
 
 	mockUCase := mocks.NewUseCaseI(t)
 
-	mockUCase.On("SendMessage", mock.AnythingOfType("*models.Message")).Return(nil)
+	mockUCase.On("SendMessage", mock.AnythingOfType("*models.Description")).Return(nil)
 	handler := chatDelivery.Delivery{
 		ChatUC: mockUCase,
 	}
