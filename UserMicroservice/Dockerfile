@@ -12,6 +12,6 @@ RUN go build cmd/main.go
 
 WORKDIR /
 
-EXPOSE 8081
+EXPOSE 8084
 
 CMD [ "./app/main" ]

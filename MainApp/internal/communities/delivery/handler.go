@@ -222,7 +222,7 @@ func (delivery *Delivery) DeleteCommunity(c echo.Context) error {
 
 	if err != nil {
 		c.Logger().Error(err)
-		return handleError(err)
+
 	}
 
 	return c.NoContent(http.StatusNoContent)

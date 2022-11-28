@@ -6,9 +6,9 @@ import (
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/cmd/server"
 	_authDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/auth/delivery"
@@ -33,8 +33,8 @@ import (
 	usersRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/user/repository/microservice"
 	usersUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/user/usecase"
 	auth "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/proto/auth"
-	image "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/proto/image"
 	chat "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/proto/chat"
+	image "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/proto/image"
 	user "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/proto/user"
 )
 
@@ -42,12 +42,12 @@ import (
 // @version 1.0
 // @host 89.208.197.127:8080
 
-var testCfgPg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
+// var testCfgPg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
 
-// var prodCfgPg = postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}
+var prodCfgPg = postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}
 
 func main() {
-	db, err := gorm.Open(postgres.New(testCfgPg),
+	db, err := gorm.Open(postgres.New(prodCfgPg),
 		&gorm.Config{})
 	if err != nil {
 		log.Fatal(err)

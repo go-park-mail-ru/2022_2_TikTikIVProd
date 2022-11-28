@@ -47,5 +47,43 @@ services:
     networks:
       - mynetwork
 
+  image_mvs:
+    build: ./ImageMicroservice
+    restart: always
+    volumes:
+      - ./images:/images
+    depends_on:
+      - ws_pg
+    ports:
+      - "8082:8082"
+    networks:
+      - mynetwork
+
+  chat_mvs:
+    build: ./ChatMicroservice
+    restart: always
+    volumes:
+      - ./images:/images
+    depends_on:
+      - ws_pg
+    ports:
+      - "8083:8083"
+    networks:
+      - mynetwork
+
+  user_mvs:
+    build: ./UserMicroservice
+    restart: always
+    volumes:
+      - ./images:/images
+    depends_on:
+      - ws_pg
+    ports:
+      - "8084:8084"
+    networks:
+      - mynetwork
+
+
+
 networks:
   mynetwork:

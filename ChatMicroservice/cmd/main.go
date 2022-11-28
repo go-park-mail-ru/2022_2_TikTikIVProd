@@ -5,16 +5,16 @@ import (
 	chatRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/ChatMicroservice/internal/chat/repository/postgres"
 	chatUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/ChatMicroservice/internal/chat/usecase"
 	chat "github.com/go-park-mail-ru/2022_2_TikTikIVProd/ChatMicroservice/proto"
-	"gorm.io/gorm"
-	"gorm.io/driver/postgres"
 	"google.golang.org/grpc"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 	"log"
 	"net"
 )
 
-var testCfgPg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
+//var testCfgPg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
 
-// var prodCfgPg = postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}
+var prodCfgPg = postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}
 
 func main() {
 	lis, err := net.Listen("tcp", ":8083")
@@ -22,7 +22,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	db, err := gorm.Open(postgres.New(testCfgPg),
+	db, err := gorm.Open(postgres.New(prodCfgPg),
 		&gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
