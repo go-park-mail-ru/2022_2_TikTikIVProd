@@ -11,9 +11,9 @@ import (
 	"net"
 )
 
-// var testCfgRedis = &redis.Options{Addr: "red:6379", Password: "ws_redis_password"}
+var testCfgRedis = &redis.Options{Addr: ":6379", Password: "ws_redis_password"}
 
-var prodCfgRedis = &redis.Options{Addr: "redis:6379", Password: "ws_redis_password"}
+// var prodCfgRedis = &redis.Options{Addr: "redis:6379", Password: "ws_redis_password"}
 
 func main() {
 	lis, err := net.Listen("tcp", ":8081")
@@ -21,7 +21,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	redisClient := redis.NewClient(prodCfgRedis)
+	redisClient := redis.NewClient(testCfgRedis)
 
 	err = redisClient.Ping().Err()
 	if err != nil {

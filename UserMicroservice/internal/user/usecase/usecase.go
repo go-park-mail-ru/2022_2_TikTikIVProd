@@ -4,6 +4,7 @@ import (
 	userRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/UserMicroservice/internal/user/repository"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/UserMicroservice/models"
 	user "github.com/go-park-mail-ru/2022_2_TikTikIVProd/UserMicroservice/proto"
+	"github.com/pkg/errors"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -34,6 +35,9 @@ func New(userRepository userRep.RepositoryI) UseCaseI {
 
 func (uc *useCase) SelectUserByNickName(nickName *user.SelectUserByNickNameRequest) (*user.User, error) {
 	usr, err := uc.userRepository.SelectUserByNickName(nickName.NickName)
+	if err != nil {
+		return nil, errors.Wrap(err, "user repository postgres error")
+	}
 
 	ts := timestamppb.New(usr.CreatedAt)
 	pbUser := &user.User {
@@ -52,6 +56,9 @@ func (uc *useCase) SelectUserByNickName(nickName *user.SelectUserByNickNameReque
 
 func (uc *useCase) SelectUserByEmail(email *user.SelectUserByEmailRequest) (*user.User, error) {
 	usr, err := uc.userRepository.SelectUserByNickName(email.Email)
+	if err != nil {
+		return nil, errors.Wrap(err, "user repository postgres error")
+	}
 
 	ts := timestamppb.New(usr.CreatedAt)
 	pbUser := &user.User {
@@ -70,6 +77,9 @@ func (uc *useCase) SelectUserByEmail(email *user.SelectUserByEmailRequest) (*use
 
 func (uc *useCase) SelectUserById(userId *user.UserId) (*user.User, error) {
 	usr, err := uc.userRepository.SelectUserById(userId.Id)
+	if err != nil {
+		return nil, errors.Wrap(err, "user repository postgres error")
+	}
 
 	ts := timestamppb.New(usr.CreatedAt)
 	pbUser := &user.User {
@@ -88,6 +98,9 @@ func (uc *useCase) SelectUserById(userId *user.UserId) (*user.User, error) {
 
 func (uc *useCase) SelectAllUsers(nothing *user.Nothing) (*user.UsersList, error) {
 	users, err := uc.userRepository.SelectAllUsers()
+	if err != nil {
+		return nil, errors.Wrap(err, "user repository postgres error")
+	}
 
 	var pbUsers *user.UsersList
 
@@ -111,6 +124,9 @@ func (uc *useCase) SelectAllUsers(nothing *user.Nothing) (*user.UsersList, error
 
 func (uc *useCase) SearchUsers(name *user.SearchUsersRequest) (*user.UsersList, error) {
 	users, err := uc.userRepository.SearchUsers(name.Name)
+	if err != nil {
+		return nil, errors.Wrap(err, "user repository postgres error")
+	}
 
 	var pbUsers *user.UsersList
 
@@ -145,6 +161,9 @@ func (uc *useCase) CreateUser(pbUser *user.User) (*user.Nothing, error) {
 	}
 
 	err := uc.userRepository.CreateUser(&usr)
+	if err != nil {
+		return nil, errors.Wrap(err, "user repository postgres error")
+	}
 
 	pbUser.Id = usr.Id
 
@@ -175,6 +194,9 @@ func (uc *useCase) AddFriend(pbFriends *user.Friends) (*user.Nothing, error) {
 	}
 
 	err := uc.userRepository.AddFriend(friends)
+	if err != nil {
+		return nil, errors.Wrap(err, "user repository postgres error")
+	}
 
 	return &user.Nothing{Dummy: true}, err
 }
@@ -186,6 +208,9 @@ func (uc *useCase) DeleteFriend(pbFriends *user.Friends) (*user.Nothing, error) 
 	}
 
 	err := uc.userRepository.DeleteFriend(friends)
+	if err != nil {
+		return nil, errors.Wrap(err, "user repository postgres error")
+	}
 
 	return &user.Nothing{Dummy: true}, err
 }
@@ -197,12 +222,18 @@ func (uc *useCase) CheckFriends(pbFriends *user.Friends) (*user.CheckFriendsResp
 	}
 
 	isExists, err := uc.userRepository.CheckFriends(friends)
+	if err != nil {
+		return nil, errors.Wrap(err, "user repository postgres error")
+	}
 
 	return &user.CheckFriendsResponse{IsExists: isExists}, err
 }
 
 func (uc *useCase) SelectFriends(pbUserId *user.UserId) (*user.UsersList, error) {
 	users, err := uc.userRepository.SelectFriends(pbUserId.Id)
+	if err != nil {
+		return nil, errors.Wrap(err, "user repository postgres error")
+	}
 
 	var pbUsers *user.UsersList
 
