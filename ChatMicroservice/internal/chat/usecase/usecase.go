@@ -4,6 +4,7 @@ import (
 	chatRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/ChatMicroservice/internal/chat/repository"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/ChatMicroservice/models"
 	chat "github.com/go-park-mail-ru/2022_2_TikTikIVProd/ChatMicroservice/proto"
+	"github.com/pkg/errors"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -28,6 +29,9 @@ func New(chatRepository chatRep.RepositoryI) UseCaseI {
 
 func (uc *useCase) SelectDialog(id *chat.DialogId) (*chat.Dialog, error) {
 	dialog, err := uc.chatRepository.SelectDialog(id.Id)
+	if err != nil {
+		return nil, errors.Wrap(err, "chat repository postgres error")
+	}
 
 	pbDialog := &chat.Dialog {
 		Id: dialog.Id,
@@ -48,11 +52,14 @@ func (uc *useCase) SelectDialog(id *chat.DialogId) (*chat.Dialog, error) {
 		pbDialog.Messages = append(pbDialog.Messages, msg)
 	}
 	
-	return pbDialog, err
+	return pbDialog, nil
 }
 
 func (uc *useCase) SelectDialogByUsers(usersId *chat.SelectDialogByUsersRequest) (*chat.Dialog, error) {
 	dialog, err := uc.chatRepository.SelectDialogByUsers(usersId.UserId, usersId.FriendId)
+	if err != nil {
+		return nil, errors.Wrap(err, "chat repository postgres error")
+	}
 
 	pbDialog := &chat.Dialog {
 		Id: dialog.Id,
@@ -73,11 +80,14 @@ func (uc *useCase) SelectDialogByUsers(usersId *chat.SelectDialogByUsersRequest)
 		pbDialog.Messages = append(pbDialog.Messages, msg)
 	}
 	
-	return pbDialog, err
+	return pbDialog, nil
 }
 
 func (uc *useCase) SelectAllDialogs(pbUserId *chat.SelectAllDialogsRequest) (*chat.SelectAllDialogsResponse, error) {
 	dialogs, err := uc.chatRepository.SelectAllDialogs(pbUserId.UserId)
+	if err != nil {
+		return nil, errors.Wrap(err, "chat repository postgres error")
+	}
 
 	pbDialogs := &chat.SelectAllDialogsResponse {}
 
@@ -104,11 +114,14 @@ func (uc *useCase) SelectAllDialogs(pbUserId *chat.SelectAllDialogsRequest) (*ch
 		pbDialogs.Dialogs = append(pbDialogs.Dialogs, dialog)
 	}
 	
-	return pbDialogs, err
+	return pbDialogs, nil
 }
 
 func (uc *useCase) SelectMessages(pbDialogId *chat.DialogId) (*chat.SelectMessagesResponse, error) {
 	messages, err := uc.chatRepository.SelectMessages(pbDialogId.Id)
+	if err != nil {
+		return nil, errors.Wrap(err, "chat repository postgres error")
+	}
 
 	pbMessages := &chat.SelectMessagesResponse {}
 
@@ -125,7 +138,7 @@ func (uc *useCase) SelectMessages(pbDialogId *chat.DialogId) (*chat.SelectMessag
 		pbMessages.Messages = append(pbMessages.Messages, msg)
 	}
 	
-	return pbMessages, err
+	return pbMessages, nil
 }
 
 func (uc *useCase) CreateDialog(pbDialog *chat.Dialog) (*chat.Nothing, error) {
@@ -148,10 +161,13 @@ func (uc *useCase) CreateDialog(pbDialog *chat.Dialog) (*chat.Nothing, error) {
 	}
 
 	err := uc.chatRepository.CreateDialog(dialog)
+	if err != nil {
+		return nil, errors.Wrap(err, "chat repository postgres error")
+	}
 
 	pbDialog.Id = dialog.Id
 	
-	return &chat.Nothing{Dummy: true}, err
+	return &chat.Nothing{Dummy: true}, nil
 }
 
 func (uc *useCase) CreateMessage(pbMessage *chat.Message) (*chat.Nothing, error) {
@@ -165,7 +181,10 @@ func (uc *useCase) CreateMessage(pbMessage *chat.Message) (*chat.Nothing, error)
 	}
 
 	err := uc.chatRepository.CreateMessage(msg)
+	if err != nil {
+		return nil, errors.Wrap(err, "chat repository postgres error")
+	}
 	
-	return &chat.Nothing{Dummy: true}, err
+	return &chat.Nothing{Dummy: true}, nil
 }
 

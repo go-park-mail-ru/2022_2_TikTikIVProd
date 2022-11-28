@@ -4,6 +4,7 @@ import (
 	imageRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/ImageMicroservice/internal/image/repository"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/ImageMicroservice/models"
 	image "github.com/go-park-mail-ru/2022_2_TikTikIVProd/ImageMicroservice/proto"
+	"github.com/pkg/errors"
 )
 
 type UseCaseI interface {
@@ -24,6 +25,9 @@ func New(imageRepository imageRep.RepositoryI) UseCaseI {
 
 func (uc *useCase) GetPostImages(pbPostId *image.GetPostImagesRequest) (*image.GetPostImagesResponse, error) {
 	images, err := uc.imageRepository.GetPostImages(pbPostId.PostId)
+	if err != nil {
+		return nil, errors.Wrap(err, "image repository postgres error")
+	}
 
 	pbImages := &image.GetPostImagesResponse{}
 
@@ -35,15 +39,18 @@ func (uc *useCase) GetPostImages(pbPostId *image.GetPostImagesRequest) (*image.G
 		pbImages.Images = append(pbImages.Images, img)
 	}
 
-	return pbImages, err
+	return pbImages, nil
 }
 
 func (uc *useCase) GetImage(pbImageId *image.GetImageRequest) (*image.Image, error) {
 	img, err := uc.imageRepository.GetImage(pbImageId.ImageId)
+	if err != nil {
+		return nil, errors.Wrap(err, "image repository postgres error")
+	}
 	return &image.Image {
 		Id: img.ID,
 		ImgLink: img.ImgLink,
-	}, err
+	}, nil
 }
 
 func (uc *useCase) CreateImage(pbImage *image.Image) (*image.Nothing, error) {
@@ -52,5 +59,8 @@ func (uc *useCase) CreateImage(pbImage *image.Image) (*image.Nothing, error) {
 		ImgLink: pbImage.ImgLink,
 	}
 	err := uc.imageRepository.CreateImage(&modelImage)
-	return &image.Nothing{Dummy: true}, err
+	if err != nil {
+		return nil, errors.Wrap(err, "image repository postgres error")
+	}
+	return &image.Nothing{Dummy: true}, nil
 }
