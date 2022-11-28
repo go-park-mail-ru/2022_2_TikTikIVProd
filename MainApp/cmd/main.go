@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/middleware"
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
@@ -24,7 +25,6 @@ import (
 	_imageDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/image/delivery"
 	imagesRepository "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/image/repository/postgres"
 	imageUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/image/usecase"
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/middleware"
 	_postsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/post/delivery"
 	postsRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/post/repository/postgres"
 	postsUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/post/usecase"
@@ -101,7 +101,7 @@ func main() {
 
 	authMiddleware := middleware.NewMiddleware(authUC)
 	e.Use(authMiddleware.Auth)
-	//e.Use(authMiddleware.CSRF)
+	e.Use(authMiddleware.CSRF)
 
 	_postsDelivery.NewDelivery(e, postsUC)
 	_authDelivery.NewDelivery(e, authUC)
