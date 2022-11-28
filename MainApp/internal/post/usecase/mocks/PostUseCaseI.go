@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	// models "github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
+	models "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -27,11 +27,11 @@ func (_m *PostUseCaseI) CreatePost(p *models.Post) error {
 }
 
 // DeletePost provides a mock function with given fields: id, userId
-func (_m *PostUseCaseI) DeletePost(id int, userId int) error {
+func (_m *PostUseCaseI) DeletePost(id uint64, userId uint64) error {
 	ret := _m.Called(id, userId)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(int, int) error); ok {
+	if rf, ok := ret.Get(0).(func(uint64, uint64) error); ok {
 		r0 = rf(id, userId)
 	} else {
 		r0 = ret.Error(0)
@@ -63,12 +63,35 @@ func (_m *PostUseCaseI) GetAllPosts() ([]*models.Post, error) {
 	return r0, r1
 }
 
+// GetCommunityPosts provides a mock function with given fields: userId
+func (_m *PostUseCaseI) GetCommunityPosts(userId uint64) ([]*models.Post, error) {
+	ret := _m.Called(userId)
+
+	var r0 []*models.Post
+	if rf, ok := ret.Get(0).(func(uint64) []*models.Post); ok {
+		r0 = rf(userId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*models.Post)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(uint64) error); ok {
+		r1 = rf(userId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetPostById provides a mock function with given fields: id
-func (_m *PostUseCaseI) GetPostById(id int) (*models.Post, error) {
+func (_m *PostUseCaseI) GetPostById(id uint64) (*models.Post, error) {
 	ret := _m.Called(id)
 
 	var r0 *models.Post
-	if rf, ok := ret.Get(0).(func(int) *models.Post); ok {
+	if rf, ok := ret.Get(0).(func(uint64) *models.Post); ok {
 		r0 = rf(id)
 	} else {
 		if ret.Get(0) != nil {
@@ -77,7 +100,7 @@ func (_m *PostUseCaseI) GetPostById(id int) (*models.Post, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(int) error); ok {
+	if rf, ok := ret.Get(1).(func(uint64) error); ok {
 		r1 = rf(id)
 	} else {
 		r1 = ret.Error(1)
@@ -87,11 +110,11 @@ func (_m *PostUseCaseI) GetPostById(id int) (*models.Post, error) {
 }
 
 // GetUserPosts provides a mock function with given fields: userId
-func (_m *PostUseCaseI) GetUserPosts(userId int) ([]*models.Post, error) {
+func (_m *PostUseCaseI) GetUserPosts(userId uint64) ([]*models.Post, error) {
 	ret := _m.Called(userId)
 
 	var r0 []*models.Post
-	if rf, ok := ret.Get(0).(func(int) []*models.Post); ok {
+	if rf, ok := ret.Get(0).(func(uint64) []*models.Post); ok {
 		r0 = rf(userId)
 	} else {
 		if ret.Get(0) != nil {
@@ -100,7 +123,7 @@ func (_m *PostUseCaseI) GetUserPosts(userId int) ([]*models.Post, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(int) error); ok {
+	if rf, ok := ret.Get(1).(func(uint64) error); ok {
 		r1 = rf(userId)
 	} else {
 		r1 = ret.Error(1)

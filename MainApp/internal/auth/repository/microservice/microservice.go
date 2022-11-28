@@ -5,7 +5,7 @@ import (
 
 	authRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/auth/repository"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
-	auth "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/proto"
+	auth "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/proto/auth"
 	"github.com/pkg/errors"
 )
 

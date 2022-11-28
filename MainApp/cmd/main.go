@@ -7,43 +7,47 @@ import (
 	"google.golang.org/grpc"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/cmd/server"
 	_authDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/auth/delivery"
 	authRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/auth/repository/microservice"
 	authUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/auth/usecase"
 	_chatDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/chat/delivery"
-	chatRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/chat/repository/postgres"
+	chatRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/chat/repository/microservice"
 	chatUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/chat/usecase"
 	_communitiesDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/communities/delivery"
 	communitiesRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/communities/repository/postgres"
 	communitiesUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/communities/usecase"
 	_friendsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/friends/delivery"
-	friendsRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/friends/repository/postgres"
+	friendsRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/friends/repository/microservice"
 	friendsUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/friends/usecase"
 	_imageDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/image/delivery"
-	imagesRepository "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/image/repository/postgres"
+	imagesRepository "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/image/repository/microservice"
 	imageUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/image/usecase"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/middleware"
 	_postsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/post/delivery"
 	postsRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/post/repository/postgres"
 	postsUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/post/usecase"
 	_usersDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/user/delivery"
-	usersRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/user/repository/postgres"
+	usersRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/user/repository/microservice"
 	usersUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/user/usecase"
-	auth "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/proto"
+	auth "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/proto/auth"
+	image "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/proto/image"
+	chat "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/proto/chat"
+	user "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/proto/user"
 )
 
 // @title WS Swagger API
 // @version 1.0
 // @host 89.208.197.127:8080
 
-// var testCfgPg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
+var testCfgPg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
 
-var prodCfgPg = postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}
+// var prodCfgPg = postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}
 
 func main() {
-	db, err := gorm.Open(postgres.New(prodCfgPg),
+	db, err := gorm.Open(postgres.New(testCfgPg),
 		&gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
@@ -51,21 +55,50 @@ func main() {
 
 	grpcConnAuth, err := grpc.Dial(
 		"auth_mvs:8081",
-		grpc.WithInsecure(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
-
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer grpcConnAuth.Close()
 	authManager := auth.NewAuthClient(grpcConnAuth)
 
+	grpcConnImage, err := grpc.Dial(
+		"image_mvs:8082",
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer grpcConnImage.Close()
+	imageManager := image.NewImagesClient(grpcConnImage)
+
+	grpcConnChat, err := grpc.Dial(
+		"chat_mvs:8083",
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer grpcConnChat.Close()
+	chatManager := chat.NewChatClient(grpcConnChat)
+
+	grpcConnUser, err := grpc.Dial(
+		"user_mvs:8084",
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer grpcConnUser.Close()
+	userManager := user.NewUsersClient(grpcConnUser)
+
 	postDB := postsRep.NewPostRepository(db)
 	authDB := authRep.New(authManager)
-	usersDB := usersRep.New(db)
-	friendsDB := friendsRep.New(db)
-	imageDB := imagesRepository.NewImageRepository(db)
-	chatDB := chatRep.NewChatRepository(db)
+	usersDB := usersRep.New(userManager)
+	friendsDB := friendsRep.New(userManager)
+	imageDB := imagesRepository.New(imageManager)
+	chatDB := chatRep.New(chatManager)
 	communitiesDb := communitiesRep.NewCommunitiesRepository(db)
 
 	postsUC := postsUsecase.NewPostUsecase(postDB, imageDB, usersDB)

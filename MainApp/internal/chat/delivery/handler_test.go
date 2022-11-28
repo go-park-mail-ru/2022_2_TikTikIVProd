@@ -2,7 +2,6 @@ package delivery_test
 
 import (
 	"encoding/json"
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -10,9 +9,9 @@ import (
 	"testing"
 
 	"github.com/bxcodec/faker"
-	// chatDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/delivery"
-	// "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/usecase/mocks"
-	// "github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
+	chatDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/chat/delivery"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/chat/usecase/mocks"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -33,14 +32,14 @@ type TestCaseGetDialog struct {
 
 type TestCaseGetDialogByUsers struct {
 	ArgDataParam   string
-	ArgDataContext int
+	ArgDataContext uint64
 	Error          error
 	StatusCode     int
 }
 
 type TestCaseSendMessage struct {
 	ArgDataBody    string
-	ArgDataContext int
+	ArgDataContext uint64
 	Error          error
 	StatusCode     int
 }
@@ -84,7 +83,7 @@ func TestDeliveryGetDialog(t *testing.T) {
 
 	cases := map[string]TestCaseGetDialog{
 		"success": {
-			ArgData:    strconv.Itoa(dialog.Id),
+			ArgData:    strconv.Itoa(int(dialog.Id)),
 			Error:      nil,
 			StatusCode: http.StatusOK,
 		},
@@ -96,14 +95,14 @@ func TestDeliveryGetDialog(t *testing.T) {
 			},
 		},
 		"not_found": {
-			ArgData: strconv.Itoa(dialogNotFound.Id),
+			ArgData: strconv.Itoa(int(dialogNotFound.Id)),
 			Error: &echo.HTTPError{
 				Code:    http.StatusNotFound,
 				Message: models.ErrNotFound.Error(),
 			},
 		},
 		"internal_error": {
-			ArgData: strconv.Itoa(dialogInternalErr.Id),
+			ArgData: strconv.Itoa(int(dialogInternalErr.Id)),
 			Error: &echo.HTTPError{
 				Code:    http.StatusInternalServerError,
 				Message: models.ErrInternalServerError.Error(),
@@ -153,7 +152,7 @@ func TestDeliveryGetDialogByUsers(t *testing.T) {
 
 	cases := map[string]TestCaseGetDialogByUsers{
 		"success": {
-			ArgDataParam:   strconv.Itoa(dialog.UserId2),
+			ArgDataParam:   strconv.Itoa(int(dialog.UserId2)),
 			ArgDataContext: dialog.UserId1,
 			Error:          nil,
 			StatusCode:     http.StatusOK,

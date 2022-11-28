@@ -8,16 +8,16 @@ import (
 	"testing"
 
 	"github.com/bxcodec/faker"
-	// friendsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/delivery"
-	// "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/usecase/mocks"
-	// "github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
+	friendsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/friends/delivery"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/friends/usecase/mocks"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 type TestCase struct {
-	ArgDataUserId int
+	ArgDataUserId uint64
 	ArgDataFriendId string
 	Error error
 	StatusCode int
@@ -74,13 +74,13 @@ func TestDeliveryAddFriend(t *testing.T) {
 	cases := map[string]TestCase {
 		"success": {
 			ArgDataUserId: mockFriendsSuccess.Id1,
-			ArgDataFriendId: strconv.Itoa(mockFriendsSuccess.Id2),
+			ArgDataFriendId: strconv.Itoa(int(mockFriendsSuccess.Id2)),
 			Error: nil,
 			StatusCode: http.StatusCreated,
 		},
 		"ivalid_friends": {
 			ArgDataUserId: mockFriendsInvalid.Id1,
-			ArgDataFriendId:   strconv.Itoa(mockFriendsInvalid.Id2),
+			ArgDataFriendId:   strconv.Itoa(int(mockFriendsInvalid.Id2)),
 			Error: &echo.HTTPError{
 				Code: http.StatusBadRequest,
 				Message: models.ErrBadRequest.Error(),
@@ -103,7 +103,7 @@ func TestDeliveryAddFriend(t *testing.T) {
 		},
 		"not_found": {
 			ArgDataUserId: mockFriendsNotFound.Id1,
-			ArgDataFriendId:   strconv.Itoa(mockFriendsNotFound.Id2),
+			ArgDataFriendId:   strconv.Itoa(int(mockFriendsNotFound.Id2)),
 			Error: &echo.HTTPError{
 				Code: http.StatusNotFound,
 				Message: models.ErrNotFound.Error(),
@@ -111,7 +111,7 @@ func TestDeliveryAddFriend(t *testing.T) {
 		},
 		"conflict": {
 			ArgDataUserId: mockFriendsConflict.Id1,
-			ArgDataFriendId:   strconv.Itoa(mockFriendsConflict.Id2),
+			ArgDataFriendId:   strconv.Itoa(int(mockFriendsConflict.Id2)),
 			Error: &echo.HTTPError{
 				Code: http.StatusConflict,
 				Message: models.ErrConflictFriend.Error(),
@@ -119,7 +119,7 @@ func TestDeliveryAddFriend(t *testing.T) {
 		},
 		"equal_id": {
 			ArgDataUserId: mockFriendsEqual.Id1,
-			ArgDataFriendId:   strconv.Itoa(mockFriendsEqual.Id2),
+			ArgDataFriendId:   strconv.Itoa(int(mockFriendsEqual.Id2)),
 			Error: &echo.HTTPError{
 				Code: http.StatusBadRequest,
 				Message: models.ErrBadRequest.Error(),
@@ -127,7 +127,7 @@ func TestDeliveryAddFriend(t *testing.T) {
 		},
 		"internal_error": {
 			ArgDataUserId: mockFriendsInternalErr.Id1,
-			ArgDataFriendId:   strconv.Itoa(mockFriendsInternalErr.Id2),
+			ArgDataFriendId:   strconv.Itoa(int(mockFriendsInternalErr.Id2)),
 			Error: &echo.HTTPError{
 				Code: http.StatusInternalServerError,
 				Message: models.ErrInternalServerError.Error(),
@@ -199,13 +199,13 @@ func TestDeliveryDeleteFriend(t *testing.T) {
 	cases := map[string]TestCase {
 		"success": {
 			ArgDataUserId: mockFriendsSuccess.Id1,
-			ArgDataFriendId: strconv.Itoa(mockFriendsSuccess.Id2),
+			ArgDataFriendId: strconv.Itoa(int(mockFriendsSuccess.Id2)),
 			Error: nil,
 			StatusCode: http.StatusNoContent,
 		},
 		"invalid_friends": {
 			ArgDataUserId: mockFriendsInvalid.Id1,
-			ArgDataFriendId: strconv.Itoa(mockFriendsInvalid.Id2),
+			ArgDataFriendId: strconv.Itoa(int(mockFriendsInvalid.Id2)),
 			Error: &echo.HTTPError{
 				Code: http.StatusBadRequest,
 				Message: models.ErrBadRequest.Error(),
@@ -213,7 +213,7 @@ func TestDeliveryDeleteFriend(t *testing.T) {
 		},
 		"not_found": {
 			ArgDataUserId: mockFriendsNotFound.Id1,
-			ArgDataFriendId: strconv.Itoa(mockFriendsNotFound.Id2),
+			ArgDataFriendId: strconv.Itoa(int(mockFriendsNotFound.Id2)),
 			Error: &echo.HTTPError{
 				Code: http.StatusNotFound,
 				Message: models.ErrNotFound.Error(),
@@ -236,7 +236,7 @@ func TestDeliveryDeleteFriend(t *testing.T) {
 		},
 		"equal_id": {
 			ArgDataUserId: mockFriendsEqual.Id1,
-			ArgDataFriendId:   strconv.Itoa(mockFriendsEqual.Id2),
+			ArgDataFriendId:   strconv.Itoa(int(mockFriendsEqual.Id2)),
 			Error: &echo.HTTPError{
 				Code: http.StatusBadRequest,
 				Message: models.ErrBadRequest.Error(),
@@ -244,7 +244,7 @@ func TestDeliveryDeleteFriend(t *testing.T) {
 		},
 		"internal_error": {
 			ArgDataUserId: mockFriendsInternalErr.Id1,
-			ArgDataFriendId:   strconv.Itoa(mockFriendsInternalErr.Id2),
+			ArgDataFriendId:   strconv.Itoa(int(mockFriendsInternalErr.Id2)),
 			Error: &echo.HTTPError{
 				Code: http.StatusInternalServerError,
 				Message: models.ErrInternalServerError.Error(),
@@ -355,10 +355,10 @@ func TestDeliverySelectFriends(t *testing.T) {
 }
 
 func TestDeliveryCheckIsFriend(t *testing.T) {
-	friendIdSuccess := 2
+	var friendIdSuccess uint64 = 2
 	friendIdBadRequest := "hgcv"
 
-	userId := 1
+	var userId uint64 = 1
 
 	mockFriendsSuccess := models.Friends {
 		Id1: userId,
@@ -393,7 +393,7 @@ func TestDeliveryCheckIsFriend(t *testing.T) {
 
 	cases := map[string]TestCase {
 		"success": {
-			ArgDataFriendId: strconv.Itoa(friendIdSuccess),
+			ArgDataFriendId: strconv.Itoa(int(friendIdSuccess)),
 			ArgDataUserId: userId,
 			Error: nil,
 			StatusCode: http.StatusOK,
@@ -415,7 +415,7 @@ func TestDeliveryCheckIsFriend(t *testing.T) {
 		},
 		"equal_id": {
 			ArgDataUserId: mockFriendsEqual.Id1,
-			ArgDataFriendId:   strconv.Itoa(mockFriendsEqual.Id2),
+			ArgDataFriendId:   strconv.Itoa(int(mockFriendsEqual.Id2)),
 			Error: &echo.HTTPError{
 				Code: http.StatusBadRequest,
 				Message: models.ErrBadRequest.Error(),
@@ -423,7 +423,7 @@ func TestDeliveryCheckIsFriend(t *testing.T) {
 		},
 		"internal_error": {
 			ArgDataUserId: mockFriendsInternalErr.Id1,
-			ArgDataFriendId:   strconv.Itoa(mockFriendsInternalErr.Id2),
+			ArgDataFriendId:   strconv.Itoa(int(mockFriendsInternalErr.Id2)),
 			Error: &echo.HTTPError{
 				Code: http.StatusInternalServerError,
 				Message: models.ErrInternalServerError.Error(),
@@ -431,7 +431,7 @@ func TestDeliveryCheckIsFriend(t *testing.T) {
 		},
 		"not_found": {
 			ArgDataUserId: mockFriendsNotFound.Id1,
-			ArgDataFriendId: strconv.Itoa(mockFriendsNotFound.Id2),
+			ArgDataFriendId: strconv.Itoa(int(mockFriendsNotFound.Id2)),
 			Error: &echo.HTTPError{
 				Code: http.StatusNotFound,
 				Message: models.ErrNotFound.Error(),

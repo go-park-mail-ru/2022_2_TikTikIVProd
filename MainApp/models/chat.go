@@ -14,6 +14,6 @@ type Message struct {
 	DialogID   uint64       `json:"dialog_id" gorm:"column:chat_id"`
 	SenderID   uint64       `json:"sender_id" readonly:"true" gorm:"column:sender_id"`
 	ReceiverID uint64       `json:"receiver_id" gorm:"column:receiver_id"`
-	Body       string    `json:"body" gorm:"column:body"`
+	Body       string    `json:"body" gorm:"column:text"`
 	CreatedAt  time.Time `json:"created_at" gorm:"column:created_at"`
 }
