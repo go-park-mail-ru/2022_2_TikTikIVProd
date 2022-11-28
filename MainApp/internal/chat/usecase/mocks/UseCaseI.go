@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	// models "github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
+	models "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -13,11 +13,11 @@ type UseCaseI struct {
 }
 
 // SelectAllDialogs provides a mock function with given fields: userId
-func (_m *UseCaseI) SelectAllDialogs(userId int) ([]models.Dialog, error) {
+func (_m *UseCaseI) SelectAllDialogs(userId uint64) ([]models.Dialog, error) {
 	ret := _m.Called(userId)
 
 	var r0 []models.Dialog
-	if rf, ok := ret.Get(0).(func(int) []models.Dialog); ok {
+	if rf, ok := ret.Get(0).(func(uint64) []models.Dialog); ok {
 		r0 = rf(userId)
 	} else {
 		if ret.Get(0) != nil {
@@ -26,7 +26,7 @@ func (_m *UseCaseI) SelectAllDialogs(userId int) ([]models.Dialog, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(int) error); ok {
+	if rf, ok := ret.Get(1).(func(uint64) error); ok {
 		r1 = rf(userId)
 	} else {
 		r1 = ret.Error(1)
@@ -36,11 +36,11 @@ func (_m *UseCaseI) SelectAllDialogs(userId int) ([]models.Dialog, error) {
 }
 
 // SelectDialog provides a mock function with given fields: id
-func (_m *UseCaseI) SelectDialog(id int) (*models.Dialog, error) {
+func (_m *UseCaseI) SelectDialog(id uint64) (*models.Dialog, error) {
 	ret := _m.Called(id)
 
 	var r0 *models.Dialog
-	if rf, ok := ret.Get(0).(func(int) *models.Dialog); ok {
+	if rf, ok := ret.Get(0).(func(uint64) *models.Dialog); ok {
 		r0 = rf(id)
 	} else {
 		if ret.Get(0) != nil {
@@ -49,7 +49,7 @@ func (_m *UseCaseI) SelectDialog(id int) (*models.Dialog, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(int) error); ok {
+	if rf, ok := ret.Get(1).(func(uint64) error); ok {
 		r1 = rf(id)
 	} else {
 		r1 = ret.Error(1)
@@ -59,11 +59,11 @@ func (_m *UseCaseI) SelectDialog(id int) (*models.Dialog, error) {
 }
 
 // SelectDialogByUsers provides a mock function with given fields: userId, friendId
-func (_m *UseCaseI) SelectDialogByUsers(userId int, friendId int) (*models.Dialog, error) {
+func (_m *UseCaseI) SelectDialogByUsers(userId uint64, friendId uint64) (*models.Dialog, error) {
 	ret := _m.Called(userId, friendId)
 
 	var r0 *models.Dialog
-	if rf, ok := ret.Get(0).(func(int, int) *models.Dialog); ok {
+	if rf, ok := ret.Get(0).(func(uint64, uint64) *models.Dialog); ok {
 		r0 = rf(userId, friendId)
 	} else {
 		if ret.Get(0) != nil {
@@ -72,7 +72,7 @@ func (_m *UseCaseI) SelectDialogByUsers(userId int, friendId int) (*models.Dialo
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(int, int) error); ok {
+	if rf, ok := ret.Get(1).(func(uint64, uint64) error); ok {
 		r1 = rf(userId, friendId)
 	} else {
 		r1 = ret.Error(1)

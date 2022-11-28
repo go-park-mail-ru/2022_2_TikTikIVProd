@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	// models "github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
+	models "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -27,11 +27,11 @@ func (_m *RepositoryI) CreateImage(image *models.Image) error {
 }
 
 // GetImage provides a mock function with given fields: imageID
-func (_m *RepositoryI) GetImage(imageID int) (*models.Image, error) {
+func (_m *RepositoryI) GetImage(imageID uint64) (*models.Image, error) {
 	ret := _m.Called(imageID)
 
 	var r0 *models.Image
-	if rf, ok := ret.Get(0).(func(int) *models.Image); ok {
+	if rf, ok := ret.Get(0).(func(uint64) *models.Image); ok {
 		r0 = rf(imageID)
 	} else {
 		if ret.Get(0) != nil {
@@ -40,7 +40,7 @@ func (_m *RepositoryI) GetImage(imageID int) (*models.Image, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(int) error); ok {
+	if rf, ok := ret.Get(1).(func(uint64) error); ok {
 		r1 = rf(imageID)
 	} else {
 		r1 = ret.Error(1)
@@ -50,11 +50,11 @@ func (_m *RepositoryI) GetImage(imageID int) (*models.Image, error) {
 }
 
 // GetPostImages provides a mock function with given fields: postID
-func (_m *RepositoryI) GetPostImages(postID int) ([]*models.Image, error) {
+func (_m *RepositoryI) GetPostImages(postID uint64) ([]*models.Image, error) {
 	ret := _m.Called(postID)
 
 	var r0 []*models.Image
-	if rf, ok := ret.Get(0).(func(int) []*models.Image); ok {
+	if rf, ok := ret.Get(0).(func(uint64) []*models.Image); ok {
 		r0 = rf(postID)
 	} else {
 		if ret.Get(0) != nil {
@@ -63,7 +63,7 @@ func (_m *RepositoryI) GetPostImages(postID int) ([]*models.Image, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(int) error); ok {
+	if rf, ok := ret.Get(1).(func(uint64) error); ok {
 		r1 = rf(postID)
 	} else {
 		r1 = ret.Error(1)

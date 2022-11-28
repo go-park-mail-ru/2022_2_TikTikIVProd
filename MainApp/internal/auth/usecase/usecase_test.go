@@ -5,10 +5,10 @@ import (
 	"testing"
 
 	"github.com/bxcodec/faker"
-	// authMocks "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/repository/mocks"
-	// authUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/usecase"
-	// userMocks "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository/mocks"
-	// "github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
+	authMocks "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/auth/repository/mocks"
+	authUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/auth/usecase"
+	userMocks "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/user/repository/mocks"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -18,14 +18,14 @@ import (
 
 type TestCaseSignUp struct {
 	ArgData *models.User
-	ExpectedRes int
+	ExpectedRes uint64
 	Error error
 }
 
 type TestCaseSignIn struct {
 	ArgData models.UserSignIn
 	ExpectedResUser *models.User
-	ExpectedResCookie int
+	ExpectedResCookie uint64
 	Error error
 }
 
@@ -173,12 +173,12 @@ func TestUsecaseDeleteCookie(t *testing.T) {
 	mockAuthRepo := authMocks.NewRepositoryI(t)
 	mockUserRepo := userMocks.NewRepositoryI(t)
 
-	mockAuthRepo.On("GetCookie", cookie.SessionToken).Return(strconv.Itoa(cookie.UserId), nil)
+	mockAuthRepo.On("GetCookie", cookie.SessionToken).Return(strconv.Itoa(int(cookie.UserId)), nil)
 	mockAuthRepo.On("DeleteCookie", cookie.SessionToken).Return(nil)
 
 	mockAuthRepo.On("GetCookie", cookieGetFail.SessionToken).Return("", models.ErrNotFound)
 
-	mockAuthRepo.On("GetCookie", cookieDeleteFail.SessionToken).Return(strconv.Itoa(cookieDeleteFail.UserId), nil)
+	mockAuthRepo.On("GetCookie", cookieDeleteFail.SessionToken).Return(strconv.Itoa(int(cookieDeleteFail.UserId)), nil)
 	mockAuthRepo.On("DeleteCookie", cookieDeleteFail.SessionToken).Return(models.ErrInternalServerError)
 
 	useCase := authUsecase.New(mockAuthRepo, mockUserRepo)
@@ -222,7 +222,7 @@ func TestUsecaseAuth(t *testing.T) {
 
 	user.Id = cookie.UserId
 
-	mockAuthRepo.On("GetCookie", cookie.SessionToken).Return(strconv.Itoa(cookie.UserId), nil)
+	mockAuthRepo.On("GetCookie", cookie.SessionToken).Return(strconv.Itoa(int(cookie.UserId)), nil)
 	mockUserRepo.On("SelectUserById", cookie.UserId).Return(&user, nil)
 
 	user.Password = ""

@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	// models "github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
+	models "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -62,11 +62,11 @@ func (_m *UseCaseI) DeleteFriend(friends models.Friends) error {
 }
 
 // SelectFriends provides a mock function with given fields: id
-func (_m *UseCaseI) SelectFriends(id int) ([]models.User, error) {
+func (_m *UseCaseI) SelectFriends(id uint64) ([]models.User, error) {
 	ret := _m.Called(id)
 
 	var r0 []models.User
-	if rf, ok := ret.Get(0).(func(int) []models.User); ok {
+	if rf, ok := ret.Get(0).(func(uint64) []models.User); ok {
 		r0 = rf(id)
 	} else {
 		if ret.Get(0) != nil {
@@ -75,7 +75,7 @@ func (_m *UseCaseI) SelectFriends(id int) ([]models.User, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(int) error); ok {
+	if rf, ok := ret.Get(1).(func(uint64) error); ok {
 		r1 = rf(id)
 	} else {
 		r1 = ret.Error(1)

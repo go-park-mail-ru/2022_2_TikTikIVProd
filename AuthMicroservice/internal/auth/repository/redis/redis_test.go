@@ -19,7 +19,6 @@ type TestCaseGetCookie struct {
 	Error error
 }
 
-
 func TestCreateCookie(t *testing.T) {
 	s := miniredis.RunT(t)
 

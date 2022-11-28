@@ -4,37 +4,37 @@ import (
 	"testing"
 
 	"github.com/bxcodec/faker"
-	// "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/repository/mocks"
-	// chatUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/usecase"
-	// "github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/chat/repository/mocks"
+	chatUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/chat/usecase"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
 type TestCaseSendMessage struct {
-	ArgData     models.Message
-	ExpectedRes int
-	Error       error
+	ArgData models.Message
+	ExpectedRes uint64
+	Error error
 }
 
 type TestCaseSelectAllDialogs struct {
-	ArgData     int
+	ArgData uint64
 	ExpectedRes []models.Dialog
 	Error       error
 }
 
 type TestCaseSelectDialog struct {
-	ArgData     int
+	ArgData uint64
 	ExpectedRes *models.Dialog
 	Error       error
 }
 
 type TestCaseSelectDialogByUsers struct {
-	ArgDataUser1 int
-	ArgDataUser2 int
-	ExpectedRes  *models.Dialog
-	Error        error
+	ArgDataUser1 uint64
+	ArgDataUser2 uint64
+	ExpectedRes *models.Dialog
+	Error error
 }
 
 func TestUsecaseSelectDialog(t *testing.T) {
@@ -111,7 +111,7 @@ func TestUsecaseSelectAllDialogs(t *testing.T) {
 
 	mockChatRepo := mocks.NewRepositoryI(t)
 
-	userId := 1
+	var userId uint64 = 1
 
 	mockChatRepo.On("SelectAllDialogs", userId).Return(mockDialogs, nil)
 
