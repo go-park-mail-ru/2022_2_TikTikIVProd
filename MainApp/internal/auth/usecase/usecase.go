@@ -65,7 +65,7 @@ func (uc *useCase) SignIn(user models.UserSignIn) (*models.User, *models.Cookie,
 	cookie := models.Cookie{
 		UserId:       u.Id,
 		SessionToken: uuid.NewString(),
-		MaxAge:      3600 * 24 * 365}
+		MaxAge:       3600 * 24 * 365}
 
 	err = uc.authRepository.CreateCookie(&cookie)
 	if err != nil {
@@ -77,16 +77,18 @@ func (uc *useCase) SignIn(user models.UserSignIn) (*models.User, *models.Cookie,
 
 func (uc *useCase) SignUp(user *models.User) (*models.Cookie, error) {
 	_, err := uc.userRepository.SelectUserByNickName(user.NickName)
-	if err != nil && !errors.Is(err, models.ErrNotFound) {
-		return nil, errors.Wrap(err, "user repository error")
-	} else if err == nil {
+	// if err != nil && !models.ErrEq(err, models.ErrNotFound) {
+	// 	return nil, errors.Wrap(err, "user repository error")
+	// } else 
+	if err == nil {
 		return nil, models.ErrConflictNickname
 	}
 
 	_, err = uc.userRepository.SelectUserByEmail(user.Email)
-	if err != nil && !errors.Is(err, models.ErrNotFound) {
-		return nil, errors.Wrap(err, "user repository error")
-	} else if err == nil {
+	// if err != nil && !models.ErrEq(err, models.ErrNotFound) {
+	// 	return nil, errors.Wrap(err, "user repository error")
+	// } else 
+	if err == nil {
 		return nil, models.ErrConflictEmail
 	}
 
@@ -108,7 +110,7 @@ func (uc *useCase) SignUp(user *models.User) (*models.Cookie, error) {
 	cookie := models.Cookie{
 		UserId:       user.Id,
 		SessionToken: uuid.NewString(),
-		MaxAge:      3600 * 24 * 365}
+		MaxAge:       3600 * 24 * 365}
 
 	err = uc.authRepository.CreateCookie(&cookie)
 	if err != nil {

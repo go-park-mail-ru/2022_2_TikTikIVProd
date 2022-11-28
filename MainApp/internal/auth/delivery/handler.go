@@ -109,7 +109,7 @@ func (del *Delivery) SignIn(c echo.Context) error {
 	if err != nil {
 		causeErr := errors.Cause(err)
 		switch {
-		case errors.Is(causeErr, models.ErrNotFound):
+		case models.ErrEq(err, models.ErrNotFound):
 			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusNotFound, models.ErrNotFound.Error())
 		case errors.Is(causeErr, models.ErrInvalidPassword):

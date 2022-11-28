@@ -188,7 +188,7 @@ func (dbPost *postRepository) GetCountLikesPost(id uint64) (uint64, error) {
 
 func (dbPost *postRepository) CheckLikePost(id uint64, userID uint64) (bool, error) {
 	var count int64
-	tx := dbPost.db.Model(&models.LikePost{UserID: userID, PostID: id}).Count(&count)
+	tx := dbPost.db.Model(&models.LikePost{}).Where(&models.LikePost{UserID: userID, PostID: id}).Count(&count)
 
 	if tx.Error != nil {
 		return false, errors.Wrap(tx.Error, "database error (table like_post) on check")

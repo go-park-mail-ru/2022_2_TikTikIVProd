@@ -55,7 +55,7 @@ func (uc *useCase) SelectUserByNickName(nickName *user.SelectUserByNickNameReque
 }
 
 func (uc *useCase) SelectUserByEmail(email *user.SelectUserByEmailRequest) (*user.User, error) {
-	usr, err := uc.userRepository.SelectUserByNickName(email.Email)
+	usr, err := uc.userRepository.SelectUserByEmail(email.Email)
 	if err != nil {
 		return nil, errors.Wrap(err, "user repository postgres error")
 	}

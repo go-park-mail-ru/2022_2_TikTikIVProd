@@ -74,4 +74,3 @@ func (um UserManager) SelectFriends(ctx context.Context, userId *user.UserId) (*
 	resp, err := um.UserUC.SelectFriends(userId)
 	return resp, err
 }
-

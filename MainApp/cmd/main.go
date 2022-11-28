@@ -54,7 +54,7 @@ func main() {
 	}
 
 	grpcConnAuth, err := grpc.Dial(
-		":8081",
+		"auth_mvs:8081",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
@@ -64,7 +64,7 @@ func main() {
 	authManager := auth.NewAuthClient(grpcConnAuth)
 
 	grpcConnImage, err := grpc.Dial(
-		":8082",
+		"image_mvs:8082",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
@@ -74,7 +74,7 @@ func main() {
 	imageManager := image.NewImagesClient(grpcConnImage)
 
 	grpcConnChat, err := grpc.Dial(
-		":8083",
+		"chat_mvs:8083",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
@@ -84,7 +84,7 @@ func main() {
 	chatManager := chat.NewChatClient(grpcConnChat)
 
 	grpcConnUser, err := grpc.Dial(
-		":8084",
+		"user_mvs:8084",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {

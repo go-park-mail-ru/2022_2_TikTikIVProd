@@ -1,6 +1,9 @@
 package models
 
-import "errors"
+import (
+	"github.com/labstack/gommon/log"
+	"github.com/pkg/errors"
+)
 
 var (
 	ErrNotFound            = errors.New("item is not found")
@@ -15,3 +18,9 @@ var (
 	ErrInvalidCsrf         = errors.New("invalid csrf")
 	ErrPermissionDenied    = errors.New("permission denied")
 )
+
+func ErrEq(err error, target error) bool {
+	log.Info("err1: ", err.Error(), "target:", target.Error())
+	log.Info("cause: ", errors.Cause(err).Error(), "target:", target.Error())
+	return errors.Cause(err).Error() == target.Error()
+}
