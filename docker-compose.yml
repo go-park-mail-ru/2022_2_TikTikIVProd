@@ -30,6 +30,9 @@ services:
     depends_on:
       - ws_pg
       - auth_mvs
+      - image_mvs
+      - chat_mvs
+      - user_mvs
     ports:
       - "8080:8080"
     networks:
