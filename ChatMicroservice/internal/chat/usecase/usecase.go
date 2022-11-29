@@ -148,13 +148,13 @@ func (uc *useCase) CreateDialog(pbDialog *chat.Dialog) (*chat.Nothing, error) {
 		UserId2: pbDialog.UserId2,
 	}
 
-	for idx := range pbDialog.Messages {
+	for idx := range dialog.Messages {
 		msg := models.Message {
-			ID: dialog.Messages[idx].ID,
-			DialogID: dialog.Messages[idx].DialogID,
-			SenderID: dialog.Messages[idx].SenderID,
-			ReceiverID: dialog.Messages[idx].ReceiverID,
-			Body: dialog.Messages[idx].Body,
+			ID: pbDialog.Messages[idx].Id,
+			DialogID: pbDialog.Messages[idx].DialogId,
+			SenderID: pbDialog.Messages[idx].SenderId,
+			ReceiverID: pbDialog.Messages[idx].ReceiverId,
+			Body: pbDialog.Messages[idx].Body,
 			CreatedAt: pbDialog.Messages[idx].CreatedAt.AsTime(),
 		}
 		dialog.Messages = append(dialog.Messages, msg)

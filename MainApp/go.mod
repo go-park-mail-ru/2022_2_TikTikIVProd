@@ -15,7 +15,6 @@ require (
 	golang.org/x/crypto v0.3.0
 	google.golang.org/grpc v1.51.0
 	google.golang.org/protobuf v1.28.1
-	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0
 	gopkg.in/go-playground/validator.v9 v9.31.0
 	gorm.io/driver/postgres v1.4.5
 	gorm.io/gorm v1.24.2

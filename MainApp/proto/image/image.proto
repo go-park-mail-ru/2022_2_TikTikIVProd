@@ -16,7 +16,7 @@ message GetPostImagesResponse {
     repeated Image images = 1;
 }
 
-message GetImageRequest {
+message ImageId {
     uint64 imageId = 1;
 }
 
@@ -27,7 +27,7 @@ message Image {
 
 service Images {
     rpc GetPostImages(GetPostImagesRequest) returns (GetPostImagesResponse) {}
-    rpc GetImage(GetImageRequest) returns (Image) {}
-    rpc CreateImage(Image) returns (Nothing) {}
+    rpc GetImage(ImageId) returns (Image) {}
+    rpc CreateImage(Image) returns (ImageId) {}
 }
 

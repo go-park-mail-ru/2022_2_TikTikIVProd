@@ -110,7 +110,7 @@ func (userMS *microService) SelectAllUsers() ([]models.User, error) {
 		return nil, errors.Wrap(err, "user microservice error")
 	}
 
-	var users []models.User
+	users := make([]models.User, 0)
 
 	for idx := range pbUsers.Users {
 		usr := models.User {
@@ -142,7 +142,7 @@ func (userMS *microService) SearchUsers(name string) ([]models.User, error) {
 		return nil, errors.Wrap(err, "user microservice error")
 	}
 
-	var users []models.User
+	users := make([]models.User, 0)
 
 	for idx := range pbUsers.Users {
 		usr := models.User {
@@ -177,12 +177,12 @@ func (userMS *microService) CreateUser(u *models.User) (error) {
 		CreatedAt: ts,
 	}
 
-	_, err := userMS.client.CreateUser(ctx, &pbUser)
+	userId, err := userMS.client.CreateUser(ctx, &pbUser)
 	if err != nil {
 		return errors.Wrap(err, "user microservice error")
 	}
 
-	u.Id = pbUser.Id
+	u.Id = userId.Id
 
 	return nil
 }

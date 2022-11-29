@@ -1360,6 +1360,12 @@ paths:
   /users/search/{name}:
     get:
       description: search users by name
+      parameters:
+      - description: User name
+        in: path
+        name: name
+        required: true
+        type: string
       produces:
       - application/json
       responses:

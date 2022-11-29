@@ -128,7 +128,7 @@ func (dbUsers *dataBase) CheckFriends(friends models.Friends) (bool, error) {
 func (dbUsers *dataBase) SelectFriends(id uint64) ([]models.User, error) {
 	friends := make([]models.User, 0, 10)
 	tx := dbUsers.db.Omit("password").Joins("JOIN friends ON friends.user_id2 = users.id").Find(&friends, 
-				"id1 = ?", id)
+				"user_id1 = ?", id)
 
 	if tx.Error != nil {
 		return nil, errors.Wrap(tx.Error, "database error (tables friends, users)")

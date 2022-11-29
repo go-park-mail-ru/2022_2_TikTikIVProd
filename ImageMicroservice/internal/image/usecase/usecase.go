@@ -9,7 +9,7 @@ import (
 
 type UseCaseI interface {
 	GetPostImages(*image.GetPostImagesRequest) (*image.GetPostImagesResponse, error)
-	GetImage(*image.GetImageRequest) (*image.Image, error)
+	GetImage(*image.ImageId) (*image.Image, error)
 	CreateImage(*image.Image) (*image.Nothing, error)
 }
 
@@ -42,7 +42,7 @@ func (uc *useCase) GetPostImages(pbPostId *image.GetPostImagesRequest) (*image.G
 	return pbImages, nil
 }
 
-func (uc *useCase) GetImage(pbImageId *image.GetImageRequest) (*image.Image, error) {
+func (uc *useCase) GetImage(pbImageId *image.ImageId) (*image.Image, error) {
 	img, err := uc.imageRepository.GetImage(pbImageId.ImageId)
 	if err != nil {
 		return nil, errors.Wrap(err, "image repository postgres error")
@@ -62,5 +62,8 @@ func (uc *useCase) CreateImage(pbImage *image.Image) (*image.Nothing, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "image repository postgres error")
 	}
+
+	pbImage.Id = modelImage.ID
+
 	return &image.Nothing{Dummy: true}, nil
 }

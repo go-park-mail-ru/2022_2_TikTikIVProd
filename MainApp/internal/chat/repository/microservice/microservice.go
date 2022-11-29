@@ -98,7 +98,7 @@ func (chatMS *microService) SelectAllDialogs(userId uint64) ([]models.Dialog, er
 		return nil, errors.Wrap(err, "chat microservice error")
 	}
 
-	var dialogs []models.Dialog
+	dialogs := make([]models.Dialog, 0)
 
 	for idx := range pbDialogs.Dialogs {
 		dialog := models.Dialog {
@@ -137,8 +137,8 @@ func (chatMS *microService) SelectMessages(id uint64) ([]models.Message, error) 
 		return nil, errors.Wrap(err, "chat microservice error")
 	}
 
-	var messages []models.Message
-
+	messages := make([]models.Message, 0)
+	
 	for idx := range pbMessages.Messages {
 		msg := models.Message {
 			ID: pbMessages.Messages[idx].Id,
@@ -176,12 +176,12 @@ func (chatMS *microService) CreateDialog(dialog *models.Dialog) (error) {
 		pbDialog.Messages = append(pbDialog.Messages, &pbMsg)
 	}
 
-	_, err := chatMS.client.CreateDialog(ctx, &pbDialog)
+	dialogId, err := chatMS.client.CreateDialog(ctx, &pbDialog)
 	if err != nil {
 		return errors.Wrap(err, "chat microservice error")
 	}
 
-	dialog.Id = pbDialog.Id
+	dialog.Id = dialogId.Id
 
 	return nil
 }

@@ -1813,6 +1813,15 @@ const docTemplate = `{
                     "users"
                 ],
                 "summary": "SearchUsers",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User name",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "success search users",

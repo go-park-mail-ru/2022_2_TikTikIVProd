@@ -12,7 +12,7 @@ import (
 	"net"
 )
 
-//var testCfgPg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
+// var testCfgPg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
 
 var prodCfgPg = postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}
 

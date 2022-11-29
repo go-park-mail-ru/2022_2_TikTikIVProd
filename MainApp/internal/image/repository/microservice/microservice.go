@@ -31,7 +31,7 @@ func (imageMS *microService) GetPostImages(postID uint64) ([]*models.Image, erro
 		return nil, errors.Wrap(err, "image microservice error")
 	}
 
-	var images []*models.Image
+	images := make([]*models.Image, 0)
 
 	for idx := range pbImages.Images {
 		img := &models.Image {
@@ -47,7 +47,7 @@ func (imageMS *microService) GetPostImages(postID uint64) ([]*models.Image, erro
 func (imageMS *microService) GetImage(imageID uint64) (*models.Image, error) {
 	ctx := context.Background()
 
-	pbGetImageRequest := image.GetImageRequest {
+	pbGetImageRequest := image.ImageId {
 		ImageId: imageID,
 	}
 
@@ -68,14 +68,15 @@ func (imageMS *microService) CreateImage(img *models.Image) (error) {
 	ctx := context.Background()
 
 	pbImage := image.Image {
-		Id: img.ID,
 		ImgLink: img.ImgLink,
 	}
 
-	_, err := imageMS.client.CreateImage(ctx, &pbImage)
+	imgId, err := imageMS.client.CreateImage(ctx, &pbImage)
 	if err != nil {
 		return errors.Wrap(err, "image microservice error")
 	}
+
+	img.ID = imgId.ImageId
 
 	return nil
 }

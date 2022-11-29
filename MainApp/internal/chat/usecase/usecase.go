@@ -67,7 +67,7 @@ func (uc *useCase) SelectAllDialogs(userId uint64) ([]models.Dialog, error) {
 }
 
 func (uc *useCase) SendMessage(message *models.Message) error {
-	if _, err := uc.chatRepository.SelectDialog(message.DialogID); err == models.ErrNotFound {
+	if _, err := uc.chatRepository.SelectDialog(message.DialogID); err != nil {
 		dialog := models.Dialog {
 			UserId1: message.SenderID,
 			UserId2: message.ReceiverID,

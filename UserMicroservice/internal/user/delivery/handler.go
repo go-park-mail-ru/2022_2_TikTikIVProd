@@ -45,9 +45,9 @@ func (um UserManager) SearchUsers(ctx context.Context, name *user.SearchUsersReq
 	return resp, err
 }
 
-func (um UserManager) CreateUser(ctx context.Context, usr *user.User) (*user.Nothing, error) {
-	resp, err := um.UserUC.CreateUser(usr)
-	return resp, err
+func (um UserManager) CreateUser(ctx context.Context, usr *user.User) (*user.UserId, error) {
+	_, err := um.UserUC.CreateUser(usr)
+	return &user.UserId{Id:usr.Id}, err
 }
 
 func (um UserManager) UpdateUser(ctx context.Context, usr *user.User) (*user.Nothing, error) {

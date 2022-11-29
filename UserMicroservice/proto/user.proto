@@ -54,7 +54,7 @@ service Users {
     rpc SelectUserByNickName(SelectUserByNickNameRequest) returns (User) {}
     rpc SelectUserByEmail(SelectUserByEmailRequest) returns (User) {}
     rpc SelectUserById(UserId) returns (User) {}
-    rpc CreateUser(User) returns (Nothing) {}
+    rpc CreateUser(User) returns (UserId) {}
     rpc UpdateUser(User) returns (Nothing) {}
     rpc SelectAllUsers(Nothing) returns (UsersList) {}
     rpc SearchUsers(SearchUsersRequest) returns (UsersList) {}

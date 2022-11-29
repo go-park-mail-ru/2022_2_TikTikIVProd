@@ -25,7 +25,7 @@ type UsersClient interface {
 	SelectUserByNickName(ctx context.Context, in *SelectUserByNickNameRequest, opts ...grpc.CallOption) (*User, error)
 	SelectUserByEmail(ctx context.Context, in *SelectUserByEmailRequest, opts ...grpc.CallOption) (*User, error)
 	SelectUserById(ctx context.Context, in *UserId, opts ...grpc.CallOption) (*User, error)
-	CreateUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*Nothing, error)
+	CreateUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*UserId, error)
 	UpdateUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*Nothing, error)
 	SelectAllUsers(ctx context.Context, in *Nothing, opts ...grpc.CallOption) (*UsersList, error)
 	SearchUsers(ctx context.Context, in *SearchUsersRequest, opts ...grpc.CallOption) (*UsersList, error)
@@ -70,8 +70,8 @@ func (c *usersClient) SelectUserById(ctx context.Context, in *UserId, opts ...gr
 	return out, nil
 }
 
-func (c *usersClient) CreateUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*Nothing, error) {
-	out := new(Nothing)
+func (c *usersClient) CreateUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*UserId, error) {
+	out := new(UserId)
 	err := c.cc.Invoke(ctx, "/user.Users/CreateUser", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -149,7 +149,7 @@ type UsersServer interface {
 	SelectUserByNickName(context.Context, *SelectUserByNickNameRequest) (*User, error)
 	SelectUserByEmail(context.Context, *SelectUserByEmailRequest) (*User, error)
 	SelectUserById(context.Context, *UserId) (*User, error)
-	CreateUser(context.Context, *User) (*Nothing, error)
+	CreateUser(context.Context, *User) (*UserId, error)
 	UpdateUser(context.Context, *User) (*Nothing, error)
 	SelectAllUsers(context.Context, *Nothing) (*UsersList, error)
 	SearchUsers(context.Context, *SearchUsersRequest) (*UsersList, error)
@@ -173,7 +173,7 @@ func (UnimplementedUsersServer) SelectUserByEmail(context.Context, *SelectUserBy
 func (UnimplementedUsersServer) SelectUserById(context.Context, *UserId) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SelectUserById not implemented")
 }
-func (UnimplementedUsersServer) CreateUser(context.Context, *User) (*Nothing, error) {
+func (UnimplementedUsersServer) CreateUser(context.Context, *User) (*UserId, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
 }
 func (UnimplementedUsersServer) UpdateUser(context.Context, *User) (*Nothing, error) {

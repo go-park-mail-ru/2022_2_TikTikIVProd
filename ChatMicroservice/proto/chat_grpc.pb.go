@@ -25,7 +25,7 @@ type ChatClient interface {
 	SelectDialog(ctx context.Context, in *DialogId, opts ...grpc.CallOption) (*Dialog, error)
 	SelectDialogByUsers(ctx context.Context, in *SelectDialogByUsersRequest, opts ...grpc.CallOption) (*Dialog, error)
 	SelectMessages(ctx context.Context, in *DialogId, opts ...grpc.CallOption) (*SelectMessagesResponse, error)
-	CreateDialog(ctx context.Context, in *Dialog, opts ...grpc.CallOption) (*Nothing, error)
+	CreateDialog(ctx context.Context, in *Dialog, opts ...grpc.CallOption) (*DialogId, error)
 	CreateMessage(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Nothing, error)
 	SelectAllDialogs(ctx context.Context, in *SelectAllDialogsRequest, opts ...grpc.CallOption) (*SelectAllDialogsResponse, error)
 }
@@ -65,8 +65,8 @@ func (c *chatClient) SelectMessages(ctx context.Context, in *DialogId, opts ...g
 	return out, nil
 }
 
-func (c *chatClient) CreateDialog(ctx context.Context, in *Dialog, opts ...grpc.CallOption) (*Nothing, error) {
-	out := new(Nothing)
+func (c *chatClient) CreateDialog(ctx context.Context, in *Dialog, opts ...grpc.CallOption) (*DialogId, error) {
+	out := new(DialogId)
 	err := c.cc.Invoke(ctx, "/chat.Chat/CreateDialog", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -99,7 +99,7 @@ type ChatServer interface {
 	SelectDialog(context.Context, *DialogId) (*Dialog, error)
 	SelectDialogByUsers(context.Context, *SelectDialogByUsersRequest) (*Dialog, error)
 	SelectMessages(context.Context, *DialogId) (*SelectMessagesResponse, error)
-	CreateDialog(context.Context, *Dialog) (*Nothing, error)
+	CreateDialog(context.Context, *Dialog) (*DialogId, error)
 	CreateMessage(context.Context, *Message) (*Nothing, error)
 	SelectAllDialogs(context.Context, *SelectAllDialogsRequest) (*SelectAllDialogsResponse, error)
 	mustEmbedUnimplementedChatServer()
@@ -118,7 +118,7 @@ func (UnimplementedChatServer) SelectDialogByUsers(context.Context, *SelectDialo
 func (UnimplementedChatServer) SelectMessages(context.Context, *DialogId) (*SelectMessagesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SelectMessages not implemented")
 }
-func (UnimplementedChatServer) CreateDialog(context.Context, *Dialog) (*Nothing, error) {
+func (UnimplementedChatServer) CreateDialog(context.Context, *Dialog) (*DialogId, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateDialog not implemented")
 }
 func (UnimplementedChatServer) CreateMessage(context.Context, *Message) (*Nothing, error) {

@@ -51,7 +51,7 @@ service Chat {
     rpc SelectDialog(DialogId) returns (Dialog) {}
     rpc SelectDialogByUsers(SelectDialogByUsersRequest) returns (Dialog) {}
     rpc SelectMessages(DialogId) returns (SelectMessagesResponse) {}
-    rpc CreateDialog(Dialog) returns (Nothing) {}
+    rpc CreateDialog(Dialog) returns (DialogId) {}
     rpc CreateMessage(Message) returns (Nothing) {}
     rpc SelectAllDialogs(SelectAllDialogsRequest) returns (SelectAllDialogsResponse) {}
 }

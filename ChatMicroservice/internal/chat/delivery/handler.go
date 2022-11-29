@@ -35,9 +35,9 @@ func (cm ChatManager) SelectAllDialogs(ctx context.Context, userId *chat.SelectA
 	return resp, err
 }
 
-func (cm ChatManager) CreateDialog(ctx context.Context, dialog *chat.Dialog) (*chat.Nothing, error) {
-	resp, err := cm.ChatUC.CreateDialog(dialog)
-	return resp, err
+func (cm ChatManager) CreateDialog(ctx context.Context, dialog *chat.Dialog) (*chat.DialogId, error) {
+	_, err := cm.ChatUC.CreateDialog(dialog)
+	return &chat.DialogId{Id: dialog.Id}, err
 }
 
 func (cm ChatManager) CreateMessage(ctx context.Context, msg *chat.Message) (*chat.Nothing, error) {

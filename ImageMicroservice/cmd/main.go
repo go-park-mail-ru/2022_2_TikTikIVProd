@@ -12,12 +12,12 @@ import (
 	"net"
 )
 
-//var testCfgPg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
+// var testCfgPg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
 
 var prodCfgPg = postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}
 
 func main() {
-	lis, err := net.Listen("tcp", ":8081")
+	lis, err := net.Listen("tcp", ":8082")
 	if err != nil {
 		log.Fatal(err)
 	}

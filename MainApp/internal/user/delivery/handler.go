@@ -123,6 +123,7 @@ func (del *Delivery) UpdateUser(c echo.Context) error {
 // @Description  search users by name
 // @Tags     users
 // @Produce  application/json
+// @Param name path string true "User name"
 // @Success  200 {object} pkg.Response{body=[]models.User} "success search users"
 // @Failure 405 {object} echo.HTTPError "Method Not Allowed"
 // @Failure 500 {object} echo.HTTPError "internal server error"

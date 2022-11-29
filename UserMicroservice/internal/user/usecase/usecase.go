@@ -102,7 +102,8 @@ func (uc *useCase) SelectAllUsers(nothing *user.Nothing) (*user.UsersList, error
 		return nil, errors.Wrap(err, "user repository postgres error")
 	}
 
-	var pbUsers *user.UsersList
+	var pbUsers user.UsersList
+	pbUsers.Users = make([]*user.User, len(users))
 
 	for idx := range users {
 		ts := timestamppb.New(users[idx].CreatedAt)
@@ -116,10 +117,10 @@ func (uc *useCase) SelectAllUsers(nothing *user.Nothing) (*user.UsersList, error
 			Password: users[idx].Password,
 			CreatedAt: ts,
 		}
-		pbUsers.Users = append(pbUsers.Users, pbUser)
+		pbUsers.Users[idx] = pbUser
 	}
 
-	return pbUsers, err
+	return &pbUsers, err
 }
 
 func (uc *useCase) SearchUsers(name *user.SearchUsersRequest) (*user.UsersList, error) {
@@ -128,7 +129,8 @@ func (uc *useCase) SearchUsers(name *user.SearchUsersRequest) (*user.UsersList, 
 		return nil, errors.Wrap(err, "user repository postgres error")
 	}
 
-	var pbUsers *user.UsersList
+	var pbUsers user.UsersList
+	pbUsers.Users = make([]*user.User, len(users))
 
 	for idx := range users {
 		ts := timestamppb.New(users[idx].CreatedAt)
@@ -142,10 +144,10 @@ func (uc *useCase) SearchUsers(name *user.SearchUsersRequest) (*user.UsersList, 
 			Password: users[idx].Password,
 			CreatedAt: ts,
 		}
-		pbUsers.Users = append(pbUsers.Users, pbUser)
+		pbUsers.Users[idx] = pbUser
 	}
 
-	return pbUsers, err
+	return &pbUsers, err
 }
 
 func (uc *useCase) CreateUser(pbUser *user.User) (*user.Nothing, error) {
@@ -235,7 +237,8 @@ func (uc *useCase) SelectFriends(pbUserId *user.UserId) (*user.UsersList, error)
 		return nil, errors.Wrap(err, "user repository postgres error")
 	}
 
-	var pbUsers *user.UsersList
+	var pbUsers user.UsersList
+	pbUsers.Users = make([]*user.User, len(users))
 
 	for idx := range users {
 		ts := timestamppb.New(users[idx].CreatedAt)
@@ -249,9 +252,9 @@ func (uc *useCase) SelectFriends(pbUserId *user.UserId) (*user.UsersList, error)
 			Password: users[idx].Password,
 			CreatedAt: ts,
 		}
-		pbUsers.Users = append(pbUsers.Users, pbUser)
+		pbUsers.Users[idx] = pbUser
 	}
 
-	return pbUsers, err
+	return &pbUsers, err
 }
 

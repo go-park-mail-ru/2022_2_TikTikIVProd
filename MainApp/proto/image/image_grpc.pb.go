@@ -23,8 +23,8 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ImagesClient interface {
 	GetPostImages(ctx context.Context, in *GetPostImagesRequest, opts ...grpc.CallOption) (*GetPostImagesResponse, error)
-	GetImage(ctx context.Context, in *GetImageRequest, opts ...grpc.CallOption) (*Image, error)
-	CreateImage(ctx context.Context, in *Image, opts ...grpc.CallOption) (*Nothing, error)
+	GetImage(ctx context.Context, in *ImageId, opts ...grpc.CallOption) (*Image, error)
+	CreateImage(ctx context.Context, in *Image, opts ...grpc.CallOption) (*ImageId, error)
 }
 
 type imagesClient struct {
@@ -44,7 +44,7 @@ func (c *imagesClient) GetPostImages(ctx context.Context, in *GetPostImagesReque
 	return out, nil
 }
 
-func (c *imagesClient) GetImage(ctx context.Context, in *GetImageRequest, opts ...grpc.CallOption) (*Image, error) {
+func (c *imagesClient) GetImage(ctx context.Context, in *ImageId, opts ...grpc.CallOption) (*Image, error) {
 	out := new(Image)
 	err := c.cc.Invoke(ctx, "/image.Images/GetImage", in, out, opts...)
 	if err != nil {
@@ -53,8 +53,8 @@ func (c *imagesClient) GetImage(ctx context.Context, in *GetImageRequest, opts .
 	return out, nil
 }
 
-func (c *imagesClient) CreateImage(ctx context.Context, in *Image, opts ...grpc.CallOption) (*Nothing, error) {
-	out := new(Nothing)
+func (c *imagesClient) CreateImage(ctx context.Context, in *Image, opts ...grpc.CallOption) (*ImageId, error) {
+	out := new(ImageId)
 	err := c.cc.Invoke(ctx, "/image.Images/CreateImage", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -67,8 +67,8 @@ func (c *imagesClient) CreateImage(ctx context.Context, in *Image, opts ...grpc.
 // for forward compatibility
 type ImagesServer interface {
 	GetPostImages(context.Context, *GetPostImagesRequest) (*GetPostImagesResponse, error)
-	GetImage(context.Context, *GetImageRequest) (*Image, error)
-	CreateImage(context.Context, *Image) (*Nothing, error)
+	GetImage(context.Context, *ImageId) (*Image, error)
+	CreateImage(context.Context, *Image) (*ImageId, error)
 	mustEmbedUnimplementedImagesServer()
 }
 
@@ -79,10 +79,10 @@ type UnimplementedImagesServer struct {
 func (UnimplementedImagesServer) GetPostImages(context.Context, *GetPostImagesRequest) (*GetPostImagesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPostImages not implemented")
 }
-func (UnimplementedImagesServer) GetImage(context.Context, *GetImageRequest) (*Image, error) {
+func (UnimplementedImagesServer) GetImage(context.Context, *ImageId) (*Image, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetImage not implemented")
 }
-func (UnimplementedImagesServer) CreateImage(context.Context, *Image) (*Nothing, error) {
+func (UnimplementedImagesServer) CreateImage(context.Context, *Image) (*ImageId, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateImage not implemented")
 }
 func (UnimplementedImagesServer) mustEmbedUnimplementedImagesServer() {}
@@ -117,7 +117,7 @@ func _Images_GetPostImages_Handler(srv interface{}, ctx context.Context, dec fun
 }
 
 func _Images_GetImage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetImageRequest)
+	in := new(ImageId)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -129,7 +129,7 @@ func _Images_GetImage_Handler(srv interface{}, ctx context.Context, dec func(int
 		FullMethod: "/image.Images/GetImage",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ImagesServer).GetImage(ctx, req.(*GetImageRequest))
+		return srv.(ImagesServer).GetImage(ctx, req.(*ImageId))
 	}
 	return interceptor(ctx, in, info, handler)
 }

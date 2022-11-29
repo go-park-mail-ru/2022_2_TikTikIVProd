@@ -31,7 +31,7 @@ func (userMS *microService) SelectFriends(id uint64) ([]models.User, error) {
 		return nil, errors.Wrap(err, "user microservice error")
 	}
 
-	var users []models.User
+	users := make([]models.User, 0)
 
 	for idx := range pbUsers.Users {
 		usr := models.User {
