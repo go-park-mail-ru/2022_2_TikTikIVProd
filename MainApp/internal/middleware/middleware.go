@@ -23,7 +23,8 @@ func NewMiddleware(authUC authUsecase.UseCaseI) *middleware {
 func (m *middleware) Auth(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		if c.Request().URL.Path == "/signup" || c.Request().URL.Path == "/signin" ||
-															c.Request().URL.Path == "/auth" {
+			c.Request().URL.Path == "/auth" || c.Request().URL.Path == "/prometheus" ||
+			c.Request().URL.Path == "/favicon.ico" {
 			return next(c)
 		}
 
@@ -52,11 +53,11 @@ func (m *middleware) Auth(next echo.HandlerFunc) echo.HandlerFunc {
 func (m *middleware) CSRF(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		if c.Request().URL.Path == "/create_csrf" || c.Request().URL.Path == "/signup" ||
-					c.Request().URL.Path == "/signin" || c.Request().URL.Path == "/auth" ||
-													c.Request().Method == http.MethodGet {
+			c.Request().URL.Path == "/signin" || c.Request().URL.Path == "/auth" ||
+			c.Request().Method == http.MethodGet {
 			return next(c)
 		}
-		
+
 		token := c.Request().Header.Get(echo.HeaderXCSRFToken)
 		if token == "" {
 			c.Logger().Error(models.ErrEmptyCsrf)
@@ -85,4 +86,3 @@ func (m *middleware) CSRF(next echo.HandlerFunc) echo.HandlerFunc {
 		return next(c)
 	}
 }
-

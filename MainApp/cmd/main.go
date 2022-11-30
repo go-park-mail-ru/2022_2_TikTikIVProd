@@ -36,6 +36,7 @@ import (
 	chat "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/proto/chat"
 	image "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/proto/image"
 	user "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/proto/user"
+	"github.com/labstack/echo-contrib/prometheus"
 )
 
 // @title WS Swagger API
@@ -115,6 +116,11 @@ func main() {
 		`file=${short_file} line=${line} message:`)
 	e.Logger.SetLevel(log.INFO)
 
+	p := prometheus.NewPrometheus("echo", nil)
+	p.MetricsPath = "/prometheus"
+	p.SetMetricsPath(e)
+	p.Use(e)
+
 	e.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
 		AllowOrigins:     []string{"http://89.208.197.127"},
 		AllowHeaders:     []string{"Content-Type", "X-CSRF-Token"},
@@ -134,7 +140,7 @@ func main() {
 
 	authMiddleware := middleware.NewMiddleware(authUC)
 	e.Use(authMiddleware.Auth)
-	e.Use(authMiddleware.CSRF)
+	// e.Use(authMiddleware.CSRF)
 
 	_postsDelivery.NewDelivery(e, postsUC)
 	_authDelivery.NewDelivery(e, authUC)

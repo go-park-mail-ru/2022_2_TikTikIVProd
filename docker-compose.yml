@@ -25,6 +25,7 @@ services:
   server:
     build: ./MainApp
     restart: always
+    container_name: server
     volumes:
       - ./images:/images
     depends_on:
@@ -85,8 +86,58 @@ services:
       - "8084:8084"
     networks:
       - mynetwork
+  grafana:
+    image: "grafana/grafana-oss"
+    restart: always
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    depends_on:
+      - server
+    ports:
+      - "3000:3000"
+    networks:
+      - mynetwork
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - 9090:9090
+    restart: always
+    networks:
+      - mynetwork
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    expose:
+      - 9100
+    ports:
+      - 9100:9100
+    networks:
+      - mynetwork
 
 
 
 networks:
   mynetwork:
+
+volumes:
+  prometheus_data:
+  grafana-storage:
