@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = ".";
+
+package user;
+
+message Nothing {
+  bool dummy = 1;
+}
+
+message User {
+	uint64 id = 1;
+	string firstName = 2;
+    string lastName = 3;
+    string nickName = 4;
+    uint64 avatar = 5;
+    string email = 6;
+    string password = 7;
+    google.protobuf.Timestamp createdAt = 8;
+}
+
+message SelectUserByNickNameRequest {
+    string nickName = 1;
+}
+
+message SelectUserByEmailRequest {
+    string email = 1;
+}
+
+message UserId {
+    uint64 id = 1;
+}
+
+message SearchUsersRequest {
+    string name = 1;
+}
+
+message Friends {
+    uint64 id1 = 1;
+    uint64 id2 = 2;
+}
+
+message CheckFriendsResponse {
+    bool isExists = 1;
+}
+
+message UsersList {
+    repeated User users = 1;
+}
+
+service Users {
+    rpc SelectUserByNickName(SelectUserByNickNameRequest) returns (User) {}
+    rpc SelectUserByEmail(SelectUserByEmailRequest) returns (User) {}
+    rpc SelectUserById(UserId) returns (User) {}
+    rpc CreateUser(User) returns (UserId) {}
+    rpc UpdateUser(User) returns (Nothing) {}
+    rpc SelectAllUsers(Nothing) returns (UsersList) {}
+    rpc SearchUsers(SearchUsersRequest) returns (UsersList) {}
+
+    rpc AddFriend(Friends) returns (Nothing) {}
+    rpc DeleteFriend(Friends) returns (Nothing) {}
+    rpc CheckFriends(Friends) returns (CheckFriendsResponse) {}
+    rpc SelectFriends(UserId) returns (UsersList) {}
+}
+

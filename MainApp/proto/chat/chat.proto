@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = ".";
+
+package chat;
+
+message Nothing {
+  bool dummy = 1;
+}
+
+message DialogId {
+    uint64 id = 1;
+}
+
+message Dialog {
+	uint64 id = 1;
+	uint64 userId1 = 2;
+    uint64 userId2 = 3;
+    repeated Message messages = 4;
+}
+
+message Message {
+	uint64 id = 1;
+	uint64 dialogId = 2;
+    uint64 senderId = 3;
+    uint64 receiverId = 4;
+    string body = 5;
+    google.protobuf.Timestamp createdAt = 6;
+}
+
+message SelectDialogByUsersRequest {
+    uint64 userId = 1;
+    uint64 friendId = 2;
+}
+
+message SelectMessagesResponse {
+    repeated Message messages = 1;
+}
+
+message SelectAllDialogsRequest {
+    uint64 userId = 1;
+}
+
+message SelectAllDialogsResponse {
+    repeated Dialog dialogs = 1;
+}
+
+service Chat {
+    rpc SelectDialog(DialogId) returns (Dialog) {}
+    rpc SelectDialogByUsers(SelectDialogByUsersRequest) returns (Dialog) {}
+    rpc SelectMessages(DialogId) returns (SelectMessagesResponse) {}
+    rpc CreateDialog(Dialog) returns (DialogId) {}
+    rpc CreateMessage(Message) returns (Nothing) {}
+    rpc SelectAllDialogs(SelectAllDialogsRequest) returns (SelectAllDialogsResponse) {}
+}
+

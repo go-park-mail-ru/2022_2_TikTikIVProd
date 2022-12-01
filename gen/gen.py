@@ -5,8 +5,9 @@ import datetime
 
 
 COUNT_USERS = 30
-COUNT_POSTS = 30
+COUNT_POSTS = 100
 COUNT_IMAGES = 30
+COUNT_COMMUNITIES = 30
 
 def gen_users():
     faker = Faker()
@@ -17,11 +18,12 @@ def gen_users():
         avatar_img_id = faker.pyint(1, COUNT_IMAGES)
         email = faker.email()
         password = "hash"
+        created_at = datetime.datetime.now()
 
-        return f"{first_name};{last_name};{nick_name};{avatar_img_id};{email};{password}"
+        return f"{first_name};{last_name};{nick_name};{avatar_img_id};{email};{password};{created_at}"
 
     with open("users.csv", "w") as f: 
-        f.write("first_name;last_name;nick_name;avatar_img_id;email;password\n")
+        f.write("first_name;last_name;nick_name;avatar_img_id;email;password;created_at\n")
         for _ in range(COUNT_USERS):
             f.write(_gen_users_string() + "\n")
 
@@ -29,14 +31,24 @@ def gen_posts():
     def _gen_post_string():
         faker = Faker()
         user_id = randint(1, COUNT_USERS)
-        message = str(faker.text()).replace('\n', ' ')
-        create_date = faker.date_this_year()
-        return f"{user_id};{message};{create_date}"
+        description = str(faker.text()).replace('\n', ' ')
+        created_at = faker.date_this_year()
+        return f"{user_id};;{description};{created_at}"
+    def _gen_post_string_communities():
+        faker = Faker()
+        user_id = randint(1, COUNT_USERS)
+        community_id = randint(1, COUNT_COMMUNITIES)
+        description = str(faker.text()).replace('\n', ' ')
+        created_at = faker.date_this_year()
+        return f"{user_id};{community_id};{description};{created_at}"
 
     with open("user_posts.csv", "w") as f: 
-        f.write("user_id;message;create_date\n")
-        for _ in range(COUNT_POSTS):
-            f.write(_gen_post_string() + "\n")
+        f.write("user_id;community_id;description;created_at\n")
+        for i in range(COUNT_POSTS):
+            if i % 2:
+                f.write(_gen_post_string() + "\n")
+            else:
+                f.write(_gen_post_string_communities() + "\n")
 
 def gen_images():
     with open("images.csv", "w") as f: 
@@ -47,11 +59,11 @@ def gen_images():
 def gen_posts_images_relation():
     relations = []
     def _gen_posts_images_relation_string():
-        user_id = randint(1, COUNT_USERS)
+        post_id = randint(1, COUNT_POSTS)
         img_id = randint(1, COUNT_IMAGES)
-        if (user_id, img_id) not in relations:
-            relations.append((user_id, img_id))
-            return f"{user_id};{img_id}"
+        if (post_id, img_id) not in relations:
+            relations.append((post_id, img_id))
+            return f"{post_id};{img_id}"
         else:
             return ""
 
@@ -100,12 +112,46 @@ def gen_messages_for_user(user_id: int):
             row = _gen_message()
             f.write(row + "\n" if row != "" else "")
 
+def gen_communities():
+    faker = Faker()
+    def _gen_communities_string():
+        name = faker.first_name()
+        owner_id = randint(1, COUNT_USERS)
+        avatar_img_id = faker.pyint(1, COUNT_IMAGES)
+        description = str(faker.text()).replace('\n', ' ')
+        created_at = datetime.datetime.now()
+
+        return f"{name};{owner_id};{avatar_img_id};{description};{created_at}"
+
+    with open("communities.csv", "w") as f: 
+        f.write("name;owner_id;nickavatar_img_id_name;description;created_at\n")
+        for _ in range(COUNT_COMMUNITIES):
+            f.write(_gen_communities_string() + "\n")
+
+def gen_likes():
+    relations = []
+    def _gen_likes_string():
+        user_post_id = randint(1, COUNT_POSTS)
+        user_id = randint(1, COUNT_USERS)
+        if (user_post_id, user_id) not in relations:
+            relations.append((user_post_id, user_id))
+            return f"{user_post_id};{user_id}"
+        else:
+            return ""
+
+    with open("like_post.csv", "w") as f: 
+        f.write("user_post_id;user_id\n")
+        for _ in range(COUNT_POSTS * 100):
+            row = _gen_likes_string()
+            f.write(row + "\n" if row != "" else "")
 
 if __name__ == '__main__':
     gen_images()
     gen_posts()
     gen_users()
     gen_posts_images_relation()
+    gen_communities()
+    gen_likes()
     
     if len(sys.argv) > 1:
         gen_messages_for_user(sys.argv[1])
