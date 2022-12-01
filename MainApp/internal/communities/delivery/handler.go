@@ -12,7 +12,7 @@ import (
 )
 
 type Delivery struct {
-	commUC communitiesUsecase.UseCaseI
+	CommUC communitiesUsecase.UseCaseI
 }
 
 // CreateCommunity godoc
@@ -36,7 +36,7 @@ func (delivery *Delivery) CreateCommunity(c echo.Context) error {
 
 	if err != nil {
 		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
+		return echo.NewHTTPError(http.StatusUnprocessableEntity, models.ErrBadRequest.Error())
 	}
 
 	if ok, err := isRequestValid(&reqComm); !ok {
@@ -55,7 +55,7 @@ func (delivery *Delivery) CreateCommunity(c echo.Context) error {
 
 	comm := models.ReqCreateToComm(reqComm)
 	comm.OwnerID = userId
-	err = delivery.commUC.CreateCommunity(&comm)
+	err = delivery.CommUC.CreateCommunity(&comm)
 
 	if err != nil {
 		c.Logger().Error(err)
@@ -86,7 +86,7 @@ func (delivery *Delivery) UpdateCommunity(c echo.Context) error {
 
 	if err != nil {
 		c.Logger().Error(err)
-		return c.JSON(http.StatusUnprocessableEntity, err.Error())
+		return echo.NewHTTPError(http.StatusUnprocessableEntity, models.ErrBadRequest.Error())
 	}
 
 	if ok, err := isRequestValid(&comm); !ok {
@@ -103,7 +103,7 @@ func (delivery *Delivery) UpdateCommunity(c echo.Context) error {
 	}
 
 	comm.OwnerID = userId
-	err = delivery.commUC.UpdateCommunity(&comm)
+	err = delivery.CommUC.UpdateCommunity(&comm)
 
 	if err != nil {
 		c.Logger().Error(err)
@@ -134,7 +134,7 @@ func (delivery *Delivery) GetCommunity(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
 	}
 
-	community, err := delivery.commUC.GetCommunity(id)
+	community, err := delivery.CommUC.GetCommunity(id)
 
 	if err != nil {
 		c.Logger().Error(err)
@@ -156,7 +156,7 @@ func (delivery *Delivery) GetCommunity(c echo.Context) error {
 // @Failure 401 {object} echo.HTTPError "no cookie"
 // @Router   /communities [get]
 func (delivery *Delivery) GetAllCommunities(c echo.Context) error {
-	communities, err := delivery.commUC.GetAllCommunities()
+	communities, err := delivery.CommUC.GetAllCommunities()
 
 	if err != nil {
 		c.Logger().Error(err)
@@ -181,7 +181,7 @@ func (delivery *Delivery) GetAllCommunities(c echo.Context) error {
 func (delivery *Delivery) SearchCommunity(c echo.Context) error {
 	param := c.QueryParam("q")
 
-	communities, err := delivery.commUC.SearchCommunities(param)
+	communities, err := delivery.CommUC.SearchCommunities(param)
 
 	if err != nil {
 		c.Logger().Error(err)
@@ -206,6 +206,10 @@ func (delivery *Delivery) SearchCommunity(c echo.Context) error {
 // @Router   /communities/{id} [delete]
 func (delivery *Delivery) DeleteCommunity(c echo.Context) error {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusNotFound, models.ErrNotFound.Error())
+	}
 
 	userId, ok := c.Get("user_id").(uint64)
 	if !ok {
@@ -213,16 +217,11 @@ func (delivery *Delivery) DeleteCommunity(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
 	}
 
-	if err != nil {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusNotFound, models.ErrNotFound)
-	}
-
-	err = delivery.commUC.DeleteCommunity(id, userId)
+	err = delivery.CommUC.DeleteCommunity(id, userId)
 
 	if err != nil {
 		c.Logger().Error(err)
-
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
 	}
 
 	return c.NoContent(http.StatusNoContent)
@@ -253,7 +252,7 @@ func handleError(err error) *echo.HTTPError {
 
 func NewDelivery(e *echo.Echo, cu communitiesUsecase.UseCaseI) {
 	handler := &Delivery{
-		commUC: cu,
+		CommUC: cu,
 	}
 
 	e.POST("/communities/create", handler.CreateCommunity)

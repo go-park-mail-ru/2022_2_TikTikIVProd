@@ -52,6 +52,7 @@ func (chatMS *microService) SelectDialog(id uint64) (*models.Dialog, error) {
 
 	return dialog, nil
 }
+
 func (chatMS *microService) SelectDialogByUsers(userId, friendId uint64) (*models.Dialog, error) {
 	ctx := context.Background()
 

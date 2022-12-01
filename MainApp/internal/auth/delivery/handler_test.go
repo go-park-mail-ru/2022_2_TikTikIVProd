@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/bxcodec/faker"
 	authDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/auth/delivery"
@@ -49,6 +50,18 @@ func TestDeliverySignUp(t *testing.T) {
 	assert.NoError(t, err)
 
 	mockUserInvalid := models.User{}
+
+	mockUser.Id = 1
+	mockUser.CreatedAt = time.Unix(3, 3)
+
+	mockUserConflictNickName.Id = 2
+	mockUserConflictNickName.CreatedAt = time.Unix(3, 3)
+
+	mockUserConflictEmail.Id = 3
+	mockUserConflictEmail.CreatedAt = time.Unix(3, 3)
+	
+	mockUserInternalErr.Id = 4
+	mockUserInternalErr.CreatedAt = time.Unix(3, 3)
 
 	var mockCookie models.Cookie
 	err = faker.FakeData(&mockCookie)

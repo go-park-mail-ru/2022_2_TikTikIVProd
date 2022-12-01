@@ -158,11 +158,11 @@ func TestUsecaseSendMessage(t *testing.T) {
 	mockChatRepo := mocks.NewRepositoryI(t)
 
 	mockChatRepo.On("SelectDialog", mockMessage.DialogID).Return(nil, nil)
-	mockChatRepo.On("CreateMessage", mock.AnythingOfType("*models.Description")).Return(nil)
+	mockChatRepo.On("CreateMessage", mock.AnythingOfType("*models.Message")).Return(nil)
 
 	mockChatRepo.On("SelectDialog", mockMessageNewDialog.DialogID).Return(nil, models.ErrNotFound)
 	mockChatRepo.On("CreateDialog", &mockDialog).Return(nil)
-	mockChatRepo.On("CreateMessage", mock.AnythingOfType("*models.Description")).Return(nil)
+	mockChatRepo.On("CreateMessage", mock.AnythingOfType("*models.Message")).Return(nil)
 
 	useCase := chatUsecase.New(mockChatRepo)
 
