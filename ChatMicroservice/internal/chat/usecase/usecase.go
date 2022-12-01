@@ -90,6 +90,7 @@ func (uc *useCase) SelectAllDialogs(pbUserId *chat.SelectAllDialogsRequest) (*ch
 	}
 
 	pbDialogs := &chat.SelectAllDialogsResponse {}
+	pbDialogs.Dialogs = make([]*chat.Dialog, 0)
 
 	for idx := range dialogs {
 		dialog := &chat.Dialog {
@@ -97,6 +98,8 @@ func (uc *useCase) SelectAllDialogs(pbUserId *chat.SelectAllDialogsRequest) (*ch
 			UserId1: dialogs[idx].UserId1,
 			UserId2: dialogs[idx].UserId2,
 		}
+
+		dialog.Messages = make([]*chat.Message, 0)
 
 		for idx2 := range dialogs[idx].Messages {
 			ts := timestamppb.New(dialogs[idx].Messages[idx2].CreatedAt)
@@ -124,6 +127,7 @@ func (uc *useCase) SelectMessages(pbDialogId *chat.DialogId) (*chat.SelectMessag
 	}
 
 	pbMessages := &chat.SelectMessagesResponse {}
+	pbMessages.Messages = make([]*chat.Message, 0)
 
 	for idx := range messages {
 		ts := timestamppb.New(messages[idx].CreatedAt)
@@ -148,7 +152,7 @@ func (uc *useCase) CreateDialog(pbDialog *chat.Dialog) (*chat.Nothing, error) {
 		UserId2: pbDialog.UserId2,
 	}
 
-	for idx := range dialog.Messages {
+	for idx := range pbDialog.Messages {
 		msg := models.Message {
 			ID: pbDialog.Messages[idx].Id,
 			DialogID: pbDialog.Messages[idx].DialogId,

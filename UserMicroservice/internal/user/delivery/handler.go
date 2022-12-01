@@ -6,11 +6,6 @@ import (
 	user "github.com/go-park-mail-ru/2022_2_TikTikIVProd/UserMicroservice/proto"
 )
 
-// rpc AddFriend(Friends) returns (Nothing) {}
-// rpc DeleteFriend(Friends) returns (Nothing) {}
-// rpc CheckFriends(Friends) returns (CheckFriendsResponse) {}
-// rpc SelectFriends(UserId) returns (UsersList) {}
-
 type UserManager struct {
 	user.UnimplementedUsersServer
 	UserUC userUsecase.UseCaseI

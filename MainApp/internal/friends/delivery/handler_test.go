@@ -284,9 +284,9 @@ func TestDeliverySelectFriends(t *testing.T) {
 	err := faker.FakeData(&friends)
 	assert.NoError(t, err)
 
-	userIdSuccess := 1
-	userIdInternalErr := 2
-	userIdNotFound := 3
+	var userIdSuccess uint64 = 1
+	var userIdInternalErr uint64 = 2
+	var userIdNotFound uint64 = 3
 	userIdBadRequest := "hgcv"
 
 	mockUCase := mocks.NewUseCaseI(t)
@@ -304,7 +304,7 @@ func TestDeliverySelectFriends(t *testing.T) {
 
 	cases := map[string]TestCaseSelectFriends {
 		"success": {
-			ArgData: strconv.Itoa(userIdSuccess),
+			ArgData: strconv.Itoa(int(userIdSuccess)),
 			Error: nil,
 			StatusCode: http.StatusOK,
 		},
@@ -316,14 +316,14 @@ func TestDeliverySelectFriends(t *testing.T) {
 			},
 		},
 		"internal_error": {
-			ArgData: strconv.Itoa(userIdInternalErr),
+			ArgData: strconv.Itoa(int(userIdInternalErr)),
 			Error: &echo.HTTPError{
 				Code: http.StatusInternalServerError,
 				Message: models.ErrInternalServerError.Error(),
 			},
 		},
 		"not_found": {
-			ArgData: strconv.Itoa(userIdNotFound),
+			ArgData: strconv.Itoa(int(userIdNotFound)),
 			Error: &echo.HTTPError{
 				Code: http.StatusNotFound,
 				Message: models.ErrNotFound.Error(),

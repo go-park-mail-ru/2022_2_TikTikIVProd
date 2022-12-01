@@ -1,23 +1,19 @@
 package middleware_test
 
 import (
-	//"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
 	"github.com/bxcodec/faker"
-	// "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/auth/usecase/mocks"
-	// middlewares "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/middleware"
-	// "github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
-	// "github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg/csrf"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/auth/usecase/mocks"
+	middlewares "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/middleware"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/pkg/csrf"
 
-	//"github.com/go-park-mail-ru/2022_2_TikTikIVProd/pkg"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
-
-	//"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 

@@ -35,7 +35,7 @@ func TestCreateCookie(t *testing.T) {
 	err := repository.CreateCookie(&mockCookie)
 	require.NoError(t, err)
 
-	s.CheckGet(t, mockCookie.SessionToken, strconv.Itoa(mockCookie.UserId))
+	s.CheckGet(t, mockCookie.SessionToken, strconv.Itoa(int(mockCookie.UserId)))
 }
 
 func TestGetCookie(t *testing.T) {
@@ -52,7 +52,7 @@ func TestGetCookie(t *testing.T) {
 	cases := map[string]TestCaseGetCookie {
 		"success": {
 			ArgData:   mockCookie.SessionToken,
-			ExpectedRes: strconv.Itoa(mockCookie.UserId),
+			ExpectedRes: strconv.Itoa(int(mockCookie.UserId)),
 			Error: nil,
 		},
 		"not_found": {

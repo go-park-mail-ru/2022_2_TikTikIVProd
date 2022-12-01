@@ -7,8 +7,8 @@ import (
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 
 	"github.com/bxcodec/faker"
-	// userRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository/postgres"
-	// "github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
+	userRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/UserMicroservice/internal/user/repository/postgres"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/UserMicroservice/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -45,12 +45,12 @@ func TestRepositoryCreateUser(t *testing.T) {
 
     mockUser.Id = 1
 
-    userId := 1
+    var userId uint64 = 1
 
     mock.ExpectQuery(regexp.QuoteMeta(
     `INSERT INTO "users" ("first_name","last_name","nick_name","email",`+
-    `"password","id") VALUES ($1,$2,$3,$4,$5,$6) RETURNING "id"`)).WithArgs(mockUser.FirstName,
-        mockUser.LastName, mockUser.NickName, mockUser.Email, mockUser.Password, mockUser.Id).
+    `"password","created_at","id") VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING "id"`)).WithArgs(mockUser.FirstName,
+        mockUser.LastName, mockUser.NickName, mockUser.Email, mockUser.Password, mockUser.CreatedAt, mockUser.Id).
     WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(userId))
 
     mock.ExpectCommit()
@@ -93,9 +93,9 @@ func TestRepositoryUpdateUser(t *testing.T) {
 
     mock.ExpectExec(regexp.QuoteMeta(
     `UPDATE "users" SET "first_name"=$1,"last_name"=$2,"nick_name"=$3,"avatar_img_id"=$4,`+
-    `"email"=$5,"password"=$6 WHERE "id" = $7`)).WithArgs(mockUser.FirstName,
+    `"email"=$5,"password"=$6,"created_at"=$7 WHERE "id" = $8`)).WithArgs(mockUser.FirstName,
         mockUser.LastName, mockUser.NickName, mockUser.Avatar, mockUser.Email, mockUser.Password,
-        mockUser.Id).WillReturnResult(sqlmock.NewResult(int64(mockUser.Id), 1))
+        mockUser.CreatedAt, mockUser.Id).WillReturnResult(sqlmock.NewResult(int64(mockUser.Id), 1))
 
     mock.ExpectCommit()
 
@@ -107,6 +107,7 @@ func TestRepositoryUpdateUser(t *testing.T) {
     err = mock.ExpectationsWereMet()
     assert.NoError(t, err)
 }
+
 func TestRepositorySelectUserById(t *testing.T) {
 	db, mock, err := sqlmock.New()
     if err != nil {
@@ -134,8 +135,8 @@ func TestRepositorySelectUserById(t *testing.T) {
     mock.ExpectQuery(regexp.QuoteMeta(
     `SELECT * FROM "users" WHERE id = $1 LIMIT 1`)).WithArgs(mockUser.Id).
     WillReturnRows(sqlmock.NewRows([]string{"id", "first_name", "last_name",
-    "nick_name", "avatar_img_id", "email", "password"}).AddRow(mockUser.Id, mockUser.FirstName,
-        mockUser.LastName, mockUser.NickName, mockUser.Avatar, mockUser.Email, mockUser.Password))
+    "nick_name", "avatar_img_id", "email", "password", "created_at"}).AddRow(mockUser.Id, mockUser.FirstName,
+        mockUser.LastName, mockUser.NickName, mockUser.Avatar, mockUser.Email, mockUser.Password, mockUser.CreatedAt))
 
 	repository := userRep.New(gdb)
 
@@ -174,8 +175,8 @@ func TestRepositorySelectUserByNickName(t *testing.T) {
     mock.ExpectQuery(regexp.QuoteMeta(
     `SELECT * FROM "users" WHERE nick_name = $1 LIMIT 1`)).WithArgs(mockUser.NickName).
     WillReturnRows(sqlmock.NewRows([]string{"id", "first_name", "last_name",
-    "nick_name", "avatar_img_id", "email", "password"}).AddRow(mockUser.Id, mockUser.FirstName,
-        mockUser.LastName, mockUser.NickName, mockUser.Avatar, mockUser.Email, mockUser.Password))
+    "nick_name", "avatar_img_id", "email", "password", "created_at"}).AddRow(mockUser.Id, mockUser.FirstName,
+        mockUser.LastName, mockUser.NickName, mockUser.Avatar, mockUser.Email, mockUser.Password, mockUser.CreatedAt))
 
 	repository := userRep.New(gdb)
 
@@ -214,8 +215,8 @@ func TestRepositorySelectUserByEmail(t *testing.T) {
     mock.ExpectQuery(regexp.QuoteMeta(
     `SELECT * FROM "users" WHERE email = $1 LIMIT 1`)).WithArgs(mockUser.Email).
     WillReturnRows(sqlmock.NewRows([]string{"id", "first_name", "last_name",
-    "nick_name", "avatar_img_id", "email", "password"}).AddRow(mockUser.Id, mockUser.FirstName,
-        mockUser.LastName, mockUser.NickName, mockUser.Avatar, mockUser.Email, mockUser.Password))
+    "nick_name", "avatar_img_id", "email", "password", "created_at"}).AddRow(mockUser.Id, mockUser.FirstName,
+        mockUser.LastName, mockUser.NickName, mockUser.Avatar, mockUser.Email, mockUser.Password, mockUser.CreatedAt))
 
 	repository := userRep.New(gdb)
 
@@ -251,15 +252,21 @@ func TestRepositorySelectAllUsers(t *testing.T) {
 	err = faker.FakeData(&mockUsers)
 	assert.NoError(t, err)
 
+    for idx := range mockUsers {
+        mockUsers[idx].Password = ""
+    }
+
     rows := sqlmock.NewRows([]string{"id",
-    "first_name", "last_name", "nick_name", "avatar_img_id", "email", "password"})
+    "first_name", "last_name", "nick_name", "avatar_img_id", "email", "created_at"})
 
     for _, mockUser := range mockUsers {
         rows.AddRow(mockUser.Id, mockUser.FirstName, mockUser.LastName, mockUser.NickName,
-            mockUser.Avatar, mockUser.Email, mockUser.Password)
+            mockUser.Avatar, mockUser.Email, mockUser.CreatedAt)
     }
     
-    mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "users"`)).WillReturnRows(rows)
+    mock.ExpectQuery(regexp.QuoteMeta(`SELECT "users"."id","users"."first_name",`+
+                `"users"."last_name","users"."nick_name","users"."avatar_img_id",`+
+                `"users"."email","users"."created_at" FROM "users"`)).WillReturnRows(rows)
 
 	repository := userRep.New(gdb)
 
@@ -270,27 +277,6 @@ func TestRepositorySelectAllUsers(t *testing.T) {
     err = mock.ExpectationsWereMet()
     assert.NoError(t, err)
 }
-
-
-
-package postgres_test
-
-import (
-	"regexp"
-	"testing"
-
-	"gopkg.in/DATA-DOG/go-sqlmock.v1"
-
-	"github.com/bxcodec/faker"
-	// friendsRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/repository/postgres"
-	// "github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
-)
 
 func TestRepositoryAddFriend(t *testing.T) {
 	db, mock, err := sqlmock.New()
@@ -319,12 +305,12 @@ func TestRepositoryAddFriend(t *testing.T) {
 	assert.NoError(t, err)
 
     mock.ExpectExec(regexp.QuoteMeta(
-    `INSERT INTO "friends" ("id1","id2") VALUES ($1,$2)`)).WithArgs(mockFriends.Id1,
+    `INSERT INTO "friends" ("user_id1","user_id2") VALUES ($1,$2)`)).WithArgs(mockFriends.Id1,
         mockFriends.Id2).WillReturnResult(sqlmock.NewResult(int64(1), 1))
 
     mock.ExpectCommit()
 
-	repository := friendsRep.New(gdb)
+	repository := userRep.New(gdb)
 
     err = repository.AddFriend(mockFriends)
     require.NoError(t, err)
@@ -360,12 +346,12 @@ func TestRepositoryDeleteFriend(t *testing.T) {
 	assert.NoError(t, err)
 
     mock.ExpectExec(regexp.QuoteMeta(
-    `DELETE FROM "friends" WHERE id1 = $1 AND id2 = $2`)).WithArgs(mockFriends.Id1,
+    `DELETE FROM "friends" WHERE user_id1 = $1 AND user_id2 = $2`)).WithArgs(mockFriends.Id1,
         mockFriends.Id2).WillReturnResult(sqlmock.NewResult(int64(1), 1))
 
     mock.ExpectCommit()
 
-	repository := friendsRep.New(gdb)
+	repository := userRep.New(gdb)
 
     err = repository.DeleteFriend(mockFriends)
     require.NoError(t, err)
@@ -373,6 +359,7 @@ func TestRepositoryDeleteFriend(t *testing.T) {
     err = mock.ExpectationsWereMet()
     assert.NoError(t, err)
 }
+
 func TestRepositoryCheckFriends(t *testing.T) {
 	db, mock, err := sqlmock.New()
     if err != nil {
@@ -400,10 +387,10 @@ func TestRepositoryCheckFriends(t *testing.T) {
     expectedCount := 1
 
     mock.ExpectQuery(regexp.QuoteMeta(
-    `SELECT count(*) FROM "friends" WHERE id1 = $1 AND id2 = $2`)).WithArgs(mockFriends.Id1,
+    `SELECT count(*) FROM "friends" WHERE user_id1 = $1 AND user_id2 = $2`)).WithArgs(mockFriends.Id1,
         mockFriends.Id2).WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(expectedCount))
 
-	repository := friendsRep.New(gdb)
+	repository := userRep.New(gdb)
 
     friendSExist, err := repository.CheckFriends(mockFriends)
     require.NoError(t, err)
@@ -437,14 +424,14 @@ func TestRepositorySelectFriends(t *testing.T) {
 	err = faker.FakeData(&mockFriends)
 	assert.NoError(t, err)
 
-    userId := 1
+    var userId uint64 = 1
 
     rows := sqlmock.NewRows([]string{"id",
-    "first_name", "last_name", "nick_name", "avatar_img_id", "email"})
+    "first_name", "last_name", "nick_name", "avatar_img_id", "email", "created_at"})
 
     for _, mockFriend := range mockFriends {
         rows.AddRow(mockFriend.Id, mockFriend.FirstName, mockFriend.LastName, mockFriend.NickName,
-            mockFriend.Avatar, mockFriend.Email)
+            mockFriend.Avatar, mockFriend.Email, mockFriend.CreatedAt)
     }
 
     for i := range mockFriends {
@@ -452,10 +439,11 @@ func TestRepositorySelectFriends(t *testing.T) {
     }
     
     mock.ExpectQuery(regexp.QuoteMeta(`SELECT "users"."id","users"."first_name",`+
-    `"users"."last_name","users"."nick_name","users"."avatar_img_id","users"."email"`+
-    ` FROM "users" JOIN friends ON friends.id2 = users.id WHERE id1 = $1`)).WillReturnRows(rows)
+    `"users"."last_name","users"."nick_name","users"."avatar_img_id","users"."email",`+
+    `"users"."created_at" FROM "users" JOIN friends ON friends.user_id2 = users.id WHERE`+
+    ` user_id1 = $1`)).WillReturnRows(rows)
 
-	repository := friendsRep.New(gdb)
+	repository := userRep.New(gdb)
 
     actualFriends, err := repository.SelectFriends(userId)
     require.NoError(t, err)

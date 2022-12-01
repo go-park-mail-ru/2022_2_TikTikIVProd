@@ -12,6 +12,27 @@ type RepositoryI struct {
 	mock.Mock
 }
 
+// CheckLikePost provides a mock function with given fields: id, userID
+func (_m *RepositoryI) CheckLikePost(id uint64, userID uint64) (bool, error) {
+	ret := _m.Called(id, userID)
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(uint64, uint64) bool); ok {
+		r0 = rf(id, userID)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(uint64, uint64) error); ok {
+		r1 = rf(id, userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // CreatePost provides a mock function with given fields: u
 func (_m *RepositoryI) CreatePost(u *models.Post) error {
 	ret := _m.Called(u)
@@ -86,6 +107,27 @@ func (_m *RepositoryI) GetCommunityPosts(userId uint64) ([]*models.Post, error) 
 	return r0, r1
 }
 
+// GetCountLikesPost provides a mock function with given fields: id
+func (_m *RepositoryI) GetCountLikesPost(id uint64) (uint64, error) {
+	ret := _m.Called(id)
+
+	var r0 uint64
+	if rf, ok := ret.Get(0).(func(uint64) uint64); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Get(0).(uint64)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(uint64) error); ok {
+		r1 = rf(id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetPostById provides a mock function with given fields: id
 func (_m *RepositoryI) GetPostById(id uint64) (*models.Post, error) {
 	ret := _m.Called(id)
@@ -130,6 +172,34 @@ func (_m *RepositoryI) GetUserPosts(userId uint64) ([]*models.Post, error) {
 	}
 
 	return r0, r1
+}
+
+// LikePost provides a mock function with given fields: id, userId
+func (_m *RepositoryI) LikePost(id uint64, userId uint64) error {
+	ret := _m.Called(id, userId)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(uint64, uint64) error); ok {
+		r0 = rf(id, userId)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// UnLikePost provides a mock function with given fields: id, userId
+func (_m *RepositoryI) UnLikePost(id uint64, userId uint64) error {
+	ret := _m.Called(id, userId)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(uint64, uint64) error); ok {
+		r0 = rf(id, userId)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // UpdatePost provides a mock function with given fields: post

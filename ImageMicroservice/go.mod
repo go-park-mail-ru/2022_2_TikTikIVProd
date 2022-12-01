@@ -3,10 +3,12 @@ module github.com/go-park-mail-ru/2022_2_TikTikIVProd/ImageMicroservice
 go 1.19
 
 require (
+	github.com/bxcodec/faker v2.0.1+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.1
 	google.golang.org/grpc v1.51.0
 	google.golang.org/protobuf v1.28.1
+	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0
 	gorm.io/driver/postgres v1.4.5
 	gorm.io/gorm v1.24.2
 )

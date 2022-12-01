@@ -4,10 +4,10 @@ import (
 	"testing"
 
 	"github.com/bxcodec/faker"
-	// friendsMocks "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/repository/mocks"
-	// friendsUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/friends/usecase"
-	// userMocks "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository/mocks"
-	// "github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
+	friendsMocks "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/friends/repository/mocks"
+	friendsUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/friends/usecase"
+	userMocks "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/user/repository/mocks"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -29,7 +29,7 @@ type TestCaseDeleteFriend struct {
 }
 
 type TestCaseSelectFriends struct {
-	ArgData int
+	ArgData uint64
 	ExpectedRes []models.User
 	Error error
 }
@@ -145,7 +145,7 @@ func TestUsecaseSelectFriends(t *testing.T) {
 	err := faker.FakeData(&mockFriends)
 	assert.NoError(t, err)
 
-	userId := 1
+	var userId uint64 = 1
 
 	mockFriendsRepo := friendsMocks.NewRepositoryI(t)
 	mockUserRepo := userMocks.NewRepositoryI(t)

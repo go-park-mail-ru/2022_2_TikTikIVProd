@@ -4,16 +4,16 @@ import (
 	"testing"
 
 	"github.com/bxcodec/faker"
-	// userMocks "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository/mocks"
-	// userUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/usecase"
-	// "github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
+	userMocks "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/user/repository/mocks"
+	userUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/user/usecase"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 type TestCaseSelectUser struct {
-	ArgData int
+	ArgData uint64
 	ExpectedRes *models.User
 	Error error
 }

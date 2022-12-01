@@ -9,9 +9,9 @@ import (
 	"testing"
 
 	"github.com/bxcodec/faker"
-	// postDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/delivery"
-	// "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/usecase/mocks"
-	// "github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
+	postDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/post/delivery"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/post/usecase/mocks"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -19,26 +19,27 @@ import (
 
 type TestCaseGetPost struct {
 	ArgData    string
+	ArgDataContext uint64
 	Error      error
 	StatusCode int
 }
 
 type TestCaseCreatePost struct {
 	ArgDataBody    string
-	ArgDataContext int
+	ArgDataContext uint64
 	Error          error
 	StatusCode     int
 }
 
 type TestCaseDeletePost struct {
-	ArgDataContext int
+	ArgDataContext uint64
 	Error          error
 	StatusCode     int
-	ID             int
+	ID             uint64
 }
 
 type TestCaseFeed struct {
-	ArgDataContext int
+	ArgDataContext uint64
 	Error          error
 	StatusCode     int
 }
@@ -52,7 +53,9 @@ func TestDeliveryGetPost(t *testing.T) {
 
 	mockUCase := mocks.NewPostUseCaseI(t)
 
-	mockUCase.On("GetPostById", post.ID).Return(&post, nil)
+	var userId uint64 = 1
+
+	mockUCase.On("GetPostById", post.ID, userId).Return(&post, nil)
 
 	handler := postDelivery.Delivery{
 		PUsecase: mockUCase,
@@ -63,15 +66,24 @@ func TestDeliveryGetPost(t *testing.T) {
 
 	cases := map[string]TestCaseGetPost{
 		"success": {
-			ArgData:    strconv.Itoa(post.ID),
+			ArgData:    strconv.Itoa(int(post.ID)),
+			ArgDataContext: userId,
 			Error:      nil,
 			StatusCode: http.StatusOK,
 		},
 		"bad_request": {
 			ArgData: postIdBadRequest,
+			ArgDataContext: userId,
 			Error: &echo.HTTPError{
-				Code:    http.StatusNotFound,
-				Message: "Post not found",
+				Code:    http.StatusBadRequest,
+				Message: "bad request",
+			},
+		},
+		"invalid_context": {
+			ArgData:   strconv.Itoa(int(post.ID)),
+			Error: &echo.HTTPError{
+				Code: http.StatusInternalServerError,
+				Message: models.ErrInternalServerError.Error(),
 			},
 		},
 	}
@@ -86,6 +98,9 @@ func TestDeliveryGetPost(t *testing.T) {
 			c.SetPath("/post/:id")
 			c.SetParamNames("id")
 			c.SetParamValues(test.ArgData)
+			if name != "invalid_context" {
+				c.Set("user_id", test.ArgDataContext)
+			}
 
 			err := handler.GetPost(c)
 			require.Equal(t, test.Error, err)
@@ -218,8 +233,8 @@ func TestDeliveryUpdatePost(t *testing.T) {
 }
 
 func TestDeliveryDeletePost(t *testing.T) {
-	validPostID := 1
-	validUserID := 1
+	var validPostID uint64 = 1
+	var validUserID uint64 = 1
 
 	mockUCase := mocks.NewPostUseCaseI(t)
 	mockUCase.On("DeletePost", validPostID, validUserID).Return(nil)
@@ -238,13 +253,13 @@ func TestDeliveryDeletePost(t *testing.T) {
 			StatusCode:     http.StatusNoContent,
 			ID:             validPostID,
 		},
-		//"bad_request": {
-		//	ArgDataContext: mockPostValid.UserID,
-		//	Error: &echo.HTTPError{
-		//		Code:    http.StatusBadRequest,
-		//		Description: models.ErrBadRequest.Error(),
-		//	},
-		//}
+		"invalid_context": {
+			ID:   validPostID,
+			Error: &echo.HTTPError{
+				Code: http.StatusInternalServerError,
+				Message: models.ErrInternalServerError.Error(),
+			},
+		},
 	}
 
 	for name, test := range cases {
@@ -256,8 +271,10 @@ func TestDeliveryDeletePost(t *testing.T) {
 			c := e.NewContext(req, rec)
 			c.SetPath("/post/:id")
 			c.SetParamNames("id")
-			c.SetParamValues(strconv.Itoa(test.ID))
-			c.Set("user_id", test.ArgDataContext)
+			c.SetParamValues(strconv.Itoa(int(test.ID)))
+			if name != "invalid_context" {
+				c.Set("user_id", test.ArgDataContext)
+			}
 
 			err := handler.DeletePost(c)
 			require.Equal(t, test.Error, err)
@@ -272,10 +289,10 @@ func TestDeliveryDeletePost(t *testing.T) {
 }
 
 func TestDeliveryFeed(t *testing.T) {
-	validUserID := 1
+	var validUserID uint64 = 1
 
 	mockUCase := mocks.NewPostUseCaseI(t)
-	mockUCase.On("GetAllPosts").Return([]*models.Post{}, nil)
+	mockUCase.On("GetAllPosts", validUserID).Return([]*models.Post{}, nil)
 
 	handler := postDelivery.Delivery{
 		PUsecase: mockUCase,

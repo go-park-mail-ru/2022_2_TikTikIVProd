@@ -7,8 +7,8 @@ import (
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 
 	"github.com/bxcodec/faker"
-	// chatRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/chat/repository/postgres"
-	// "github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
+	chatRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/ChatMicroservice/internal/chat/repository/postgres"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/ChatMicroservice/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -45,7 +45,7 @@ func TestRepositoryCreateDialog(t *testing.T) {
 
     mockDialog.Id = 1
 
-    mockId := 1
+    var mockId uint64 = 1
 
     mock.ExpectQuery(regexp.QuoteMeta(
     `INSERT INTO "chat" ("user_id1","user_id2","id") VALUES ($1,$2,$3) RETURNING "id"`)).WithArgs(
@@ -92,10 +92,10 @@ func TestRepositoryCreateMessage(t *testing.T) {
 
     mockMessage.ID = 1
 
-    mockId := 1
+    var mockId uint64 = 1
 
     mock.ExpectQuery(regexp.QuoteMeta(
-    `INSERT INTO "message" ("chat_id","sender_id","receiver_id","body","created_at","id")`+
+    `INSERT INTO "message" ("chat_id","sender_id","receiver_id","text","created_at","id")`+
 		` VALUES ($1,$2,$3,$4,$5,$6) RETURNING "id"`)).WithArgs(
 		mockMessage.DialogID, mockMessage.SenderID, mockMessage.ReceiverID, mockMessage.Body,
 		mockMessage.CreatedAt, mockMessage.ID).
@@ -223,7 +223,7 @@ func TestRepositorySelectAllDialogs(t *testing.T) {
 	err = faker.FakeData(&mockDialogs)
 	assert.NoError(t, err)
 
-	userId := 1
+	var userId uint64 = 1
 
     rows := sqlmock.NewRows([]string{"id", "user_id1", "user_id2"})
 
@@ -270,9 +270,9 @@ func TestRepositorySelectMessages(t *testing.T) {
 	err = faker.FakeData(&mockMessages)
 	assert.NoError(t, err)
 
-	chatId := 1
+	var chatId uint64 = 1
 
-    rows := sqlmock.NewRows([]string{"id", "chat_id","sender_id","receiver_id","body","created_at"})
+    rows := sqlmock.NewRows([]string{"id", "chat_id","sender_id","receiver_id","text","created_at"})
 
     for _, mockMessage := range mockMessages {
         rows.AddRow(mockMessage.ID, mockMessage.DialogID, mockMessage.SenderID,

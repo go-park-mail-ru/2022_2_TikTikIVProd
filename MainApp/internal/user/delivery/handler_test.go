@@ -7,11 +7,12 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/bxcodec/faker"
-	// userDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/delivery"
-	// "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/usecase/mocks"
-	// "github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
+	userDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/user/delivery"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/user/usecase/mocks"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -30,7 +31,7 @@ type TestCaseGetUsers struct {
 
 type TestCaseUpdateUser struct {
 	ArgDataBody string
-	ArgDataContext int
+	ArgDataContext uint64
 	Error error
 	StatusCode int
 }
@@ -42,8 +43,8 @@ func TestDeliveryGetProfile(t *testing.T) {
 	user.Id = 1
 
 	userIdBadRequest := "hgcv"
-	userIdNotFound := 2
-	userIdInternalErr := 3
+	var userIdNotFound uint64 = 2
+	var userIdInternalErr uint64 = 3
 
 	mockUCase := mocks.NewUseCaseI(t)
 
@@ -60,7 +61,7 @@ func TestDeliveryGetProfile(t *testing.T) {
 
 	cases := map[string]TestCaseGetProfile {
 		"success": {
-			ArgData: strconv.Itoa(user.Id),
+			ArgData: strconv.Itoa(int(user.Id)),
 			Error: nil,
 			StatusCode: http.StatusOK,
 		},
@@ -72,14 +73,14 @@ func TestDeliveryGetProfile(t *testing.T) {
 			},
 		},
 		"not_found": {
-			ArgData: strconv.Itoa(userIdNotFound),
+			ArgData: strconv.Itoa(int(userIdNotFound)),
 			Error: &echo.HTTPError{
 				Code: http.StatusNotFound,
 				Message: models.ErrNotFound.Error(),
 			},
 		},
 		"internal_error": {
-			ArgData: strconv.Itoa(userIdInternalErr),
+			ArgData: strconv.Itoa(int(userIdInternalErr)),
 			Error: &echo.HTTPError{
 				Code: http.StatusInternalServerError,
 				Message: models.ErrInternalServerError.Error(),
@@ -115,6 +116,7 @@ func TestDeliveryUpdateUser(t *testing.T) {
 	err := faker.FakeData(&mockUser)
 	assert.NoError(t, err)
 	mockUser.Id = 1
+	mockUser.CreatedAt = time.Unix(3, 3)
 
 	jsonUser, err := json.Marshal(mockUser)
 	assert.NoError(t, err)
@@ -122,7 +124,8 @@ func TestDeliveryUpdateUser(t *testing.T) {
 	var mockUserNotFound models.User
 	err = faker.FakeData(&mockUserNotFound)
 	assert.NoError(t, err)
-	mockUser.Id = 2
+	mockUserNotFound.Id = 2
+	mockUserNotFound.CreatedAt = time.Unix(3, 3)
 
 	jsonUserNotFound, err := json.Marshal(mockUserNotFound)
 	assert.NoError(t, err)
@@ -130,7 +133,8 @@ func TestDeliveryUpdateUser(t *testing.T) {
 	var mockUserInternalErr models.User
 	err = faker.FakeData(&mockUserInternalErr)
 	assert.NoError(t, err)
-	mockUser.Id = 3
+	mockUserInternalErr.Id = 3
+	mockUserInternalErr.CreatedAt = time.Unix(3, 3)
 
 	jsonUserInternalErr, err := json.Marshal(mockUserInternalErr)
 	assert.NoError(t, err)

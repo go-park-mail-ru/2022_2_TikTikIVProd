@@ -4,17 +4,17 @@ import (
 	"testing"
 
 	"github.com/bxcodec/faker"
-	// postMocks "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/repository/mocks"
-	// imageMocks "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/image/repository/mocks"
-	// userMocks "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/user/repository/mocks"
-	// postUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/internal/post/usecase"
-	// "github.com/go-park-mail-ru/2022_2_TikTikIVProd/models"
+	postMocks "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/post/repository/mocks"
+	imageMocks "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/image/repository/mocks"
+	userMocks "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/user/repository/mocks"
+	postUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/post/usecase"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 type TestCaseGetPostById struct {
-	ArgData int
+	ArgData uint64
 	ExpectedRes *models.Post
 	Error error
 }
@@ -43,9 +43,13 @@ func TestUsecaseGetPostById(t *testing.T) {
 	mockImageRepo := imageMocks.NewRepositoryI(t)
 	mockUserRepo := userMocks.NewRepositoryI(t)
 
+	var userId uint64 = mockPost.UserID
+
 	mockPostRepo.On("GetPostById", mockPost.ID).Return(&mockPost, nil)
 	mockImageRepo.On("GetPostImages", mockPost.ID).Return(mockImages, nil)
 	mockUserRepo.On("SelectUserById", mockPost.UserID).Return(&mockUser, nil)
+	mockPostRepo.On("GetCountLikesPost", mockPost.ID).Return(uint64(50), nil)
+	mockPostRepo.On("CheckLikePost", mockPost.ID, mockPost.UserID).Return(true, nil)
 
 	useCase := postUsecase.NewPostUsecase(mockPostRepo, mockImageRepo, mockUserRepo)
 
@@ -59,7 +63,7 @@ func TestUsecaseGetPostById(t *testing.T) {
 
 	for name, test := range cases {
 		t.Run(name, func(t *testing.T) {
-			post, err := useCase.GetPostById(test.ArgData)
+			post, err := useCase.GetPostById(test.ArgData, userId)
 			require.Equal(t, test.Error, err)
 
 			if err == nil {
@@ -98,9 +102,13 @@ func TestUsecaseGetUserPosts(t *testing.T) {
 	mockImageRepo := imageMocks.NewRepositoryI(t)
 	mockUserRepo := userMocks.NewRepositoryI(t)
 
+	var userId uint64 = mockPost.UserID
+
 	mockPostRepo.On("GetUserPosts", mockPost.UserID).Return(mockPosts, nil)
 	mockImageRepo.On("GetPostImages", mockPost.ID).Return(mockImages, nil)
 	mockUserRepo.On("SelectUserById", mockPost.UserID).Return(&mockUser, nil)
+	mockPostRepo.On("GetCountLikesPost", mockPost.ID).Return(uint64(50), nil)
+	mockPostRepo.On("CheckLikePost", mockPost.ID, mockPost.UserID).Return(true, nil)
 
 	useCase := postUsecase.NewPostUsecase(mockPostRepo, mockImageRepo, mockUserRepo)
 
@@ -114,7 +122,7 @@ func TestUsecaseGetUserPosts(t *testing.T) {
 
 	for name, test := range cases {
 		t.Run(name, func(t *testing.T) {
-			_, err := useCase.GetUserPosts(test.ArgData)
+			_, err := useCase.GetUserPosts(test.ArgData, userId)
 			require.Equal(t, test.Error, err)
 		})
 	}

@@ -19,7 +19,7 @@ import (
 )
 
 type TestCaseGetAllDialogs struct {
-	ArgDataContext int
+	ArgDataContext uint64
 	Error          error
 	StatusCode     int
 }
@@ -207,7 +207,7 @@ func TestDeliveryGetAllDialogs(t *testing.T) {
 
 	mockUCase := mocks.NewUseCaseI(t)
 
-	userId := 1
+	var userId uint64 = 1
 
 	mockUCase.On("SelectAllDialogs", userId).Return(dialogs, nil)
 	handler := chatDelivery.Delivery{
@@ -262,7 +262,7 @@ func TestDeliverySendMessage(t *testing.T) {
 
 	mockUCase := mocks.NewUseCaseI(t)
 
-	mockUCase.On("SendMessage", mock.AnythingOfType("*models.Description")).Return(nil)
+	mockUCase.On("SendMessage", mock.AnythingOfType("*models.Message")).Return(nil)
 	handler := chatDelivery.Delivery{
 		ChatUC: mockUCase,
 	}

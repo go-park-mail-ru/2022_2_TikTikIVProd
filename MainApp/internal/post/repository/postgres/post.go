@@ -1,7 +1,6 @@
 package postgres
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/post/repository"
@@ -125,7 +124,6 @@ func (dbPost *postRepository) CreatePost(p *models.Post) error {
 
 	if len(postImages) > 0 {
 		tx = dbPost.db.Create(&postImages)
-		fmt.Println(postImages)
 		if tx.Error != nil {
 			return errors.Wrap(tx.Error, "postRepository.CreatePost error while insert relation")
 		}
@@ -136,7 +134,7 @@ func (dbPost *postRepository) CreatePost(p *models.Post) error {
 
 func (dbPost *postRepository) GetPostById(id uint64) (*models.Post, error) {
 	var post Post
-	tx := dbPost.db.First(&post, id)
+	tx := dbPost.db.Where("id = ?", id).Take(&post)
 
 	if tx.Error != nil {
 		return nil, errors.Wrap(tx.Error, "postRepository.GetPostById error")
