@@ -15,23 +15,129 @@ services:
       POSTGRES_PASSWORD: postgres
 
   redis:
-    image: redis:alpine
-    command: redis-server --appendonly yes --replica-read-only no
+    image: redis:latest
+    command: --requirepass "ws_redis_password"
     ports:
       - "6379:6379"
     networks:
       - mynetwork
 
   server:
-    build: .
+    build: ./MainApp
     restart: always
+    container_name: server
+    volumes:
+      - ./images:/images
     depends_on:
       - ws_pg
-      - redis
+      - auth_mvs
+      - image_mvs
+      - chat_mvs
+      - user_mvs
     ports:
       - "8080:8080"
     networks:
       - mynetwork
 
+  auth_mvs:
+    build: ./AuthMicroservice
+    restart: always
+    volumes:
+      - ./images:/images
+    depends_on:
+      - redis
+    ports:
+      - "8081:8081"
+    networks:
+      - mynetwork
+
+  image_mvs:
+    build: ./ImageMicroservice
+    restart: always
+    volumes:
+      - ./images:/images
+    depends_on:
+      - ws_pg
+    ports:
+      - "8082:8082"
+    networks:
+      - mynetwork
+
+  chat_mvs:
+    build: ./ChatMicroservice
+    restart: always
+    volumes:
+      - ./images:/images
+    depends_on:
+      - ws_pg
+    ports:
+      - "8083:8083"
+    networks:
+      - mynetwork
+
+  user_mvs:
+    build: ./UserMicroservice
+    restart: always
+    volumes:
+      - ./images:/images
+    depends_on:
+      - ws_pg
+    ports:
+      - "8084:8084"
+    networks:
+      - mynetwork
+  grafana:
+    image: "grafana/grafana-oss"
+    restart: always
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    depends_on:
+      - server
+    ports:
+      - "3000:3000"
+    networks:
+      - mynetwork
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - 9090:9090
+    restart: always
+    networks:
+      - mynetwork
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    expose:
+      - 9100
+    ports:
+      - 9100:9100
+    networks:
+      - mynetwork
+
+
+
 networks:
   mynetwork:
+
+volumes:
+  prometheus_data:
+  grafana-storage:
