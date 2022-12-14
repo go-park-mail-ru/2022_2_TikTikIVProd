@@ -28,6 +28,7 @@ services:
     container_name: server
     volumes:
       - ./images:/images
+      - ./stickers:/stickers
     depends_on:
       - ws_pg
       - auth_mvs
