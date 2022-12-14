@@ -87,6 +87,7 @@ services:
       - "8084:8084"
     networks:
       - mynetwork
+      
   grafana:
     image: "grafana/grafana-oss"
     restart: always
