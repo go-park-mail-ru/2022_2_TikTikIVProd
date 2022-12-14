@@ -12,9 +12,9 @@ import (
 	"net"
 )
 
-// var testCfgPg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
+var testCfgPg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
 
-var prodCfgPg = postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}
+// var prodCfgPg = postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}
 
 func main() {
 	lis, err := net.Listen("tcp", ":8084")
@@ -22,7 +22,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	db, err := gorm.Open(postgres.New(prodCfgPg),
+	db, err := gorm.Open(postgres.New(testCfgPg),
 		&gorm.Config{})
 	if err != nil {
 		log.Fatal(err)

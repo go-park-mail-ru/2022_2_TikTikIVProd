@@ -19,6 +19,7 @@ import (
 	chatUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/chat/usecase"
 	_communitiesDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/communities/delivery"
 	communitiesRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/communities/repository/postgres"
+	stickersRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/stickers/repository/postgres"
 	communitiesUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/communities/usecase"
 	_friendsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/friends/delivery"
 	friendsRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/friends/repository/microservice"
@@ -30,8 +31,10 @@ import (
 	postsRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/post/repository/postgres"
 	postsUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/post/usecase"
 	_usersDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/user/delivery"
+	_stickersDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/stickers/delivery"
 	usersRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/user/repository/microservice"
 	usersUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/user/usecase"
+	stickersUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/stickers/usecase"
 	auth "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/proto/auth"
 	chat "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/proto/chat"
 	image "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/proto/image"
@@ -101,6 +104,7 @@ func main() {
 	imageDB := imagesRepository.New(imageManager)
 	chatDB := chatRep.New(chatManager)
 	communitiesDb := communitiesRep.NewCommunitiesRepository(db)
+	stickersDb := stickersRep.New(db)
 
 	postsUC := postsUsecase.NewPostUsecase(postDB, imageDB, usersDB)
 	authUC := authUseCase.New(authDB, usersDB)
@@ -109,6 +113,7 @@ func main() {
 	imageUC := imageUsecase.NewImageUsecase(imageDB)
 	chatUC := chatUseCase.New(chatDB)
 	communitiesUC := communitiesUseCase.New(communitiesDb)
+	stickersUC := stickersUseCase.NewStickerUsecase(stickersDb)
 
 	e := echo.New()
 
@@ -140,7 +145,7 @@ func main() {
 
 	authMiddleware := middleware.NewMiddleware(authUC)
 	e.Use(authMiddleware.Auth)
-	// e.Use(authMiddleware.CSRF)
+	e.Use(authMiddleware.CSRF)
 
 	_postsDelivery.NewDelivery(e, postsUC)
 	_authDelivery.NewDelivery(e, authUC)
@@ -149,6 +154,7 @@ func main() {
 	_friendsDelivery.NewDelivery(e, friendsUC)
 	_chatDelivery.NewDelivery(e, chatUC)
 	_communitiesDelivery.NewDelivery(e, communitiesUC)
+	_stickersDelivery.NewDelivery(e, stickersUC)
 
 	s := server.NewServer(e)
 	if err := s.Start(); err != nil {

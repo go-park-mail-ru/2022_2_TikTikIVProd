@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"time"
+
 	imageRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/image/repository"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/post/repository"
 	userRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/user/repository"
@@ -18,6 +20,10 @@ type PostUseCaseI interface {
 	DeletePost(id uint64, userId uint64) error
 	LikePost(id uint64, userId uint64) error
 	UnLikePost(id uint64, userId uint64) error
+	GetComments(id uint64) ([]*models.Comment, error)
+	AddComment(comment *models.Comment) error
+	UpdateComment(comment *models.Comment) error
+	DeleteComment(id uint64, userId uint64) error
 }
 
 type postsUsecase struct {
@@ -68,6 +74,57 @@ func (p *postsUsecase) DeletePost(id uint64, userId uint64) error {
 
 	if err != nil {
 		return errors.Wrap(err, "post repository error in delete")
+	}
+
+	return nil
+}
+
+func (p *postsUsecase) DeleteComment(id uint64, userId uint64) error {
+	existedComment, err := p.postsRepo.GetCommentById(id)
+	if err != nil {
+		return err
+	}
+
+	if existedComment == nil {
+		return models.ErrNotFound
+	}
+
+	if existedComment.UserID != userId {
+		return errors.New("Permission denied")
+	}
+
+	err = p.postsRepo.DeleteComment(id)
+	if err != nil {
+		return errors.Wrap(err, "post repository error in delete comment")
+	}
+
+	return nil
+}
+
+func (p *postsUsecase) UpdateComment(comment *models.Comment) error {
+	existedComment, err := p.postsRepo.GetCommentById(comment.ID)
+	if err != nil {
+		return err
+	}
+
+	if existedComment == nil {
+		return models.ErrNotFound
+	}
+
+	if existedComment.UserID != comment.UserID {
+		return errors.New("Permission denied")
+	}
+
+	err = p.postsRepo.UpdateComment(comment)
+
+	if err != nil {
+		return errors.Wrap(err, "Error in func postsUsecase.UpdateComment")
+	}
+
+	err = addAuthorForComment(comment, p.userRepo)
+
+	if err != nil {
+		return errors.Wrap(err, "Error in func postsUsecase.UpdateComment")
 	}
 
 	return nil
@@ -127,6 +184,26 @@ func (p *postsUsecase) CreatePost(post *models.Post) error {
 	post.UserFirstName = user.FirstName
 	post.UserLastName = user.LastName
 	post.AvatarID = user.Avatar
+
+	return nil
+}
+
+func (p *postsUsecase) AddComment(comment *models.Comment) error {
+	comment.CreateDate = time.Now()
+
+	err := p.postsRepo.AddComment(comment)
+	if err != nil {
+		return errors.Wrap(err, "Error in func postsUsecase.AddComment")
+	}
+
+	user, err := p.userRepo.SelectUserById(comment.UserID)
+	if err != nil {
+		return errors.Wrap(err, "Error in func postsUsecase.AddComment")
+	}
+
+	comment.UserFirstName = user.FirstName
+	comment.UserLastName = user.LastName
+	comment.AvatarID = user.Avatar
 
 	return nil
 }
@@ -293,3 +370,39 @@ func (p *postsUsecase) GetCommunityPosts(communityID uint64, userId uint64) ([]*
 
 	return posts, nil
 }
+
+func (p *postsUsecase) GetComments(postId uint64) ([]*models.Comment, error) {
+	_, err := p.postsRepo.GetPostById(postId)
+	if err != nil {
+		return nil, models.ErrNotFound
+	}
+	
+	comments, err := p.postsRepo.GetComments(postId)
+	if err != nil {
+		return nil, errors.Wrap(err, "Error in func postsUsecase.GetComments")
+	}
+
+	for idx := range comments {
+		err = addAuthorForComment(comments[idx], p.userRepo)
+		if err != nil {
+			return nil, errors.Wrap(err, "postsUsecase.GetComments error while add additional fields")
+		}
+	}
+
+	return comments, nil
+}
+
+func addAuthorForComment(comment *models.Comment, repUsers userRep.RepositoryI) error {
+	author, err := repUsers.SelectUserById(comment.UserID)
+
+	if err != nil {
+		return errors.Wrap(err, "Error in func addAuthorForComment")
+	}
+
+	comment.UserLastName = author.LastName
+	comment.UserFirstName = author.FirstName
+	comment.AvatarID = author.Avatar
+
+	return nil
+}
+
