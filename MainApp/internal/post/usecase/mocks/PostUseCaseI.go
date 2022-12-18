@@ -12,6 +12,20 @@ type PostUseCaseI struct {
 	mock.Mock
 }
 
+// AddComment provides a mock function with given fields: comment
+func (_m *PostUseCaseI) AddComment(comment *models.Comment) error {
+	ret := _m.Called(comment)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*models.Comment) error); ok {
+		r0 = rf(comment)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // CreatePost provides a mock function with given fields: p
 func (_m *PostUseCaseI) CreatePost(p *models.Post) error {
 	ret := _m.Called(p)
@@ -19,6 +33,20 @@ func (_m *PostUseCaseI) CreatePost(p *models.Post) error {
 	var r0 error
 	if rf, ok := ret.Get(0).(func(*models.Post) error); ok {
 		r0 = rf(p)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// DeleteComment provides a mock function with given fields: id, userId
+func (_m *PostUseCaseI) DeleteComment(id uint64, userId uint64) error {
+	ret := _m.Called(id, userId)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(uint64, uint64) error); ok {
+		r0 = rf(id, userId)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -56,6 +84,29 @@ func (_m *PostUseCaseI) GetAllPosts(userId uint64) ([]*models.Post, error) {
 	var r1 error
 	if rf, ok := ret.Get(1).(func(uint64) error); ok {
 		r1 = rf(userId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetComments provides a mock function with given fields: id
+func (_m *PostUseCaseI) GetComments(id uint64) ([]*models.Comment, error) {
+	ret := _m.Called(id)
+
+	var r0 []*models.Comment
+	if rf, ok := ret.Get(0).(func(uint64) []*models.Comment); ok {
+		r0 = rf(id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*models.Comment)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(uint64) error); ok {
+		r1 = rf(id)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -153,6 +204,20 @@ func (_m *PostUseCaseI) UnLikePost(id uint64, userId uint64) error {
 	var r0 error
 	if rf, ok := ret.Get(0).(func(uint64, uint64) error); ok {
 		r0 = rf(id, userId)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// UpdateComment provides a mock function with given fields: comment
+func (_m *PostUseCaseI) UpdateComment(comment *models.Comment) error {
+	ret := _m.Called(comment)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*models.Comment) error); ok {
+		r0 = rf(comment)
 	} else {
 		r0 = ret.Error(0)
 	}

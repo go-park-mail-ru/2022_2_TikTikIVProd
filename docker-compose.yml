@@ -28,6 +28,8 @@ services:
     container_name: server
     volumes:
       - ./files:/files
+      - ./images:/images
+      - ./stickers:/stickers
     depends_on:
       - ws_pg
       - auth_mvs
@@ -80,6 +82,7 @@ services:
       - "8084:8084"
     networks:
       - mynetwork
+      
   grafana:
     image: "grafana/grafana-oss"
     restart: always

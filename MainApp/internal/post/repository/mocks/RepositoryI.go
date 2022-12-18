@@ -12,6 +12,20 @@ type RepositoryI struct {
 	mock.Mock
 }
 
+// AddComment provides a mock function with given fields: comment
+func (_m *RepositoryI) AddComment(comment *models.Comment) error {
+	ret := _m.Called(comment)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*models.Comment) error); ok {
+		r0 = rf(comment)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // CheckLikePost provides a mock function with given fields: id, userID
 func (_m *RepositoryI) CheckLikePost(id uint64, userID uint64) (bool, error) {
 	ret := _m.Called(id, userID)
@@ -33,13 +47,27 @@ func (_m *RepositoryI) CheckLikePost(id uint64, userID uint64) (bool, error) {
 	return r0, r1
 }
 
-// CreatePost provides a mock function with given fields: u
-func (_m *RepositoryI) CreatePost(u *models.Post) error {
-	ret := _m.Called(u)
+// CreatePost provides a mock function with given fields: p
+func (_m *RepositoryI) CreatePost(p *models.Post) error {
+	ret := _m.Called(p)
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(*models.Post) error); ok {
-		r0 = rf(u)
+		r0 = rf(p)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// DeleteComment provides a mock function with given fields: id
+func (_m *RepositoryI) DeleteComment(id uint64) error {
+	ret := _m.Called(id)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(uint64) error); ok {
+		r0 = rf(id)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -77,6 +105,52 @@ func (_m *RepositoryI) GetAllPosts() ([]*models.Post, error) {
 	var r1 error
 	if rf, ok := ret.Get(1).(func() error); ok {
 		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetCommentById provides a mock function with given fields: id
+func (_m *RepositoryI) GetCommentById(id uint64) (*models.Comment, error) {
+	ret := _m.Called(id)
+
+	var r0 *models.Comment
+	if rf, ok := ret.Get(0).(func(uint64) *models.Comment); ok {
+		r0 = rf(id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.Comment)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(uint64) error); ok {
+		r1 = rf(id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetComments provides a mock function with given fields: postId
+func (_m *RepositoryI) GetComments(postId uint64) ([]*models.Comment, error) {
+	ret := _m.Called(postId)
+
+	var r0 []*models.Comment
+	if rf, ok := ret.Get(0).(func(uint64) []*models.Comment); ok {
+		r0 = rf(postId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*models.Comment)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(uint64) error); ok {
+		r1 = rf(postId)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -195,6 +269,20 @@ func (_m *RepositoryI) UnLikePost(id uint64, userId uint64) error {
 	var r0 error
 	if rf, ok := ret.Get(0).(func(uint64, uint64) error); ok {
 		r0 = rf(id, userId)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// UpdateComment provides a mock function with given fields: comment
+func (_m *RepositoryI) UpdateComment(comment *models.Comment) error {
+	ret := _m.Called(comment)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*models.Comment) error); ok {
+		r0 = rf(comment)
 	} else {
 		r0 = ret.Error(0)
 	}

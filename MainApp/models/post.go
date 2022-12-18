@@ -16,3 +16,14 @@ type Post struct {
 	Images        []Image   `json:"images"`
 	Files         []File    `json:"files"`
 }
+
+type Comment struct {
+	ID            uint64    `json:"id" gorm:"column:id"`
+	UserID        uint64    `json:"user_id" readonly:"true" gorm:"column:user_id"`
+	AvatarID      uint64    `json:"avatar_id" readonly:"true" gorm:"-"`
+	UserFirstName string    `json:"user_first_name" readonly:"true" gorm:"-"`
+	UserLastName  string    `json:"user_last_name" readonly:"true" gorm:"-"`
+	PostID        uint64    `json:"post_id" validate:"required" gorm:"column:post_id"`
+	Message       string    `json:"message" validate:"required" gorm:"column:text"`
+	CreateDate    time.Time `json:"create_date" readonly:"true" gorm:"column:created_at"`
+}
