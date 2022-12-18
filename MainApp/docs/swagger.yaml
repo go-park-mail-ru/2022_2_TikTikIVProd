@@ -34,6 +34,11 @@ definitions:
       userId2:
         type: integer
     type: object
+  models.File:
+    properties:
+      id:
+        type: integer
+    type: object
   models.Image:
     properties:
       id:
@@ -47,14 +52,26 @@ definitions:
         type: string
       dialog_id:
         type: integer
+      files:
+        items:
+          type: integer
+        type: array
       id:
         readOnly: true
         type: integer
+      images:
+        items:
+          type: integer
+        type: array
       receiver_id:
         type: integer
       sender_id:
         readOnly: true
         type: integer
+      stickers:
+        items:
+          type: integer
+        type: array
     type: object
   models.Post:
     properties:
@@ -68,6 +85,10 @@ definitions:
       create_date:
         readOnly: true
         type: string
+      files:
+        items:
+          $ref: '#/definitions/models.File'
+        type: array
       id:
         type: integer
       images:
@@ -660,6 +681,68 @@ paths:
       summary: Feed
       tags:
       - posts
+  /file/{id}:
+    get:
+      description: Get file by id
+      parameters:
+      - description: file ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: success get file
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Get file by id
+      tags:
+      - file
+  /file/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload file
+      parameters:
+      - description: file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success upload file
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Upload file
+      tags:
+      - file
   /friends/{user_id}:
     get:
       description: get user's friends

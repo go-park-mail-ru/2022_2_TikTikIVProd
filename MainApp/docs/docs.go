@@ -841,6 +841,100 @@ const docTemplate = `{
                 }
             }
         },
+        "/file/upload": {
+            "post": {
+                "description": "Upload file",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "file"
+                ],
+                "summary": "Upload file",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "file",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success upload file"
+                    },
+                    "401": {
+                        "description": "no cookie",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "403": {
+                        "description": "invalid csrf",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "405": {
+                        "description": "invalid http method",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/file/{id}": {
+            "get": {
+                "description": "Get file by id",
+                "tags": [
+                    "file"
+                ],
+                "summary": "Get file by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "file ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success get file"
+                    },
+                    "401": {
+                        "description": "no cookie",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "405": {
+                        "description": "invalid http method",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/friends/add/{friend_id}": {
             "post": {
                 "description": "add friend",
@@ -2125,6 +2219,14 @@ const docTemplate = `{
                 }
             }
         },
+        "models.File": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
         "models.Image": {
             "type": "object",
             "properties": {
@@ -2145,9 +2247,21 @@ const docTemplate = `{
                 "dialog_id": {
                     "type": "integer"
                 },
+                "files": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
                 "id": {
                     "type": "integer",
                     "readOnly": true
+                },
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "receiver_id": {
                     "type": "integer"
@@ -2155,6 +2269,12 @@ const docTemplate = `{
                 "sender_id": {
                     "type": "integer",
                     "readOnly": true
+                },
+                "stickers": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
         },
@@ -2177,6 +2297,12 @@ const docTemplate = `{
                 "create_date": {
                     "type": "string",
                     "readOnly": true
+                },
+                "files": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.File"
+                    }
                 },
                 "id": {
                     "type": "integer"

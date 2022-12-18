@@ -28,6 +28,9 @@ message Message {
     uint64 receiverId = 4;
     string body = 5;
     google.protobuf.Timestamp createdAt = 6;
+    repeated uint64 imagesIds = 7;
+    repeated uint64 filesIds = 8;
+    repeated uint64 stickersIds = 9;
 }
 
 message SelectDialogByUsersRequest {

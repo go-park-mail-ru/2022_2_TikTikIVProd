@@ -7,6 +7,7 @@ import datetime
 COUNT_USERS = 30
 COUNT_POSTS = 100
 COUNT_IMAGES = 30
+COUNT_FILES = 10
 COUNT_COMMUNITIES = 30
 
 def gen_users():
@@ -56,6 +57,12 @@ def gen_images():
         for i in range(COUNT_IMAGES):
             f.write(f"{i + 1}.png" + "\n")
 
+def gen_files():
+    with open("files.csv", "w") as f: 
+        f.write("link\n")
+        for i in range(COUNT_IMAGES):
+            f.write(f"{i + 1}.html" + "\n")
+
 def gen_posts_images_relation():
     relations = []
     def _gen_posts_images_relation_string():
@@ -71,6 +78,23 @@ def gen_posts_images_relation():
         f.write("user_post_id;img_id\n")
         for _ in range(COUNT_POSTS * 2):
             row = _gen_posts_images_relation_string()
+            f.write(row + "\n" if row != "" else "")
+
+def gen_posts_files_relation():
+    relations = []
+    def _gen_posts_files_relation_string():
+        post_id = randint(1, COUNT_POSTS)
+        file_id = randint(1, COUNT_FILES)
+        if (post_id, file_id) not in relations:
+            relations.append((post_id, file_id))
+            return f"{post_id};{file_id}"
+        else:
+            return ""
+
+    with open("user_posts_files.csv", "w") as f: 
+        f.write("user_post_id;file_id\n")
+        for _ in range(COUNT_POSTS // 2):
+            row = _gen_posts_files_relation_string()
             f.write(row + "\n" if row != "" else "")
 
 COUNT_CHATS = COUNT_USERS
@@ -147,9 +171,11 @@ def gen_likes():
 
 if __name__ == '__main__':
     gen_images()
+    gen_files()
     gen_posts()
     gen_users()
     gen_posts_images_relation()
+    gen_posts_files_relation()
     gen_communities()
     gen_likes()
     

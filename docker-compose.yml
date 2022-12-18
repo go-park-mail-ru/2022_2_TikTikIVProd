@@ -27,7 +27,7 @@ services:
     restart: always
     container_name: server
     volumes:
-      - ./images:/images
+      - ./files:/files
     depends_on:
       - ws_pg
       - auth_mvs
@@ -42,8 +42,6 @@ services:
   auth_mvs:
     build: ./AuthMicroservice
     restart: always
-    volumes:
-      - ./images:/images
     depends_on:
       - redis
     ports:
@@ -66,8 +64,6 @@ services:
   chat_mvs:
     build: ./ChatMicroservice
     restart: always
-    volumes:
-      - ./images:/images
     depends_on:
       - ws_pg
     ports:
@@ -78,8 +74,6 @@ services:
   user_mvs:
     build: ./UserMicroservice
     restart: always
-    volumes:
-      - ./images:/images
     depends_on:
       - ws_pg
     ports:

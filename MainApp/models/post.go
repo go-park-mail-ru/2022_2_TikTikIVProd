@@ -14,4 +14,5 @@ type Post struct {
 	Message       string    `json:"message" validate:"required"`
 	CreateDate    time.Time `json:"create_date" readonly:"true"`
 	Images        []Image   `json:"images"`
+	Files         []File    `json:"files"`
 }

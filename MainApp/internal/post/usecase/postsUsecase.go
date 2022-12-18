@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	fileRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/file/repository"
 	imageRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/image/repository"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/post/repository"
 	userRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/user/repository"
@@ -24,13 +25,15 @@ type postsUsecase struct {
 	postsRepo repository.RepositoryI
 	imageRepo imageRep.RepositoryI
 	userRepo  userRep.RepositoryI
+	fileRepo  fileRep.RepositoryI
 }
 
-func NewPostUsecase(ps repository.RepositoryI, ir imageRep.RepositoryI, ur userRep.RepositoryI) PostUseCaseI {
+func NewPostUsecase(ps repository.RepositoryI, ir imageRep.RepositoryI, ur userRep.RepositoryI, fr fileRep.RepositoryI) PostUseCaseI {
 	return &postsUsecase{
 		postsRepo: ps,
 		imageRepo: ir,
 		userRepo:  ur,
+		fileRepo:  fr,
 	}
 }
 
@@ -190,6 +193,22 @@ func addImagesForPost(post *models.Post, repImg imageRep.RepositoryI) error {
 	return nil
 }
 
+func addFilesForPost(post *models.Post, repfile fileRep.RepositoryI) error {
+	files, err := repfile.GetPostFiles(post.ID)
+
+	if err != nil {
+		return errors.Wrap(err, "Error in func addPostFilesAuthors")
+	}
+
+	post.Files = make([]models.File, 0, 10)
+
+	for _, file := range files {
+		post.Files = append(post.Files, *file)
+	}
+
+	return nil
+}
+
 func addCountLikesForPost(post *models.Post, postsRepo repository.RepositoryI) error {
 	count, err := postsRepo.GetCountLikesPost(post.ID)
 
@@ -235,6 +254,12 @@ func addAdditionalFieldsToPost(post *models.Post, postsUsecase *postsUsecase, us
 
 	if err != nil {
 		return errors.Wrap(err, "error while get isLiked")
+	}
+
+	err = addFilesForPost(post, postsUsecase.fileRepo)
+
+	if err != nil {
+		return errors.Wrap(err, "error while get files")
 	}
 
 	return nil

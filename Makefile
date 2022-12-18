@@ -30,4 +30,10 @@ fill_images:
 drop_images:
 	./images/delete.sh
 
+fill_files:
+	./files/download.sh
+
+drop_files:
+	./files/delete.sh
+
 

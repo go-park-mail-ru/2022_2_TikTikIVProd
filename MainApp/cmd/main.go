@@ -1,6 +1,7 @@
 package main
 
 import (
+	fileUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/file/usecase"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/middleware"
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
@@ -20,6 +21,8 @@ import (
 	_communitiesDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/communities/delivery"
 	communitiesRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/communities/repository/postgres"
 	communitiesUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/communities/usecase"
+	_fileDelivert "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/file/delivery"
+	fileRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/file/repository/postgres"
 	_friendsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/friends/delivery"
 	friendsRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/friends/repository/microservice"
 	friendsUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/friends/usecase"
@@ -95,6 +98,7 @@ func main() {
 	userManager := user.NewUsersClient(grpcConnUser)
 
 	postDB := postsRep.NewPostRepository(db)
+	fileDB := fileRep.NewFileRepository(db)
 	authDB := authRep.New(authManager)
 	usersDB := usersRep.New(userManager)
 	friendsDB := friendsRep.New(userManager)
@@ -102,7 +106,8 @@ func main() {
 	chatDB := chatRep.New(chatManager)
 	communitiesDb := communitiesRep.NewCommunitiesRepository(db)
 
-	postsUC := postsUsecase.NewPostUsecase(postDB, imageDB, usersDB)
+	postsUC := postsUsecase.NewPostUsecase(postDB, imageDB, usersDB, fileDB)
+	fileUC := fileUsecase.NewFileUsecase(fileDB)
 	authUC := authUseCase.New(authDB, usersDB)
 	usersUC := usersUseCase.New(usersDB)
 	friendsUC := friendsUseCase.New(friendsDB, usersDB)
@@ -143,6 +148,7 @@ func main() {
 	// e.Use(authMiddleware.CSRF)
 
 	_postsDelivery.NewDelivery(e, postsUC)
+	_fileDelivert.NewDelivery(e, fileUC)
 	_authDelivery.NewDelivery(e, authUC)
 	_usersDelivery.NewDelivery(e, usersUC)
 	_imageDelivery.NewDelivery(e, imageUC)
