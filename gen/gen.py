@@ -56,6 +56,12 @@ def gen_images():
         for i in range(COUNT_IMAGES):
             f.write(f"{i + 1}.png" + "\n")
 
+def gen_stickers():
+    with open("stickers.csv", "w") as f: 
+        f.write("link\n")
+        for i in range(10):
+            f.write(f"{i + 1}.png" + "\n")
+
 def gen_posts_images_relation():
     relations = []
     def _gen_posts_images_relation_string():
@@ -147,6 +153,7 @@ def gen_likes():
 
 if __name__ == '__main__':
     gen_images()
+    gen_stickers()
     gen_posts()
     gen_users()
     gen_posts_images_relation()

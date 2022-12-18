@@ -123,9 +123,9 @@ func (delivery *Delivery) UnLikePost(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
-func isRequestValid(p *models.Post) (bool, error) {
+func isRequestValid(entity interface{}) (bool, error) {
 	validate := validator.New()
-	err := validate.Struct(p)
+	err := validate.Struct(entity)
 	if err != nil {
 		return false, err
 	}
@@ -184,6 +184,14 @@ func requestSanitizePost(post *models.Post) {
 	post.UserFirstName = sanitizer.Sanitize(post.UserFirstName)
 	post.UserLastName = sanitizer.Sanitize(post.UserLastName)
 	post.Message = sanitizer.Sanitize(post.Message)
+}
+
+func requestSanitizeComment(comment *models.Comment) {
+	sanitizer := bluemonday.UGCPolicy()
+
+	comment.UserFirstName = sanitizer.Sanitize(comment.UserFirstName)
+	comment.UserLastName = sanitizer.Sanitize(comment.UserLastName)
+	comment.Message = sanitizer.Sanitize(comment.Message)
 }
 
 // UpdatePost godoc
@@ -255,11 +263,6 @@ func (delivery *Delivery) DeletePost(c echo.Context) error {
 	if !ok {
 		c.Logger().Error(models.ErrInternalServerError)
 		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
-	}
-
-	if err != nil {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusNotFound, "Post not found")
 	}
 
 	err = delivery.PUsecase.DeletePost(idP, userId)
@@ -369,6 +372,154 @@ func (delivery *Delivery) GetCommunityPosts(c echo.Context) error {
 	return c.JSON(http.StatusOK, pkg.Response{Body: posts})
 }
 
+// AddComment godoc
+// @Summary      Add a comment
+// @Description  Add a comment
+// @Tags     	 posts
+// @Accept	 application/json
+// @Produce  application/json
+// @Param    comment body models.Comment true "comment info"
+// @Success  200 {object} pkg.Response{body=models.Comment} "success get post"
+// @Failure 400 {object} echo.HTTPError "bad request"
+// @Failure 500 {object} echo.HTTPError "internal server error"
+// @Failure 401 {object} echo.HTTPError "no cookie"
+// @Failure 403 {object} echo.HTTPError "invalid csrf"
+// @Router   /post/comment/add [post]
+func (delivery *Delivery) AddComment(c echo.Context) error {
+	var comment models.Comment
+	err := c.Bind(&comment)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
+	}
+
+	if ok, err := isRequestValid(&comment); !ok {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
+	}
+
+	requestSanitizeComment(&comment)
+
+	userId, ok := c.Get("user_id").(uint64)
+	if !ok {
+		c.Logger().Error(models.ErrInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
+	}
+
+	comment.UserID = userId
+	err = delivery.PUsecase.AddComment(&comment)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
+	}
+
+	return c.JSON(http.StatusOK, pkg.Response{Body: comment})
+}
+
+// UpdateComment godoc
+// @Summary      Update a comment
+// @Description  Update a comment
+// @Tags     	 posts
+// @Accept	 application/json
+// @Produce  application/json
+// @Param    comment body models.Comment true "comment info"
+// @Success  200 {object} pkg.Response{body=models.Comment} "success update comment"
+// @Failure 400 {object} echo.HTTPError "bad request"
+// @Failure 500 {object} echo.HTTPError "internal server error"
+// @Failure 401 {object} echo.HTTPError "no cookie"
+// @Failure 403 {object} echo.HTTPError "invalid csrf"
+// @Router   /post/comment/edit [post]
+func (delivery *Delivery) UpdateComment(c echo.Context) error {
+	var comment models.Comment
+	err := c.Bind(&comment)
+	if err != nil {
+		c.Logger().Error(err)
+		return c.JSON(http.StatusBadRequest, models.ErrBadRequest.Error())
+	}
+
+	requestSanitizeComment(&comment)
+
+	userId, ok := c.Get("user_id").(uint64)
+	if !ok {
+		c.Logger().Error(models.ErrInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
+	}
+
+	comment.UserID = userId
+
+	err = delivery.PUsecase.UpdateComment(&comment)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
+	}
+
+	return c.JSON(http.StatusOK, pkg.Response{Body: comment})
+}
+
+// DeleteComment godoc
+// @Summary      Delete a comment
+// @Description  Delete a comment
+// @Tags     	 posts
+// @Accept	 application/json
+// @Param id path int  true  "Comment ID"
+// @Success  204
+// @Failure 405 {object} echo.HTTPError "invalid http method"
+// @Failure 400 {object} echo.HTTPError "bad request"
+// @Failure 404 {object} echo.HTTPError "item not found"
+// @Failure 500 {object} echo.HTTPError "internal server error"
+// @Failure 401 {object} echo.HTTPError "no cookie"
+// @Failure 403 {object} echo.HTTPError "invalid csrf"
+// @Router   /post/comment/{id} [delete]
+func (delivery *Delivery) DeleteComment(c echo.Context) error {
+	idC, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
+	}
+
+	userId, ok := c.Get("user_id").(uint64)
+	if !ok {
+		c.Logger().Error(models.ErrInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
+	}
+
+	err = delivery.PUsecase.DeleteComment(idC, userId)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+	}
+
+	return c.NoContent(http.StatusNoContent)
+}
+
+// GetComments godoc
+// @Summary      Get comments
+// @Description  Get all comments by post
+// @Tags     	 posts
+// @Param id path int  true  "Post ID"
+// @Produce  application/json
+// @Success  200 {object} pkg.Response{body=[]models.Comment} "success get post comments"
+// @Failure 400 {object} echo.HTTPError "bad request"
+// @Failure 404 {object} echo.HTTPError "Post not found"
+// @Failure 500 {object} echo.HTTPError "internal server error"
+// @Failure 401 {object} echo.HTTPError "no cookie"
+// @Router   /post/{id}/comments [get]
+func (delivery *Delivery) GetComments(c echo.Context) error {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
+	}
+
+	comments, err := delivery.PUsecase.GetComments(id)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
+	}
+
+	return c.JSON(http.StatusOK, pkg.Response{Body: comments})
+}
+
 func NewDelivery(e *echo.Echo, up postsUsecase.PostUseCaseI) {
 	handler := &Delivery{
 		PUsecase: up,
@@ -383,4 +534,8 @@ func NewDelivery(e *echo.Echo, up postsUsecase.PostUseCaseI) {
 	e.GET("/communities/:id/posts", handler.GetCommunityPosts)
 	e.GET("/feed", handler.Feed)
 	e.DELETE("/post/:id", handler.DeletePost)
+	e.GET("/post/:id/comments", handler.GetComments)
+	e.POST("/post/comment/add", handler.AddComment)
+	e.POST("/post/comment/edit", handler.UpdateComment)
+	e.DELETE("/post/comment/:id", handler.DeleteComment)
 }

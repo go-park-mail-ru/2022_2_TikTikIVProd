@@ -104,6 +104,8 @@ func (dbPost *postRepository) CreatePost(p *models.Post) error {
 
 	var tx *gorm.DB = nil
 
+	p.CreateDate = time.Now()
+
 	if p.CommunityID == 0 {
 		tx = dbPost.db.Omit("community_id").Create(post)
 	} else {
@@ -115,7 +117,6 @@ func (dbPost *postRepository) CreatePost(p *models.Post) error {
 	}
 
 	p.ID = post.ID
-	p.CreateDate = time.Now()
 
 	postImages := make([]PostImagesRelation, 0, 10)
 	for _, elem := range p.Images {
@@ -226,3 +227,52 @@ func (dbPost *postRepository) GetCommunityPosts(communityID uint64) ([]*models.P
 
 	return toModelPosts(posts), nil
 }
+
+func (dbPost *postRepository) GetComments(postId uint64) ([]*models.Comment, error) {
+	comments := make([]*models.Comment, 0, 10)
+	tx := dbPost.db.Table("comments").Where(&models.Comment{PostID: postId}).Find(&comments)
+	if tx.Error != nil {
+		return nil, errors.Wrap(tx.Error, "postRepository.GetComments error")
+	}
+
+	return comments, nil
+}
+
+func (dbPost *postRepository) GetCommentById(id uint64) (*models.Comment, error) {
+	var comment models.Comment
+	tx := dbPost.db.Table("comments").Where("id = ?", id).Take(&comment)
+	if tx.Error != nil {
+		return nil, errors.Wrap(tx.Error, "postRepository.GetPostGetCommentByIdById error")
+	}
+
+	return &comment, nil
+}
+
+func (dbPost *postRepository) AddComment(comment *models.Comment) error {
+	tx := dbPost.db.Table("comments").Create(comment)
+	if tx.Error != nil {
+		return errors.Wrap(tx.Error, "postRepository.AddComment error while insert comment")
+	}
+
+	return nil
+}
+
+func (dbPost *postRepository) UpdateComment(comment *models.Comment) error {
+	tx := dbPost.db.Table("comments").Omit("id").Updates(comment)
+	if tx.Error != nil {
+		return errors.Wrap(tx.Error, "postRepository.UpdateComment error while UPDATE comment")
+	}
+
+	return nil
+}
+
+func (dbPost *postRepository) DeleteComment(id uint64) error {
+	tx := dbPost.db.Table("comments").Delete(&models.Comment{}, id)
+
+	if tx.Error != nil {
+		return errors.Wrap(tx.Error, "postRepository.DeleteComment error")
+	}
+
+	return nil
+}
+
