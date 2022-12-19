@@ -53,9 +53,9 @@ def gen_posts():
 
 def gen_attachments():
     with open("attachments.csv", "w") as f: 
-        f.write("link\n")
+        f.write("link;type\n")
         for i in range(COUNT_IMAGES):
-            f.write(f"{i + 1}.png" + "\n")
+            f.write(f"{i + 1}.png;0" + "\n")
 
 def gen_files():
     with open("files.csv", "w") as f: 
@@ -178,11 +178,8 @@ def gen_likes():
 
 if __name__ == '__main__':
     gen_attachments()
-<<<<<<< HEAD
     gen_files()
-=======
     gen_stickers()
->>>>>>> dev
     gen_posts()
     gen_users()
     gen_posts_attachments_relation()

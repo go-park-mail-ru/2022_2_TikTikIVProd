@@ -2,7 +2,7 @@ package microservice
 
 import (
 	"context"
-
+	"fmt"
 	attachmentRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/attachment/repository"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
 	Attachment "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/proto/attachment"
@@ -40,6 +40,7 @@ func (attachmentMS *microService) GetPostAttachments(postID uint64) ([]*models.A
 			Type:    pbAttachments.Attachments[idx].Type,
 		}
 		attachments = append(attachments, att)
+		fmt.Println("attachments: ", att.Type, att.ID)
 	}
 
 	return attachments, nil

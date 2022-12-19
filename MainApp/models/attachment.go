@@ -7,6 +7,6 @@ const (
 
 type Attachment struct {
 	ID      uint64 `json:"id"`
-	AttLink string `json:"-"`
 	Type    string `json:"type"`
+	AttLink string `json:"-"`
 }
