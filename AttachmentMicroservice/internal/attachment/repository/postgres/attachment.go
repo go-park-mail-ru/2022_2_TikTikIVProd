@@ -10,7 +10,7 @@ import (
 type Attachment struct {
 	ID      uint64
 	AttLink string
-	Type    int
+	Type    int  `gorm:"column:ttype"`
 }
 
 type MessageAttachmentRelation struct {

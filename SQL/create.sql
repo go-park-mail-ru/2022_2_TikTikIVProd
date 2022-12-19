@@ -82,5 +82,5 @@ CREATE TABLE IF NOT EXISTS like_post (
 CREATE TABLE IF NOT EXISTS message_attachments (
 	message_id INT NOT NULL REFERENCES user_posts(id) ON DELETE CASCADE,
 	att_id INT NOT NULL REFERENCES attachments(id) ON DELETE CASCADE,
-	PRIMARY KEY (user_post_id, att_id)
+	PRIMARY KEY (message_id, att_id)
 );
