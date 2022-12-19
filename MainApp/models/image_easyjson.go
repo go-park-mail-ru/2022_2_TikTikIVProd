@@ -17,7 +17,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjson220accf5DecodeGithubComGoParkMailRu20222TikTikIVProdMainAppModels(in *jlexer.Lexer, out *Image) {
+func easyjson220accf5DecodeGithubComGoParkMailRu20222TikTikIVProdMainAppModels(in *jlexer.Lexer, out *Attachment) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -48,7 +48,7 @@ func easyjson220accf5DecodeGithubComGoParkMailRu20222TikTikIVProdMainAppModels(i
 		in.Consumed()
 	}
 }
-func easyjson220accf5EncodeGithubComGoParkMailRu20222TikTikIVProdMainAppModels(out *jwriter.Writer, in Image) {
+func easyjson220accf5EncodeGithubComGoParkMailRu20222TikTikIVProdMainAppModels(out *jwriter.Writer, in Attachment) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -61,25 +61,25 @@ func easyjson220accf5EncodeGithubComGoParkMailRu20222TikTikIVProdMainAppModels(o
 }
 
 // MarshalJSON supports json.Marshaler interface
-func (v Image) MarshalJSON() ([]byte, error) {
+func (v Attachment) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
 	easyjson220accf5EncodeGithubComGoParkMailRu20222TikTikIVProdMainAppModels(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
-func (v Image) MarshalEasyJSON(w *jwriter.Writer) {
+func (v Attachment) MarshalEasyJSON(w *jwriter.Writer) {
 	easyjson220accf5EncodeGithubComGoParkMailRu20222TikTikIVProdMainAppModels(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
-func (v *Image) UnmarshalJSON(data []byte) error {
+func (v *Attachment) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
 	easyjson220accf5DecodeGithubComGoParkMailRu20222TikTikIVProdMainAppModels(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *Image) UnmarshalEasyJSON(l *jlexer.Lexer) {
+func (v *Attachment) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson220accf5DecodeGithubComGoParkMailRu20222TikTikIVProdMainAppModels(l, v)
 }

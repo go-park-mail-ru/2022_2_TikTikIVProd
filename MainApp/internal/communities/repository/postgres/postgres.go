@@ -1,17 +1,18 @@
 package postgres
 
 import (
+	"time"
+
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/communities/repository"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
-	"time"
 )
 
 type Community struct {
 	ID          uint64
 	OwnerID     uint64
-	AvatarID    uint64 `gorm:"column:avatar_img_id"`
+	AvatarID    uint64 `gorm:"column:avatar_att_id"`
 	Name        string
 	Description string
 	CreateDate  time.Time `gorm:"column:created_at"`

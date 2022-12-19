@@ -16,15 +16,15 @@ def gen_users():
         first_name = faker.first_name()
         last_name = faker.last_name()
         nick_name = faker.unique.word()
-        avatar_img_id = faker.pyint(1, COUNT_IMAGES)
+        avatar_att_id = faker.pyint(1, COUNT_IMAGES)
         email = faker.email()
         password = "hash"
         created_at = datetime.datetime.now()
 
-        return f"{first_name};{last_name};{nick_name};{avatar_img_id};{email};{password};{created_at}"
+        return f"{first_name};{last_name};{nick_name};{avatar_att_id};{email};{password};{created_at}"
 
     with open("users.csv", "w") as f: 
-        f.write("first_name;last_name;nick_name;avatar_img_id;email;password;created_at\n")
+        f.write("first_name;last_name;nick_name;avatar_att_id;email;password;created_at\n")
         for _ in range(COUNT_USERS):
             f.write(_gen_users_string() + "\n")
 
@@ -51,8 +51,8 @@ def gen_posts():
             else:
                 f.write(_gen_post_string_communities() + "\n")
 
-def gen_images():
-    with open("images.csv", "w") as f: 
+def gen_attachments():
+    with open("attachments.csv", "w") as f: 
         f.write("link\n")
         for i in range(COUNT_IMAGES):
             f.write(f"{i + 1}.png" + "\n")
@@ -70,21 +70,21 @@ def gen_stickers():
         for i in range(10):
             f.write(f"{i + 1}.png" + "\n")
 
-def gen_posts_images_relation():
+def gen_posts_attachments_relation():
     relations = []
-    def _gen_posts_images_relation_string():
+    def _gen_posts_attachments_relation_string():
         post_id = randint(1, COUNT_POSTS)
-        img_id = randint(1, COUNT_IMAGES)
-        if (post_id, img_id) not in relations:
-            relations.append((post_id, img_id))
-            return f"{post_id};{img_id}"
+        att_id = randint(1, COUNT_IMAGES)
+        if (post_id, att_id) not in relations:
+            relations.append((post_id, att_id))
+            return f"{post_id};{att_id}"
         else:
             return ""
 
-    with open("user_posts_images.csv", "w") as f: 
-        f.write("user_post_id;img_id\n")
+    with open("user_posts_attachments.csv", "w") as f: 
+        f.write("user_post_id;att_id\n")
         for _ in range(COUNT_POSTS * 2):
-            row = _gen_posts_images_relation_string()
+            row = _gen_posts_attachments_relation_string()
             f.write(row + "\n" if row != "" else "")
 
 def gen_posts_files_relation():
@@ -148,14 +148,14 @@ def gen_communities():
     def _gen_communities_string():
         name = faker.first_name()
         owner_id = randint(1, COUNT_USERS)
-        avatar_img_id = faker.pyint(1, COUNT_IMAGES)
+        avatar_att_id = faker.pyint(1, COUNT_IMAGES)
         description = str(faker.text()).replace('\n', ' ')
         created_at = datetime.datetime.now()
 
-        return f"{name};{owner_id};{avatar_img_id};{description};{created_at}"
+        return f"{name};{owner_id};{avatar_att_id};{description};{created_at}"
 
     with open("communities.csv", "w") as f: 
-        f.write("name;owner_id;nickavatar_img_id_name;description;created_at\n")
+        f.write("name;owner_id;nickavatar_att_id_name;description;created_at\n")
         for _ in range(COUNT_COMMUNITIES):
             f.write(_gen_communities_string() + "\n")
 
@@ -177,7 +177,7 @@ def gen_likes():
             f.write(row + "\n" if row != "" else "")
 
 if __name__ == '__main__':
-    gen_images()
+    gen_attachments()
 <<<<<<< HEAD
     gen_files()
 =======
@@ -185,7 +185,7 @@ if __name__ == '__main__':
 >>>>>>> dev
     gen_posts()
     gen_users()
-    gen_posts_images_relation()
+    gen_posts_attachments_relation()
     gen_posts_files_relation()
     gen_communities()
     gen_likes()

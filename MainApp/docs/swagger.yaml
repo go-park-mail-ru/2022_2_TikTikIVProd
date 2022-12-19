@@ -66,7 +66,7 @@ definitions:
       id:
         type: integer
     type: object
-  models.Image:
+  models.Attachment:
     properties:
       id:
         type: integer
@@ -86,7 +86,7 @@ definitions:
       id:
         readOnly: true
         type: integer
-      images:
+      attachments:
         items:
           type: integer
         type: array
@@ -118,9 +118,9 @@ definitions:
         type: array
       id:
         type: integer
-      images:
+      attachments:
         items:
-          $ref: '#/definitions/models.Image'
+          $ref: '#/definitions/models.Attachment'
         type: array
       is_liked:
         type: boolean
@@ -951,20 +951,20 @@ paths:
       summary: DeleteFriend
       tags:
       - friends
-  /image/{id}:
+  /Attachment/{id}:
     get:
-      description: Get image by id
+      description: Get Attachment by id
       parameters:
-      - description: image ID
+      - description: Attachment ID
         in: path
         name: id
         required: true
         type: integer
       produces:
-      - image/png
+      - Attachment/png
       responses:
         "200":
-          description: success get image
+          description: success get Attachment
         "401":
           description: no cookie
           schema:
@@ -977,25 +977,25 @@ paths:
           description: internal server error
           schema:
             $ref: '#/definitions/echo.HTTPError'
-      summary: Get image by id
+      summary: Get Attachment by id
       tags:
-      - image
-  /image/upload:
+      - Attachment
+  /Attachment/upload:
     post:
       consumes:
       - multipart/form-data
-      description: Upload image
+      description: Upload Attachment
       parameters:
-      - description: image file
+      - description: Attachment file
         in: formData
-        name: image
+        name: Attachment
         required: true
         type: file
       produces:
       - application/json
       responses:
         "200":
-          description: success upload image
+          description: success upload Attachment
         "401":
           description: no cookie
           schema:
@@ -1012,9 +1012,9 @@ paths:
           description: internal server error
           schema:
             $ref: '#/definitions/echo.HTTPError'
-      summary: Upload image
+      summary: Upload Attachment
       tags:
-      - image
+      - Attachment
   /logout:
     post:
       description: user logout
@@ -1533,7 +1533,7 @@ paths:
         required: true
         type: integer
       produces:
-      - image/png
+      - Attachment/png
       responses:
         "200":
           description: success get sticker

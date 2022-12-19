@@ -1,13 +1,14 @@
 package delivery
 
 import (
+	"net/http"
+	"os"
+	"strconv"
+
 	stickersUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/stickers/usecase"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/pkg"
 	"github.com/labstack/echo/v4"
-	"net/http"
-	"os"
-	"strconv"
 )
 
 type DeliveryI interface {
@@ -24,7 +25,7 @@ type delivery struct {
 // @Description  Get sticker by id
 // @Tags     	 stickers
 // @Param id path int  true  "sticker ID"
-// @Produce  image/png
+// @Produce  Attachment/png
 // @Success  200 "success get sticker"
 // @Failure 405 {object} echo.HTTPError "invalid http method"
 // @Failure 400 {object} echo.HTTPError "bad request"
@@ -50,7 +51,7 @@ func (delivery *delivery) GetStickerByID(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
 	}
 
-	return c.Stream(http.StatusOK, "image/png", f)
+	return c.Stream(http.StatusOK, "Attachment/png", f)
 }
 
 // GetAllStickers godoc

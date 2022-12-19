@@ -1210,9 +1210,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/image/upload": {
+        "/Attachment/upload": {
             "post": {
-                "description": "Upload image",
+                "description": "Upload Attachment",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -1220,21 +1220,21 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "image"
+                    "Attachment"
                 ],
-                "summary": "Upload image",
+                "summary": "Upload Attachment",
                 "parameters": [
                     {
                         "type": "file",
-                        "description": "image file",
-                        "name": "image",
+                        "description": "Attachment file",
+                        "name": "Attachment",
                         "in": "formData",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "success upload image"
+                        "description": "success upload Attachment"
                     },
                     "401": {
                         "description": "no cookie",
@@ -1263,20 +1263,20 @@ const docTemplate = `{
                 }
             }
         },
-        "/image/{id}": {
+        "/Attachment/{id}": {
             "get": {
-                "description": "Get image by id",
+                "description": "Get Attachment by id",
                 "produces": [
-                    "image/png"
+                    "Attachment/png"
                 ],
                 "tags": [
-                    "image"
+                    "Attachment"
                 ],
-                "summary": "Get image by id",
+                "summary": "Get Attachment by id",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "image ID",
+                        "description": "Attachment ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1284,7 +1284,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "success get image"
+                        "description": "success get Attachment"
                     },
                     "401": {
                         "description": "no cookie",
@@ -2118,7 +2118,7 @@ const docTemplate = `{
             "get": {
                 "description": "Get sticker by id",
                 "produces": [
-                    "image/png"
+                    "Attachment/png"
                 ],
                 "tags": [
                     "stickers"
@@ -2644,7 +2644,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Image": {
+        "models.Attachment": {
             "type": "object",
             "properties": {
                 "id": {
@@ -2674,7 +2674,7 @@ const docTemplate = `{
                     "type": "integer",
                     "readOnly": true
                 },
-                "images": {
+                "attachments": {
                     "type": "array",
                     "items": {
                         "type": "integer"
@@ -2724,10 +2724,10 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "images": {
+                "attachments": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.Image"
+                        "$ref": "#/definitions/models.Attachment"
                     }
                 },
                 "is_liked": {

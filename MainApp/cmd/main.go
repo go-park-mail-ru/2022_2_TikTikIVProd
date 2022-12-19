@@ -1,7 +1,6 @@
 package main
 
 import (
-	fileUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/file/usecase"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/middleware"
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
@@ -12,6 +11,9 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/cmd/server"
+	_attachmentDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/attachment/delivery"
+	attachmentsRepository "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/attachment/repository/microservice"
+	attachmentUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/attachment/usecase"
 	_authDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/auth/delivery"
 	authRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/auth/repository/microservice"
 	authUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/auth/usecase"
@@ -20,27 +22,22 @@ import (
 	chatUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/chat/usecase"
 	_communitiesDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/communities/delivery"
 	communitiesRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/communities/repository/postgres"
-	stickersRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/stickers/repository/postgres"
 	communitiesUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/communities/usecase"
-	_fileDelivert "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/file/delivery"
-	fileRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/file/repository/postgres"
 	_friendsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/friends/delivery"
 	friendsRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/friends/repository/microservice"
 	friendsUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/friends/usecase"
-	_imageDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/image/delivery"
-	imagesRepository "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/image/repository/microservice"
-	imageUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/image/usecase"
 	_postsDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/post/delivery"
 	postsRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/post/repository/postgres"
 	postsUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/post/usecase"
-	_usersDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/user/delivery"
 	_stickersDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/stickers/delivery"
+	stickersRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/stickers/repository/postgres"
+	stickersUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/stickers/usecase"
+	_usersDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/user/delivery"
 	usersRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/user/repository/microservice"
 	usersUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/user/usecase"
-	stickersUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/stickers/usecase"
+	attachment "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/proto/attachment"
 	auth "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/proto/auth"
 	chat "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/proto/chat"
-	image "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/proto/image"
 	user "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/proto/user"
 	"github.com/labstack/echo-contrib/prometheus"
 )
@@ -70,15 +67,15 @@ func main() {
 	defer grpcConnAuth.Close()
 	authManager := auth.NewAuthClient(grpcConnAuth)
 
-	grpcConnImage, err := grpc.Dial(
-		"image_mvs:8082",
+	grpcConnAttachment, err := grpc.Dial(
+		"attachment_mvs:8082",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer grpcConnImage.Close()
-	imageManager := image.NewImagesClient(grpcConnImage)
+	defer grpcConnAttachment.Close()
+	attachmentManager := attachment.NewAttachmentsClient(grpcConnAttachment)
 
 	grpcConnChat, err := grpc.Dial(
 		"chat_mvs:8083",
@@ -101,22 +98,20 @@ func main() {
 	userManager := user.NewUsersClient(grpcConnUser)
 
 	postDB := postsRep.NewPostRepository(db)
-	fileDB := fileRep.NewFileRepository(db)
 	authDB := authRep.New(authManager)
 	usersDB := usersRep.New(userManager)
 	friendsDB := friendsRep.New(userManager)
-	imageDB := imagesRepository.New(imageManager)
+	attachmentDB := attachmentsRepository.New(attachmentManager)
 	chatDB := chatRep.New(chatManager)
 	communitiesDb := communitiesRep.NewCommunitiesRepository(db)
 	stickersDb := stickersRep.New(db)
 
-	postsUC := postsUsecase.NewPostUsecase(postDB, imageDB, usersDB, fileDB)
-	fileUC := fileUsecase.NewFileUsecase(fileDB)
+	postsUC := postsUsecase.NewPostUsecase(postDB, attachmentDB, usersDB)
 	authUC := authUseCase.New(authDB, usersDB)
 	usersUC := usersUseCase.New(usersDB)
 	friendsUC := friendsUseCase.New(friendsDB, usersDB)
-	imageUC := imageUsecase.NewImageUsecase(imageDB)
-	chatUC := chatUseCase.New(chatDB)
+	attachmentUC := attachmentUsecase.NewAttachmentUsecase(attachmentDB)
+	chatUC := chatUseCase.New(chatDB, attachmentDB)
 	communitiesUC := communitiesUseCase.New(communitiesDb)
 	stickersUC := stickersUseCase.NewStickerUsecase(stickersDb)
 
@@ -153,10 +148,9 @@ func main() {
 	e.Use(authMiddleware.CSRF)
 
 	_postsDelivery.NewDelivery(e, postsUC)
-	_fileDelivert.NewDelivery(e, fileUC)
 	_authDelivery.NewDelivery(e, authUC)
 	_usersDelivery.NewDelivery(e, usersUC)
-	_imageDelivery.NewDelivery(e, imageUC)
+	_attachmentDelivery.NewDelivery(e, attachmentUC)
 	_friendsDelivery.NewDelivery(e, friendsUC)
 	_chatDelivery.NewDelivery(e, chatUC)
 	_communitiesDelivery.NewDelivery(e, communitiesUC)

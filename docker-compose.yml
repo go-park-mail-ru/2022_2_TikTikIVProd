@@ -28,12 +28,12 @@ services:
     container_name: server
     volumes:
       - ./files:/files
-      - ./images:/images
+      - ./attachments:/attachments
       - ./stickers:/stickers
     depends_on:
       - ws_pg
       - auth_mvs
-      - image_mvs
+      - attachment_mvs
       - chat_mvs
       - user_mvs
     ports:
@@ -51,11 +51,11 @@ services:
     networks:
       - mynetwork
 
-  image_mvs:
-    build: ./ImageMicroservice
+  attachment_mvs:
+    build: ./AttachmentMicroservice
     restart: always
     volumes:
-      - ./images:/images
+      - ./attachments:/attachments
     depends_on:
       - ws_pg
     ports:
