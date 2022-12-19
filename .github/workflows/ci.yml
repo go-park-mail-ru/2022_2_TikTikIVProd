@@ -1,9 +1,160 @@
-name: Docker Compose Actions Workflow
-on: push
+# name: Docker Compose Actions Workflow
+# on: push
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#       - name: Build the stack
+#         run: (docker rm -f $(docker ps -aq) || true) && docker-compose up -d
+
+
+
+
+
+
+
+
+
+name: Docker Build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+# commit hash 435ab34
+# semver v1.2.3-beta.1
+# 202204282024-435ab34
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v1
+      - name: Login to DockerHub Registry
+        run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+      - name: Build Docker image
+        run: docker build -t dmitrydorofeev/godeploy:${GITHUB_SHA::8} .
+      - name: Push the image
+        run: docker push dmitrydorofeev/godeploy:${GITHUB_SHA::8}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: pull docker image
+        uses: appleboy/ssh-action@master
+        with:
+          envs: GITHUB_SHA
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          script: sudo docker pull dmitrydorofeev/godeploy:${GITHUB_SHA::8}
+      - name: deploy docker image
+        uses: appleboy/ssh-action@master
+        with:
+          envs: GITHUB_SHA
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          script: |
+            sudo docker rm -f $(sudo docker ps -aq)
+            sudo docker run -e VERSION=${GITHUB_SHA::8} -d -p 8080:8080 dmitrydorofeev/godeploy:${GITHUB_SHA::8}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+name: Docker Compose Actions Workflow
+on:
+  push:
+    branches: [deploy]
+jobs:
+  golangci:
+    name: linter
+    runs-on: ubuntu-latest
+    steps:
       - uses: actions/checkout@v2
-      - name: Build the stack
-        run: (docker rm -f $(docker ps -aq) || true) && docker-compose up -d
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.29
+
+  tests:
+    needs: golangci
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.15
+
+    - name: tests
+      run: |
+        go test ./... -v -coverpkg=./... -coverprofile=cover.out.tmp 
+        cat cover.out.tmp | grep -v "mock.go" | grep -v "pb.go" > cover.out
+        go tool cover -func=cover.out
+  build:
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Login to Docker Registry
+        run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build Docker image
+        run: |
+          sudo docker build -t ${{ secrets.DOCKER_USER }}/image_server:latest -f ./build/image.Dockerfile .
+          sudo docker build -t ${{ secrets.DOCKER_USER }}/pickleapp_server:latest -f ./build/pickleapp.Dockerfile .
+          sudo docker build -t ${{ secrets.DOCKER_USER }}/user_server:latest -f ./build/user.Dockerfile .
+          sudo docker build -t ${{ secrets.DOCKER_USER }}/auth_server:latest -f ./build/auth.Dockerfile .
+      - name: Push the image
+        run: |
+          docker push ${{ secrets.DOCKER_USER }}/image_server --all-tags
+          docker push ${{ secrets.DOCKER_USER }}/pickleapp_server --all-tags
+          docker push ${{ secrets.DOCKER_USER }}/user_server --all-tags
+          docker push ${{ secrets.DOCKER_USER }}/auth_server --all-tags
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: pull project
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            sudo docker rm -vf $(sudo docker ps -a -q)
+            docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
+            cd 2021_1_LonelyBoiz/
+            sudo docker pull ${{ secrets.DOCKER_USER }}/image_server
+            sudo docker pull ${{ secrets.DOCKER_USER }}/pickleapp_server
+            sudo docker pull ${{ secrets.DOCKER_USER }}/auth_server
+            sudo docker pull ${{ secrets.DOCKER_USER }}/user_server
+      - name: run project
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd 2021_1_LonelyBoiz/
+            sudo docker-compose up -d --build --no-deps
+

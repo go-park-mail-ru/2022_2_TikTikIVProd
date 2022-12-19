@@ -73,7 +73,7 @@ func (dbcomm *communitiesRepository) GetCommunity(id uint64) (*models.Community,
 func (dbcomm *communitiesRepository) SearchCommunities(searchString string) ([]*models.Community, error) {
 	comms := make([]*Community, 0, 10)
 
-	tx := dbcomm.db.Where("name LIKE ?", "%"+searchString+"%").Find(&comms)
+	tx := dbcomm.db.Where("lower(name) LIKE lower(?)", "%"+searchString+"%").Find(&comms)
 	if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
 		return nil, models.ErrNotFound
 	} else if tx.Error != nil {

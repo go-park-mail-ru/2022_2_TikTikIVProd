@@ -197,7 +197,7 @@ func (dbPost *postRepository) CheckLikePost(id uint64, userID uint64) (bool, err
 }
 func (dbPost *postRepository) GetAllPosts() ([]*models.Post, error) {
 	posts := make([]*Post, 0, 10)
-	tx := dbPost.db.Order("created_at desc").Find(&posts)
+	tx := dbPost.db.Order("id desc").Find(&posts)
 
 	if tx.Error != nil {
 		return nil, errors.Wrap(tx.Error, "postRepository.GetAllPosts error")
@@ -208,7 +208,7 @@ func (dbPost *postRepository) GetAllPosts() ([]*models.Post, error) {
 
 func (dbPost *postRepository) GetUserPosts(userId uint64) ([]*models.Post, error) {
 	posts := make([]*Post, 0, 10)
-	tx := dbPost.db.Where("community_id is NULL").Where(&Post{UserID: userId}).Find(&posts)
+	tx := dbPost.db.Where("community_id is NULL").Where(&Post{UserID: userId}).Order("id desc").Find(&posts)
 
 	if tx.Error != nil {
 		return nil, errors.Wrap(tx.Error, "postRepository.GetAllPosts error") // TODO
@@ -219,7 +219,7 @@ func (dbPost *postRepository) GetUserPosts(userId uint64) ([]*models.Post, error
 
 func (dbPost *postRepository) GetCommunityPosts(communityID uint64) ([]*models.Post, error) {
 	posts := make([]*Post, 0, 10)
-	tx := dbPost.db.Where(&Post{CommunityID: communityID}).Find(&posts)
+	tx := dbPost.db.Where(&Post{CommunityID: communityID}).Order("id desc").Find(&posts)
 
 	if tx.Error != nil {
 		return nil, errors.Wrap(tx.Error, "postRepository.GetAllPosts error")
