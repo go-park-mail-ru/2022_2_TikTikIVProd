@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"fmt"
 	"time"
 
 	attachmentRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/attachment/repository"
@@ -54,7 +53,6 @@ func (p *postsUsecase) GetPostById(id uint64, userId uint64) (*models.Post, erro
 		return nil, errors.Wrap(err, "postsUsecase.GetPostById error while get additional info")
 	}
 
-	fmt.Println("respost: ", resPost.Attachments[0].Type)
 	return resPost, nil
 }
 
@@ -263,9 +261,7 @@ func addAttachmentsForPost(post *models.Post, repImg attachmentRep.RepositoryI) 
 	post.Attachments = make([]models.Attachment, 0, 10)
 
 	for idx, att := range attachments {
-		fmt.Println("debug addatt type: ", att.Type)
 		post.Attachments = append(post.Attachments, *att)
-		fmt.Println("debug2: ", post.Attachments[idx].Type)
 	}
 
 	return nil
@@ -295,7 +291,6 @@ func addIsLikedForPost(post *models.Post, postRepo repository.RepositoryI, userI
 
 func addAdditionalFieldsToPost(post *models.Post, postsUsecase *postsUsecase, userId uint64) error {
 	err := addAttachmentsForPost(post, postsUsecase.attachmentRepo)
-	fmt.Println("debug addAdditional: ", post.Attachments[0].Type)
 
 	if err != nil {
 		return errors.Wrap(err, "error while get attachments")
