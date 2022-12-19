@@ -27,12 +27,13 @@ services:
     restart: always
     container_name: server
     volumes:
-      - ./images:/images
+      - ./files:/files
+      - ./attachments:/attachments
       - ./stickers:/stickers
     depends_on:
       - ws_pg
       - auth_mvs
-      - image_mvs
+      - attachment_mvs
       - chat_mvs
       - user_mvs
     ports:
@@ -43,8 +44,6 @@ services:
   auth_mvs:
     build: ./AuthMicroservice
     restart: always
-    volumes:
-      - ./images:/images
     depends_on:
       - redis
     ports:
@@ -52,11 +51,11 @@ services:
     networks:
       - mynetwork
 
-  image_mvs:
-    build: ./ImageMicroservice
+  attachment_mvs:
+    build: ./AttachmentMicroservice
     restart: always
     volumes:
-      - ./images:/images
+      - ./attachments:/attachments
     depends_on:
       - ws_pg
     ports:
@@ -67,8 +66,6 @@ services:
   chat_mvs:
     build: ./ChatMicroservice
     restart: always
-    volumes:
-      - ./images:/images
     depends_on:
       - ws_pg
     ports:
@@ -79,8 +76,6 @@ services:
   user_mvs:
     build: ./UserMicroservice
     restart: always
-    volumes:
-      - ./images:/images
     depends_on:
       - ws_pg
     ports:

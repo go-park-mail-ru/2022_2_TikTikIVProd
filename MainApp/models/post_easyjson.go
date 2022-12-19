@@ -58,25 +58,25 @@ func easyjson5a72dc82DecodeGithubComGoParkMailRu20222TikTikIVProdMainAppModels(i
 			if data := in.Raw(); in.Ok() {
 				in.AddError((out.CreateDate).UnmarshalJSON(data))
 			}
-		case "images":
+		case "attachments":
 			if in.IsNull() {
 				in.Skip()
-				out.Images = nil
+				out.Attachments = nil
 			} else {
 				in.Delim('[')
-				if out.Images == nil {
+				if out.Attachments == nil {
 					if !in.IsDelim(']') {
-						out.Images = make([]Image, 0, 2)
+						out.Attachments = make([]Attachment, 0, 2)
 					} else {
-						out.Images = []Image{}
+						out.Attachments = []Attachment{}
 					}
 				} else {
-					out.Images = (out.Images)[:0]
+					out.Attachments = (out.Attachments)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v1 Image
+					var v1 Attachment
 					easyjson5a72dc82DecodeGithubComGoParkMailRu20222TikTikIVProdMainAppModels1(in, &v1)
-					out.Images = append(out.Images, v1)
+					out.Attachments = append(out.Attachments, v1)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -146,13 +146,13 @@ func easyjson5a72dc82EncodeGithubComGoParkMailRu20222TikTikIVProdMainAppModels(o
 		out.Raw((in.CreateDate).MarshalJSON())
 	}
 	{
-		const prefix string = ",\"images\":"
+		const prefix string = ",\"attachments\":"
 		out.RawString(prefix)
-		if in.Images == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+		if in.Attachments == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v2, v3 := range in.Images {
+			for v2, v3 := range in.Attachments {
 				if v2 > 0 {
 					out.RawByte(',')
 				}
@@ -187,7 +187,7 @@ func (v *Post) UnmarshalJSON(data []byte) error {
 func (v *Post) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson5a72dc82DecodeGithubComGoParkMailRu20222TikTikIVProdMainAppModels(l, v)
 }
-func easyjson5a72dc82DecodeGithubComGoParkMailRu20222TikTikIVProdMainAppModels1(in *jlexer.Lexer, out *Image) {
+func easyjson5a72dc82DecodeGithubComGoParkMailRu20222TikTikIVProdMainAppModels1(in *jlexer.Lexer, out *Attachment) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -218,7 +218,7 @@ func easyjson5a72dc82DecodeGithubComGoParkMailRu20222TikTikIVProdMainAppModels1(
 		in.Consumed()
 	}
 }
-func easyjson5a72dc82EncodeGithubComGoParkMailRu20222TikTikIVProdMainAppModels1(out *jwriter.Writer, in Image) {
+func easyjson5a72dc82EncodeGithubComGoParkMailRu20222TikTikIVProdMainAppModels1(out *jwriter.Writer, in Attachment) {
 	out.RawByte('{')
 	first := true
 	_ = first

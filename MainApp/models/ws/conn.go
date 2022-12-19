@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	chatUseCase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/chat/usecase"
 	models "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
 	"github.com/gorilla/websocket"
@@ -12,9 +11,9 @@ import (
 )
 
 const (
-	writeWait = 10 * time.Second
-	pongWait = 60 * time.Second
-	pingPeriod = (pongWait * 9) / 10
+	writeWait      = 10 * time.Second
+	pongWait       = 60 * time.Second
+	pingPeriod     = (pongWait * 9) / 10
 	maxMessageSize = 512
 )
 
@@ -27,7 +26,7 @@ var upgrader = websocket.Upgrader{
 }
 
 type connection struct {
-	ws *websocket.Conn
+	ws   *websocket.Conn
 	send chan models.Message
 }
 
@@ -47,7 +46,6 @@ func (s Subscription) readPump(hub *Hub, cu chatUseCase.UseCaseI) {
 		}
 
 		err := c.ws.ReadJSON(&msg)
-		fmt.Println(msg)
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
 				log.Printf("error: %v", err)

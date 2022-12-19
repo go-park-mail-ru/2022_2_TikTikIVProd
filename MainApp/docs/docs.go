@@ -841,6 +841,100 @@ const docTemplate = `{
                 }
             }
         },
+        "/file/upload": {
+            "post": {
+                "description": "Upload file",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "file"
+                ],
+                "summary": "Upload file",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "file",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success upload file"
+                    },
+                    "401": {
+                        "description": "no cookie",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "403": {
+                        "description": "invalid csrf",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "405": {
+                        "description": "invalid http method",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/file/{id}": {
+            "get": {
+                "description": "Get file by id",
+                "tags": [
+                    "file"
+                ],
+                "summary": "Get file by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "file ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success get file"
+                    },
+                    "401": {
+                        "description": "no cookie",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "405": {
+                        "description": "invalid http method",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/friends/add/{friend_id}": {
             "post": {
                 "description": "add friend",
@@ -1116,9 +1210,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/image/upload": {
+        "/Attachment/upload": {
             "post": {
-                "description": "Upload image",
+                "description": "Upload Attachment",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -1126,21 +1220,21 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "image"
+                    "Attachment"
                 ],
-                "summary": "Upload image",
+                "summary": "Upload Attachment",
                 "parameters": [
                     {
                         "type": "file",
-                        "description": "image file",
-                        "name": "image",
+                        "description": "Attachment file",
+                        "name": "Attachment",
                         "in": "formData",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "success upload image"
+                        "description": "success upload Attachment"
                     },
                     "401": {
                         "description": "no cookie",
@@ -1169,20 +1263,20 @@ const docTemplate = `{
                 }
             }
         },
-        "/image/{id}": {
+        "/Attachment/{id}": {
             "get": {
-                "description": "Get image by id",
+                "description": "Get Attachment by id",
                 "produces": [
-                    "image/png"
+                    "Attachment/png"
                 ],
                 "tags": [
-                    "image"
+                    "Attachment"
                 ],
-                "summary": "Get image by id",
+                "summary": "Get Attachment by id",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "image ID",
+                        "description": "Attachment ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1190,7 +1284,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "success get image"
+                        "description": "success get Attachment"
                     },
                     "401": {
                         "description": "no cookie",
@@ -2024,7 +2118,7 @@ const docTemplate = `{
             "get": {
                 "description": "Get sticker by id",
                 "produces": [
-                    "image/png"
+                    "Attachment/png"
                 ],
                 "tags": [
                     "stickers"
@@ -2542,7 +2636,15 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Image": {
+        "models.File": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.Attachment": {
             "type": "object",
             "properties": {
                 "id": {
@@ -2562,9 +2664,21 @@ const docTemplate = `{
                 "dialog_id": {
                     "type": "integer"
                 },
+                "files": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
                 "id": {
                     "type": "integer",
                     "readOnly": true
+                },
+                "attachments": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "receiver_id": {
                     "type": "integer"
@@ -2572,6 +2686,12 @@ const docTemplate = `{
                 "sender_id": {
                     "type": "integer",
                     "readOnly": true
+                },
+                "stickers": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
         },
@@ -2595,13 +2715,19 @@ const docTemplate = `{
                     "type": "string",
                     "readOnly": true
                 },
+                "files": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.File"
+                    }
+                },
                 "id": {
                     "type": "integer"
                 },
-                "images": {
+                "attachments": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.Image"
+                        "$ref": "#/definitions/models.Attachment"
                     }
                 },
                 "is_liked": {

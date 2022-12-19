@@ -3,7 +3,7 @@ package usecase
 import (
 	"time"
 
-	imageRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/image/repository"
+	attachmentRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/attachment/repository"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/post/repository"
 	userRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/user/repository"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
@@ -27,16 +27,16 @@ type PostUseCaseI interface {
 }
 
 type postsUsecase struct {
-	postsRepo repository.RepositoryI
-	imageRepo imageRep.RepositoryI
-	userRepo  userRep.RepositoryI
+	postsRepo      repository.RepositoryI
+	attachmentRepo attachmentRep.RepositoryI
+	userRepo       userRep.RepositoryI
 }
 
-func NewPostUsecase(ps repository.RepositoryI, ir imageRep.RepositoryI, ur userRep.RepositoryI) PostUseCaseI {
+func NewPostUsecase(ps repository.RepositoryI, ir attachmentRep.RepositoryI, ur userRep.RepositoryI) PostUseCaseI {
 	return &postsUsecase{
-		postsRepo: ps,
-		imageRepo: ir,
-		userRepo:  ur,
+		postsRepo:      ps,
+		attachmentRepo: ir,
+		userRepo:       ur,
 	}
 }
 
@@ -251,17 +251,17 @@ func addAuthorForPost(post *models.Post, repUsers userRep.RepositoryI) error {
 	return nil
 }
 
-func addImagesForPost(post *models.Post, repImg imageRep.RepositoryI) error {
-	images, err := repImg.GetPostImages(post.ID)
+func addAttachmentsForPost(post *models.Post, repImg attachmentRep.RepositoryI) error {
+	attachments, err := repImg.GetPostAttachments(post.ID)
 
 	if err != nil {
-		return errors.Wrap(err, "Error in func addPostImagesAuthors")
+		return errors.Wrap(err, "Error in func addPostAttachmentsAuthors")
 	}
 
-	post.Images = make([]models.Image, 0, 10)
+	post.Attachments = make([]models.Attachment, 0, 10)
 
-	for _, image := range images {
-		post.Images = append(post.Images, *image)
+	for _, Attachment := range attachments {
+		post.Attachments = append(post.Attachments, *Attachment)
 	}
 
 	return nil
@@ -271,7 +271,7 @@ func addCountLikesForPost(post *models.Post, postsRepo repository.RepositoryI) e
 	count, err := postsRepo.GetCountLikesPost(post.ID)
 
 	if err != nil {
-		return errors.Wrap(err, "Post repository error in func addPostImagesAuthors")
+		return errors.Wrap(err, "Post repository error in func addPostAttachmentsAuthors")
 	}
 
 	post.CountLikes = count
@@ -290,10 +290,10 @@ func addIsLikedForPost(post *models.Post, postRepo repository.RepositoryI, userI
 }
 
 func addAdditionalFieldsToPost(post *models.Post, postsUsecase *postsUsecase, userId uint64) error {
-	err := addImagesForPost(post, postsUsecase.imageRepo)
+	err := addAttachmentsForPost(post, postsUsecase.attachmentRepo)
 
 	if err != nil {
-		return errors.Wrap(err, "error while get images")
+		return errors.Wrap(err, "error while get attachments")
 	}
 
 	err = addAuthorForPost(post, postsUsecase.userRepo)
@@ -376,7 +376,7 @@ func (p *postsUsecase) GetComments(postId uint64) ([]*models.Comment, error) {
 	if err != nil {
 		return nil, models.ErrNotFound
 	}
-	
+
 	comments, err := p.postsRepo.GetComments(postId)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error in func postsUsecase.GetComments")
@@ -405,4 +405,3 @@ func addAuthorForComment(comment *models.Comment, repUsers userRep.RepositoryI) 
 
 	return nil
 }
-
