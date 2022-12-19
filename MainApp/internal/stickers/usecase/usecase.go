@@ -1,4 +1,4 @@
-package imageUsecase
+package attachmentUsecase
 
 import (
 	stickerRepository "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/stickers/repository"
@@ -38,4 +38,3 @@ func (su *stickerUsecase) GetAllStickers() ([]*models.Sticker, error) {
 
 	return stickers, nil
 }
-

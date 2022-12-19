@@ -22,13 +22,13 @@ func (Post) TableName() string {
 	return "user_posts"
 }
 
-type PostImagesRelation struct {
-	PostID  uint64 `gorm:"column:user_post_id"`
-	ImageID uint64 `gorm:"column:img_id"`
+type PostAttachmentsRelation struct {
+	PostID       uint64 `gorm:"column:user_post_id"`
+	AttachmentID uint64 `gorm:"column:att_id"`
 }
 
-func (PostImagesRelation) TableName() string {
-	return "user_posts_images"
+func (PostAttachmentsRelation) TableName() string {
+	return "user_posts_attachments"
 }
 
 func toPostgresPost(p *models.Post) *Post {
@@ -79,18 +79,18 @@ func (dbPost *postRepository) UpdatePost(p *models.Post) error {
 		return errors.Wrap(tx.Error, "postRepository.UpdatePost error while insert post")
 	}
 
-	tx = dbPost.db.Where(&PostImagesRelation{PostID: p.ID}).Delete(&PostImagesRelation{})
+	tx = dbPost.db.Where(&PostAttachmentsRelation{PostID: p.ID}).Delete(&PostAttachmentsRelation{})
 	if tx.Error != nil {
 		return errors.Wrap(tx.Error, "postRepository.UpdatePost error while delete relation")
 	}
 
-	postImages := make([]PostImagesRelation, 0, 10)
-	for _, elem := range p.Images {
-		postImages = append(postImages, PostImagesRelation{PostID: p.ID, ImageID: elem.ID})
+	postAttachments := make([]PostAttachmentsRelation, 0, 10)
+	for _, elem := range p.Attachments {
+		postAttachments = append(postAttachments, PostAttachmentsRelation{PostID: p.ID, AttachmentID: elem.ID})
 	}
 
-	if len(postImages) > 0 {
-		tx = dbPost.db.Create(&postImages)
+	if len(postAttachments) > 0 {
+		tx = dbPost.db.Create(&postAttachments)
 		if tx.Error != nil {
 			return errors.Wrap(tx.Error, "postRepository.CreatePost error while insert relation")
 		}
@@ -118,13 +118,13 @@ func (dbPost *postRepository) CreatePost(p *models.Post) error {
 
 	p.ID = post.ID
 
-	postImages := make([]PostImagesRelation, 0, 10)
-	for _, elem := range p.Images {
-		postImages = append(postImages, PostImagesRelation{PostID: p.ID, ImageID: elem.ID})
+	postAttachments := make([]PostAttachmentsRelation, 0, 10)
+	for _, elem := range p.Attachments {
+		postAttachments = append(postAttachments, PostAttachmentsRelation{PostID: p.ID, AttachmentID: elem.ID})
 	}
 
-	if len(postImages) > 0 {
-		tx = dbPost.db.Create(&postImages)
+	if len(postAttachments) > 0 {
+		tx = dbPost.db.Create(&postAttachments)
 		if tx.Error != nil {
 			return errors.Wrap(tx.Error, "postRepository.CreatePost error while insert relation")
 		}
@@ -275,4 +275,3 @@ func (dbPost *postRepository) DeleteComment(id uint64) error {
 
 	return nil
 }
-
