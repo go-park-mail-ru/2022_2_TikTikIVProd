@@ -141,6 +141,7 @@ func (uc *useCase) SelectMessages(pbDialogId *chat.DialogId) (*chat.SelectMessag
 			ReceiverId: messages[idx].ReceiverID,
 			Body:       messages[idx].Body,
 			CreatedAt:  ts,
+			StickerId: messages[idx].StickerID,
 		}
 		pbMessages.Messages = append(pbMessages.Messages, msg)
 	}
@@ -163,6 +164,7 @@ func (uc *useCase) CreateDialog(pbDialog *chat.Dialog) (*chat.Nothing, error) {
 			ReceiverID: pbDialog.Messages[idx].ReceiverId,
 			Body:       pbDialog.Messages[idx].Body,
 			CreatedAt:  pbDialog.Messages[idx].CreatedAt.AsTime(),
+			StickerID: pbDialog.Messages[idx].StickerId,
 		}
 		dialog.Messages = append(dialog.Messages, msg)
 	}
@@ -185,6 +187,7 @@ func (uc *useCase) CreateMessage(pbMessage *chat.Message) (*chat.Nothing, error)
 		ReceiverID: pbMessage.ReceiverId,
 		Body:       pbMessage.Body,
 		CreatedAt:  pbMessage.CreatedAt.AsTime(),
+		StickerID: pbMessage.StickerId,
 	}
 
 	err := uc.chatRepository.CreateMessage(msg)

@@ -58,7 +58,7 @@ func (delivery *delivery) GetAttachmentByID(c echo.Context) error {
 // @Summary      Upload image
 // @Description  Upload image
 // @Tags     	 Attachment
-// @Param Attachment formData image  true  ""
+// @Param image formData file  true  "image file"
 // @Accept multipart/form-data
 // @Produce  application/json
 // @Success  200 "success upload Attachment"

@@ -16,6 +16,6 @@ type Message struct {
 	ReceiverID  uint64       `json:"receiver_id" gorm:"column:receiver_id"`
 	Body        string       `json:"body" gorm:"column:text"`
 	CreatedAt   time.Time    `json:"created_at" gorm:"column:created_at"`
-	Attachments []Attachment `json:"attachments"`
-	StickerID   uint64       `json:"sticker"`
+	Attachments []Attachment `json:"attachments" gorm:"-"`
+	StickerID   uint64       `json:"sticker" gorm:"column:sticker_id"`
 }

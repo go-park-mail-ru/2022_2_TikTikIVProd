@@ -3,6 +3,13 @@ definitions:
     properties:
       message: {}
     type: object
+  models.Attachment:
+    properties:
+      id:
+        type: integer
+      type:
+        type: string
+    type: object
   models.Comment:
     properties:
       avatar_id:
@@ -61,47 +68,35 @@ definitions:
       userId2:
         type: integer
     type: object
-  models.File:
-    properties:
-      id:
-        type: integer
-    type: object
-  models.Attachment:
-    properties:
-      id:
-        type: integer
-    type: object
   models.Message:
     properties:
+      attachments:
+        items:
+          $ref: '#/definitions/models.Attachment'
+        type: array
       body:
         type: string
       created_at:
         type: string
       dialog_id:
         type: integer
-      files:
-        items:
-          type: integer
-        type: array
       id:
         readOnly: true
         type: integer
-      attachments:
-        items:
-          type: integer
-        type: array
       receiver_id:
         type: integer
       sender_id:
         readOnly: true
         type: integer
-      stickers:
-        items:
-          type: integer
-        type: array
+      sticker:
+        type: integer
     type: object
   models.Post:
     properties:
+      attachments:
+        items:
+          $ref: '#/definitions/models.Attachment'
+        type: array
       avatar_id:
         readOnly: true
         type: integer
@@ -112,16 +107,8 @@ definitions:
       create_date:
         readOnly: true
         type: string
-      files:
-        items:
-          $ref: '#/definitions/models.File'
-        type: array
       id:
         type: integer
-      attachments:
-        items:
-          $ref: '#/definitions/models.Attachment'
-        type: array
       is_liked:
         type: boolean
       message:
@@ -201,6 +188,105 @@ info:
   title: WS Swagger API
   version: "1.0"
 paths:
+  /attachment/{id}:
+    get:
+      description: Get Attachment by id
+      parameters:
+      - description: Attachment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - Attachment/png
+      responses:
+        "200":
+          description: success get Attachment
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Get Attachment by id
+      tags:
+      - Attachment
+  /attachment/file/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload file
+      parameters:
+      - description: file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success upload file
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Upload file
+      tags:
+      - file
+  /attachment/image/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload image
+      parameters:
+      - description: image file
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success upload Attachment
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Upload image
+      tags:
+      - Attachment
   /auth:
     get:
       description: check user auth
@@ -713,68 +799,6 @@ paths:
       summary: Feed
       tags:
       - posts
-  /file/{id}:
-    get:
-      description: Get file by id
-      parameters:
-      - description: file ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: success get file
-        "401":
-          description: no cookie
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "405":
-          description: invalid http method
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "500":
-          description: internal server error
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-      summary: Get file by id
-      tags:
-      - file
-  /file/upload:
-    post:
-      consumes:
-      - multipart/form-data
-      description: Upload file
-      parameters:
-      - description: file
-        in: formData
-        name: file
-        required: true
-        type: file
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: success upload file
-        "401":
-          description: no cookie
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "403":
-          description: invalid csrf
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "405":
-          description: invalid http method
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "500":
-          description: internal server error
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-      summary: Upload file
-      tags:
-      - file
   /friends/{user_id}:
     get:
       description: get user's friends
@@ -951,70 +975,6 @@ paths:
       summary: DeleteFriend
       tags:
       - friends
-  /Attachment/{id}:
-    get:
-      description: Get Attachment by id
-      parameters:
-      - description: Attachment ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - Attachment/png
-      responses:
-        "200":
-          description: success get Attachment
-        "401":
-          description: no cookie
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "405":
-          description: invalid http method
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "500":
-          description: internal server error
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-      summary: Get Attachment by id
-      tags:
-      - Attachment
-  /Attachment/upload:
-    post:
-      consumes:
-      - multipart/form-data
-      description: Upload Attachment
-      parameters:
-      - description: Attachment file
-        in: formData
-        name: Attachment
-        required: true
-        type: file
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: success upload Attachment
-        "401":
-          description: no cookie
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "403":
-          description: invalid csrf
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "405":
-          description: invalid http method
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "500":
-          description: internal server error
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-      summary: Upload Attachment
-      tags:
-      - Attachment
   /logout:
     post:
       description: user logout

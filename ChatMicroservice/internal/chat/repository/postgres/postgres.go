@@ -135,7 +135,7 @@ func (dbChat *chatRepository) SelectDialogByUsers(userId, friendId uint64) (*mod
 
 func (dbChat *chatRepository) SelectMessages(id uint64) ([]models.Message, error) {
 	messages := make([]models.Message, 0, 10)
-	tx := dbChat.db.Table("message").Order("created_at").Find(&messages, "chat_id = ?", id)
+	tx := dbChat.db.Table("message").Order("id").Find(&messages, "chat_id = ?", id)
 
 	if tx.Error != nil {
 		return nil, errors.Wrap(tx.Error, "database error (table message)")

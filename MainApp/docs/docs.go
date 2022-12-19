@@ -16,6 +16,156 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/attachment/file/upload": {
+            "post": {
+                "description": "Upload file",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "file"
+                ],
+                "summary": "Upload file",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "file",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success upload file"
+                    },
+                    "401": {
+                        "description": "no cookie",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "403": {
+                        "description": "invalid csrf",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "405": {
+                        "description": "invalid http method",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/attachment/image/upload": {
+            "post": {
+                "description": "Upload image",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Attachment"
+                ],
+                "summary": "Upload image",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "image file",
+                        "name": "image",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success upload Attachment"
+                    },
+                    "401": {
+                        "description": "no cookie",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "403": {
+                        "description": "invalid csrf",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "405": {
+                        "description": "invalid http method",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/attachment/{id}": {
+            "get": {
+                "description": "Get Attachment by id",
+                "produces": [
+                    "Attachment/png"
+                ],
+                "tags": [
+                    "Attachment"
+                ],
+                "summary": "Get Attachment by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Attachment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success get Attachment"
+                    },
+                    "401": {
+                        "description": "no cookie",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "405": {
+                        "description": "invalid http method",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/auth": {
             "get": {
                 "description": "check user auth",
@@ -841,100 +991,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/file/upload": {
-            "post": {
-                "description": "Upload file",
-                "consumes": [
-                    "multipart/form-data"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "file"
-                ],
-                "summary": "Upload file",
-                "parameters": [
-                    {
-                        "type": "file",
-                        "description": "file",
-                        "name": "file",
-                        "in": "formData",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "success upload file"
-                    },
-                    "401": {
-                        "description": "no cookie",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "403": {
-                        "description": "invalid csrf",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "405": {
-                        "description": "invalid http method",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "500": {
-                        "description": "internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    }
-                }
-            }
-        },
-        "/file/{id}": {
-            "get": {
-                "description": "Get file by id",
-                "tags": [
-                    "file"
-                ],
-                "summary": "Get file by id",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "file ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "success get file"
-                    },
-                    "401": {
-                        "description": "no cookie",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "405": {
-                        "description": "invalid http method",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "500": {
-                        "description": "internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    }
-                }
-            }
-        },
         "/friends/add/{friend_id}": {
             "post": {
                 "description": "add friend",
@@ -1197,103 +1253,6 @@ const docTemplate = `{
                     },
                     "405": {
                         "description": "Method Not Allowed",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "500": {
-                        "description": "internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    }
-                }
-            }
-        },
-        "/Attachment/upload": {
-            "post": {
-                "description": "Upload Attachment",
-                "consumes": [
-                    "multipart/form-data"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Attachment"
-                ],
-                "summary": "Upload Attachment",
-                "parameters": [
-                    {
-                        "type": "file",
-                        "description": "Attachment file",
-                        "name": "Attachment",
-                        "in": "formData",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "success upload Attachment"
-                    },
-                    "401": {
-                        "description": "no cookie",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "403": {
-                        "description": "invalid csrf",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "405": {
-                        "description": "invalid http method",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "500": {
-                        "description": "internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    }
-                }
-            }
-        },
-        "/Attachment/{id}": {
-            "get": {
-                "description": "Get Attachment by id",
-                "produces": [
-                    "Attachment/png"
-                ],
-                "tags": [
-                    "Attachment"
-                ],
-                "summary": "Get Attachment by id",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Attachment ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "success get Attachment"
-                    },
-                    "401": {
-                        "description": "no cookie",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "405": {
-                        "description": "invalid http method",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
                         }
@@ -2552,6 +2511,17 @@ const docTemplate = `{
                 "message": {}
             }
         },
+        "models.Attachment": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
         "models.Comment": {
             "type": "object",
             "required": [
@@ -2636,25 +2606,15 @@ const docTemplate = `{
                 }
             }
         },
-        "models.File": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "models.Attachment": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                }
-            }
-        },
         "models.Message": {
             "type": "object",
             "properties": {
+                "attachments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Attachment"
+                    }
+                },
                 "body": {
                     "type": "string"
                 },
@@ -2664,21 +2624,9 @@ const docTemplate = `{
                 "dialog_id": {
                     "type": "integer"
                 },
-                "files": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
                 "id": {
                     "type": "integer",
                     "readOnly": true
-                },
-                "attachments": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
                 },
                 "receiver_id": {
                     "type": "integer"
@@ -2687,11 +2635,8 @@ const docTemplate = `{
                     "type": "integer",
                     "readOnly": true
                 },
-                "stickers": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
+                "sticker": {
+                    "type": "integer"
                 }
             }
         },
@@ -2701,6 +2646,12 @@ const docTemplate = `{
                 "message"
             ],
             "properties": {
+                "attachments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Attachment"
+                    }
+                },
                 "avatar_id": {
                     "type": "integer",
                     "readOnly": true
@@ -2715,20 +2666,8 @@ const docTemplate = `{
                     "type": "string",
                     "readOnly": true
                 },
-                "files": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.File"
-                    }
-                },
                 "id": {
                     "type": "integer"
-                },
-                "attachments": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.Attachment"
-                    }
                 },
                 "is_liked": {
                     "type": "boolean"
