@@ -12,6 +12,7 @@ jobs:
         uses: golangci/golangci-lint-action@v2
         with:
           version: v1.29
+          working-directory: ./MainApp
 
   tests:
     needs: golangci
@@ -128,4 +129,3 @@ jobs:
             cd 2022_2_TikTikIVProd/
             sudo docker-compose up -d --build --no-deps
 
-            
