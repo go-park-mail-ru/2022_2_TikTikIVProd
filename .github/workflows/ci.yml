@@ -3,25 +3,25 @@ on:
   push:
     branches: [deploy]
 jobs:
-  golangci:
-    name: linter
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/setup-go@v2
-        with:
-          go-version: 1.19
-      - uses: actions/checkout@v2
-      - name: run golangci-lint
-        run: |
-          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.50.1
-          cd MainApp && golangci-lint run ./... && cd ..
-          cd UserMicroservice && golangci-lint run ./... && cd ..
-          cd AuthMicroservice && golangci-lint run ./... && cd ..
-          cd ImageMicroservice && golangci-lint run ./... && cd ..
-          cd ChatMicroservice && golangci-lint run ./... && cd ..
+  # golangci:
+  #   name: linter
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/setup-go@v2
+  #       with:
+  #         go-version: 1.19
+  #     - uses: actions/checkout@v2
+  #     - name: run golangci-lint
+  #       run: |
+  #         go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.50.1
+  #         cd MainApp && golangci-lint run ./... && cd ..
+  #         cd UserMicroservice && golangci-lint run ./... && cd ..
+  #         cd AuthMicroservice && golangci-lint run ./... && cd ..
+  #         cd ImageMicroservice && golangci-lint run ./... && cd ..
+  #         cd ChatMicroservice && golangci-lint run ./... && cd ..
 
   tests:
-    needs: golangci
+    # needs: golangci
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

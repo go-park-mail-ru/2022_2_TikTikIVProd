@@ -116,7 +116,7 @@ func TestDeliveryUpdateUser(t *testing.T) {
 	err := faker.FakeData(&mockUser)
 	assert.NoError(t, err)
 	mockUser.Id = 1
-	mockUser.CreatedAt = time.Date(2022, time.September, 5, 1, 12, 12, 12, time.Local)
+	mockUser.CreatedAt = time.Date(2022, time.September, 5, 1, 12, 12, 12, time.UTC)
 	
 
 	jsonUser, err := json.Marshal(mockUser)
@@ -126,7 +126,7 @@ func TestDeliveryUpdateUser(t *testing.T) {
 	err = faker.FakeData(&mockUserNotFound)
 	assert.NoError(t, err)
 	mockUserNotFound.Id = 2
-	mockUserNotFound.CreatedAt = time.Date(2022, time.September, 5, 1, 12, 12, 12, time.Local)
+	mockUserNotFound.CreatedAt = time.Date(2022, time.September, 5, 1, 12, 12, 12, time.UTC)
 
 	jsonUserNotFound, err := json.Marshal(mockUserNotFound)
 	assert.NoError(t, err)
@@ -135,7 +135,7 @@ func TestDeliveryUpdateUser(t *testing.T) {
 	err = faker.FakeData(&mockUserInternalErr)
 	assert.NoError(t, err)
 	mockUserInternalErr.Id = 3
-	mockUserInternalErr.CreatedAt = time.Date(2022, time.September, 5, 1, 12, 12, 12, time.Local)
+	mockUserInternalErr.CreatedAt = time.Date(2022, time.September, 5, 1, 12, 12, 12, time.UTC)
 
 	jsonUserInternalErr, err := json.Marshal(mockUserInternalErr)
 	assert.NoError(t, err)

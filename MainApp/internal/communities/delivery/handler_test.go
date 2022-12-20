@@ -137,7 +137,7 @@ func TestDeliveryUpdateCommunity(t *testing.T) {
 		AvatarID: 1,
 		Name: "name",
 		Description: "descr",
-		CreateDate: time.Date(2022, time.September, 5, 1, 12, 12, 12, time.Local),
+		CreateDate: time.Date(2022, time.September, 5, 1, 12, 12, 12, time.UTC),
 	}
 
 	mockCommunityInternalErr := models.Community {
@@ -146,7 +146,7 @@ func TestDeliveryUpdateCommunity(t *testing.T) {
 		AvatarID: 1,
 		Name: "name",
 		Description: "descr",
-		CreateDate: time.Date(2022, time.September, 5, 1, 12, 12, 12, time.Local),
+		CreateDate: time.Date(2022, time.September, 5, 1, 12, 12, 12, time.UTC),
 	}
 
 	jsonCommunity, err := json.Marshal(mockCommunity)
