@@ -1,6 +1,12 @@
-CREATE TABLE IF NOT EXISTS images (
+CREATE TABLE IF NOT EXISTS attachments (
 	id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-	img_link VARCHAR(260) NOT NULL
+	att_link VARCHAR(260) NOT NULL,
+	ttype int NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS stickers (
+	id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	link VARCHAR(260) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS users (
@@ -8,7 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
 	first_name VARCHAR(35) NOT NULL,
 	last_name VARCHAR(35) NOT NULL,
 	nick_name VARCHAR(30) NOT NULL UNIQUE,
-	avatar_img_id INT REFERENCES images(id),
+	avatar_att_id INT REFERENCES attachments(id),
 	email VARCHAR(254) NOT NULL UNIQUE,
 	password VARCHAR(128) NOT NULL,
 	created_at date NOT NULL
@@ -23,7 +29,7 @@ CREATE TABLE IF NOT EXISTS friends (
 CREATE TABLE IF NOT EXISTS communities (
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     owner_id INT REFERENCES users(id),
-    avatar_img_id INT REFERENCES images(id),
+    avatar_att_id INT REFERENCES attachments(id),
     name VARCHAR(30) NOT NULL,
     description TEXT DEFAULT '',
     created_at date NOT NULL
@@ -34,13 +40,21 @@ CREATE TABLE IF NOT EXISTS user_posts (
 	user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 	community_id INT REFERENCES communities(id),
 	description TEXT NOT NULL DEFAULT '',
+	created_at TIMESTAMP NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS comments (
+	id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	user_id INT NOT NULL REFERENCES users(id),
+	post_id INT NOT NULL REFERENCES user_posts(id) ON DELETE CASCADE,
+	text TEXT NOT NULL,
 	created_at DATE NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS user_posts_images (
+CREATE TABLE IF NOT EXISTS user_posts_attachments (
 	user_post_id INT NOT NULL REFERENCES user_posts(id) ON DELETE CASCADE,
-	img_id INT NOT NULL REFERENCES images(id) ON DELETE CASCADE,
-	PRIMARY KEY (user_post_id, img_id)
+	att_id INT NOT NULL REFERENCES attachments(id) ON DELETE CASCADE,
+	PRIMARY KEY (user_post_id, att_id)
 );
 
 CREATE TABLE IF NOT EXISTS chat (
@@ -51,15 +65,22 @@ CREATE TABLE IF NOT EXISTS chat (
 
 CREATE TABLE IF NOT EXISTS message (
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    text TEXT NOT NULL,
+    text TEXT,
     sender_id INT NOT NULL REFERENCES users(id),
 	receiver_id INT NOT NULL REFERENCES users(id),
 	chat_id INT NOT NULL REFERENCES chat(id) ON DELETE CASCADE,
-    created_at date NOT NULL
+    created_at TIMESTAMP NOT NULL,
+	sticker_id int REFERENCES stickers(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS like_post (
 	user_post_id INT NOT NULL REFERENCES user_posts(id) ON DELETE CASCADE,
 	user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 	PRIMARY KEY (user_post_id, user_id)
+);
+
+CREATE TABLE IF NOT EXISTS message_attachments (
+	message_id INT NOT NULL REFERENCES user_posts(id) ON DELETE CASCADE,
+	att_id INT NOT NULL REFERENCES attachments(id) ON DELETE CASCADE,
+	PRIMARY KEY (message_id, att_id)
 );

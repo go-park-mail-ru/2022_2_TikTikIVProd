@@ -22,13 +22,13 @@ func (Post) TableName() string {
 	return "user_posts"
 }
 
-type PostImagesRelation struct {
-	PostID  uint64 `gorm:"column:user_post_id"`
-	ImageID uint64 `gorm:"column:img_id"`
+type PostAttachmentsRelation struct {
+	PostID       uint64 `gorm:"column:user_post_id"`
+	AttachmentID uint64 `gorm:"column:att_id"`
 }
 
-func (PostImagesRelation) TableName() string {
-	return "user_posts_images"
+func (PostAttachmentsRelation) TableName() string {
+	return "user_posts_attachments"
 }
 
 func toPostgresPost(p *models.Post) *Post {
@@ -79,18 +79,18 @@ func (dbPost *postRepository) UpdatePost(p *models.Post) error {
 		return errors.Wrap(tx.Error, "postRepository.UpdatePost error while insert post")
 	}
 
-	tx = dbPost.db.Where(&PostImagesRelation{PostID: p.ID}).Delete(&PostImagesRelation{})
+	tx = dbPost.db.Where(&PostAttachmentsRelation{PostID: p.ID}).Delete(&PostAttachmentsRelation{})
 	if tx.Error != nil {
 		return errors.Wrap(tx.Error, "postRepository.UpdatePost error while delete relation")
 	}
 
-	postImages := make([]PostImagesRelation, 0, 10)
-	for _, elem := range p.Images {
-		postImages = append(postImages, PostImagesRelation{PostID: p.ID, ImageID: elem.ID})
+	postAttachments := make([]PostAttachmentsRelation, 0, 10)
+	for _, elem := range p.Attachments {
+		postAttachments = append(postAttachments, PostAttachmentsRelation{PostID: p.ID, AttachmentID: elem.ID})
 	}
 
-	if len(postImages) > 0 {
-		tx = dbPost.db.Create(&postImages)
+	if len(postAttachments) > 0 {
+		tx = dbPost.db.Create(&postAttachments)
 		if tx.Error != nil {
 			return errors.Wrap(tx.Error, "postRepository.CreatePost error while insert relation")
 		}
@@ -104,6 +104,8 @@ func (dbPost *postRepository) CreatePost(p *models.Post) error {
 
 	var tx *gorm.DB = nil
 
+	p.CreateDate = time.Now()
+
 	if p.CommunityID == 0 {
 		tx = dbPost.db.Omit("community_id").Create(post)
 	} else {
@@ -115,15 +117,14 @@ func (dbPost *postRepository) CreatePost(p *models.Post) error {
 	}
 
 	p.ID = post.ID
-	p.CreateDate = time.Now()
 
-	postImages := make([]PostImagesRelation, 0, 10)
-	for _, elem := range p.Images {
-		postImages = append(postImages, PostImagesRelation{PostID: p.ID, ImageID: elem.ID})
+	postAttachments := make([]PostAttachmentsRelation, 0, 10)
+	for _, elem := range p.Attachments {
+		postAttachments = append(postAttachments, PostAttachmentsRelation{PostID: p.ID, AttachmentID: elem.ID})
 	}
 
-	if len(postImages) > 0 {
-		tx = dbPost.db.Create(&postImages)
+	if len(postAttachments) > 0 {
+		tx = dbPost.db.Create(&postAttachments)
 		if tx.Error != nil {
 			return errors.Wrap(tx.Error, "postRepository.CreatePost error while insert relation")
 		}
@@ -196,7 +197,7 @@ func (dbPost *postRepository) CheckLikePost(id uint64, userID uint64) (bool, err
 }
 func (dbPost *postRepository) GetAllPosts() ([]*models.Post, error) {
 	posts := make([]*Post, 0, 10)
-	tx := dbPost.db.Order("created_at desc").Find(&posts)
+	tx := dbPost.db.Order("id desc").Find(&posts)
 
 	if tx.Error != nil {
 		return nil, errors.Wrap(tx.Error, "postRepository.GetAllPosts error")
@@ -207,7 +208,7 @@ func (dbPost *postRepository) GetAllPosts() ([]*models.Post, error) {
 
 func (dbPost *postRepository) GetUserPosts(userId uint64) ([]*models.Post, error) {
 	posts := make([]*Post, 0, 10)
-	tx := dbPost.db.Where("community_id is NULL").Where(&Post{UserID: userId}).Find(&posts)
+	tx := dbPost.db.Where("community_id is NULL").Where(&Post{UserID: userId}).Order("id desc").Find(&posts)
 
 	if tx.Error != nil {
 		return nil, errors.Wrap(tx.Error, "postRepository.GetAllPosts error") // TODO
@@ -218,11 +219,59 @@ func (dbPost *postRepository) GetUserPosts(userId uint64) ([]*models.Post, error
 
 func (dbPost *postRepository) GetCommunityPosts(communityID uint64) ([]*models.Post, error) {
 	posts := make([]*Post, 0, 10)
-	tx := dbPost.db.Where(&Post{CommunityID: communityID}).Find(&posts)
+	tx := dbPost.db.Where(&Post{CommunityID: communityID}).Order("id desc").Find(&posts)
 
 	if tx.Error != nil {
 		return nil, errors.Wrap(tx.Error, "postRepository.GetAllPosts error")
 	}
 
 	return toModelPosts(posts), nil
+}
+
+func (dbPost *postRepository) GetComments(postId uint64) ([]*models.Comment, error) {
+	comments := make([]*models.Comment, 0, 10)
+	tx := dbPost.db.Table("comments").Where(&models.Comment{PostID: postId}).Find(&comments)
+	if tx.Error != nil {
+		return nil, errors.Wrap(tx.Error, "postRepository.GetComments error")
+	}
+
+	return comments, nil
+}
+
+func (dbPost *postRepository) GetCommentById(id uint64) (*models.Comment, error) {
+	var comment models.Comment
+	tx := dbPost.db.Table("comments").Where("id = ?", id).Take(&comment)
+	if tx.Error != nil {
+		return nil, errors.Wrap(tx.Error, "postRepository.GetPostGetCommentByIdById error")
+	}
+
+	return &comment, nil
+}
+
+func (dbPost *postRepository) AddComment(comment *models.Comment) error {
+	tx := dbPost.db.Table("comments").Create(comment)
+	if tx.Error != nil {
+		return errors.Wrap(tx.Error, "postRepository.AddComment error while insert comment")
+	}
+
+	return nil
+}
+
+func (dbPost *postRepository) UpdateComment(comment *models.Comment) error {
+	tx := dbPost.db.Table("comments").Omit("id").Updates(comment)
+	if tx.Error != nil {
+		return errors.Wrap(tx.Error, "postRepository.UpdateComment error while UPDATE comment")
+	}
+
+	return nil
+}
+
+func (dbPost *postRepository) DeleteComment(id uint64) error {
+	tx := dbPost.db.Table("comments").Delete(&models.Comment{}, id)
+
+	if tx.Error != nil {
+		return errors.Wrap(tx.Error, "postRepository.DeleteComment error")
+	}
+
+	return nil
 }

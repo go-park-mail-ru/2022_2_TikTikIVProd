@@ -63,6 +63,7 @@ func TestUsecaseSelectDialog(t *testing.T) {
 	}
 
 	for idx := range mockPbDialog.Messages {
+		mockPbDialog.Messages[idx].AttachmentsIds = nil
 		msg := models.Message {
 			ID: mockPbDialog.Messages[idx].Id,
 			DialogID: mockPbDialog.Messages[idx].DialogId,
@@ -70,6 +71,7 @@ func TestUsecaseSelectDialog(t *testing.T) {
 			ReceiverID: mockPbDialog.Messages[idx].ReceiverId,
 			Body: mockPbDialog.Messages[idx].Body,
 			CreatedAt: mockPbDialog.Messages[idx].CreatedAt.AsTime(),
+			StickerID: mockPbDialog.Messages[idx].StickerId,
 		}
 		dialog.Messages = append(dialog.Messages, msg)
 	}
@@ -128,6 +130,7 @@ func TestUsecaseSelectDialogByUsers(t *testing.T) {
 	}
 
 	for idx := range mockPbDialog.Messages {
+		mockPbDialog.Messages[idx].AttachmentsIds = nil
 		msg := models.Message {
 			ID: mockPbDialog.Messages[idx].Id,
 			DialogID: mockPbDialog.Messages[idx].DialogId,
@@ -135,6 +138,7 @@ func TestUsecaseSelectDialogByUsers(t *testing.T) {
 			ReceiverID: mockPbDialog.Messages[idx].ReceiverId,
 			Body: mockPbDialog.Messages[idx].Body,
 			CreatedAt: mockPbDialog.Messages[idx].CreatedAt.AsTime(),
+			StickerID: mockPbDialog.Messages[idx].StickerId,
 		}
 		dialog.Messages = append(dialog.Messages, msg)
 	}
@@ -196,6 +200,7 @@ func TestUsecaseSelectAllDialogs(t *testing.T) {
 		}
 	
 		for idx2 := range mockPbDialogs.Dialogs[idx].Messages {
+			mockPbDialogs.Dialogs[idx].Messages[idx2].AttachmentsIds = nil
 			msg := models.Message {
 				ID: mockPbDialogs.Dialogs[idx].Messages[idx2].Id,
 				DialogID: mockPbDialogs.Dialogs[idx].Messages[idx2].DialogId,
@@ -203,6 +208,7 @@ func TestUsecaseSelectAllDialogs(t *testing.T) {
 				ReceiverID: mockPbDialogs.Dialogs[idx].Messages[idx2].ReceiverId,
 				Body: mockPbDialogs.Dialogs[idx].Messages[idx2].Body,
 				CreatedAt: mockPbDialogs.Dialogs[idx].Messages[idx2].CreatedAt.AsTime(),
+				StickerID: mockPbDialogs.Dialogs[idx].Messages[idx2].StickerId,
 			}
 			dialog.Messages = append(dialog.Messages, msg)
 		}
@@ -260,6 +266,7 @@ func TestUsecaseSelectMessages(t *testing.T) {
 	messages := make([]models.Message, 0)
 	
 	for idx := range mockPbMessages.Messages {
+		mockPbMessages.Messages[idx].AttachmentsIds = nil
 		msg := models.Message {
 			ID: mockPbMessages.Messages[idx].Id,
 			DialogID: mockPbMessages.Messages[idx].DialogId,
@@ -267,6 +274,7 @@ func TestUsecaseSelectMessages(t *testing.T) {
 			ReceiverID: mockPbMessages.Messages[idx].ReceiverId,
 			Body: mockPbMessages.Messages[idx].Body,
 			CreatedAt: mockPbMessages.Messages[idx].CreatedAt.AsTime(),
+			StickerID: mockPbMessages.Messages[idx].StickerId,
 		}
 		messages = append(messages, msg)
 	}
@@ -322,6 +330,7 @@ func TestUsecaseCreateDialog(t *testing.T) {
 	}
 
 	for idx := range mockPbDialog.Messages {
+		mockPbDialog.Messages[idx].AttachmentsIds = nil
 		msg := models.Message {
 			ID: mockPbDialog.Messages[idx].Id,
 			DialogID: mockPbDialog.Messages[idx].DialogId,
@@ -329,6 +338,7 @@ func TestUsecaseCreateDialog(t *testing.T) {
 			ReceiverID: mockPbDialog.Messages[idx].ReceiverId,
 			Body: mockPbDialog.Messages[idx].Body,
 			CreatedAt: mockPbDialog.Messages[idx].CreatedAt.AsTime(),
+			StickerID: mockPbDialog.Messages[idx].StickerId,
 		}
 		dialog.Messages = append(dialog.Messages, msg)
 	}
@@ -345,6 +355,7 @@ func TestUsecaseCreateDialog(t *testing.T) {
 	}
 
 	for idx := range mockPbDialogError.Messages {
+		mockPbDialogError.Messages[idx].AttachmentsIds = nil
 		msg := models.Message {
 			ID: mockPbDialogError.Messages[idx].Id,
 			DialogID: mockPbDialogError.Messages[idx].DialogId,
@@ -352,6 +363,7 @@ func TestUsecaseCreateDialog(t *testing.T) {
 			ReceiverID: mockPbDialogError.Messages[idx].ReceiverId,
 			Body: mockPbDialogError.Messages[idx].Body,
 			CreatedAt: mockPbDialogError.Messages[idx].CreatedAt.AsTime(),
+			StickerID: mockPbDialogError.Messages[idx].StickerId,
 		}
 		dialogError.Messages = append(dialogError.Messages, msg)
 	}
@@ -384,4 +396,84 @@ func TestUsecaseCreateDialog(t *testing.T) {
 	}
 	mockChatRepo.AssertExpectations(t)
 }
+
+// func TestUsecaseCreateMessage(t *testing.T) {
+// 	var mockPbDialog chat.Dialog
+// 	err := faker.FakeData(&mockPbDialog)
+// 	assert.NoError(t, err)
+// 	mockPbDialog.Id = 1
+
+// 	dialog := &models.Dialog {
+// 		Id: mockPbDialog.Id,
+// 		UserId1: mockPbDialog.UserId1,
+// 		UserId2: mockPbDialog.UserId2,
+// 	}
+
+// 	for idx := range mockPbDialog.Messages {
+// 		mockPbDialog.Messages[idx].AttachmentsIds = nil
+// 		msg := models.Message {
+// 			ID: mockPbDialog.Messages[idx].Id,
+// 			DialogID: mockPbDialog.Messages[idx].DialogId,
+// 			SenderID: mockPbDialog.Messages[idx].SenderId,
+// 			ReceiverID: mockPbDialog.Messages[idx].ReceiverId,
+// 			Body: mockPbDialog.Messages[idx].Body,
+// 			CreatedAt: mockPbDialog.Messages[idx].CreatedAt.AsTime(),
+// 			StickerID: mockPbDialog.Messages[idx].StickerId,
+// 		}
+// 		dialog.Messages = append(dialog.Messages, msg)
+// 	}
+
+// 	var mockPbDialogError chat.Dialog
+// 	err = faker.FakeData(&mockPbDialogError)
+// 	assert.NoError(t, err)
+// 	mockPbDialogError.Id = 2
+
+// 	dialogError := &models.Dialog {
+// 		Id: mockPbDialogError.Id,
+// 		UserId1: mockPbDialogError.UserId1,
+// 		UserId2: mockPbDialogError.UserId2,
+// 	}
+
+// 	for idx := range mockPbDialogError.Messages {
+// 		mockPbDialogError.Messages[idx].AttachmentsIds = nil
+// 		msg := models.Message {
+// 			ID: mockPbDialogError.Messages[idx].Id,
+// 			DialogID: mockPbDialogError.Messages[idx].DialogId,
+// 			SenderID: mockPbDialogError.Messages[idx].SenderId,
+// 			ReceiverID: mockPbDialogError.Messages[idx].ReceiverId,
+// 			Body: mockPbDialogError.Messages[idx].Body,
+// 			CreatedAt: mockPbDialogError.Messages[idx].CreatedAt.AsTime(),
+// 			StickerID: mockPbDialogError.Messages[idx].StickerId,
+// 		}
+// 		dialogError.Messages = append(dialogError.Messages, msg)
+// 	}
+
+// 	createErr := errors.New("error")
+
+// 	mockChatRepo := chatMocks.NewRepositoryI(t)
+
+// 	mockChatRepo.On("CreateDialog", dialog).Return(nil)
+// 	mockChatRepo.On("CreateDialog", dialogError).Return(createErr)
+
+// 	useCase := chatUsecase.New(mockChatRepo)
+
+// 	cases := map[string]TestCaseCreateDialog {
+// 		"success": {
+// 			ArgData:   &mockPbDialog,
+// 			Error: nil,
+// 		},
+// 		"error": {
+// 			ArgData:   &mockPbDialogError,
+// 			Error: createErr,
+// 		},
+// 	}
+
+// 	for name, test := range cases {
+// 		t.Run(name, func(t *testing.T) {
+// 			_, err := useCase.CreateDialog(test.ArgData)
+// 			require.Equal(t, test.Error, errors.Cause(err))
+// 		})
+// 	}
+// 	mockChatRepo.AssertExpectations(t)
+// }
 

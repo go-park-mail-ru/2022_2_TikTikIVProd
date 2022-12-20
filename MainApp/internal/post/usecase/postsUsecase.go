@@ -1,7 +1,9 @@
 package usecase
 
 import (
-	imageRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/image/repository"
+	"time"
+
+	attachmentRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/attachment/repository"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/post/repository"
 	userRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/user/repository"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
@@ -18,19 +20,23 @@ type PostUseCaseI interface {
 	DeletePost(id uint64, userId uint64) error
 	LikePost(id uint64, userId uint64) error
 	UnLikePost(id uint64, userId uint64) error
+	GetComments(id uint64) ([]*models.Comment, error)
+	AddComment(comment *models.Comment) error
+	UpdateComment(comment *models.Comment) error
+	DeleteComment(id uint64, userId uint64) error
 }
 
 type postsUsecase struct {
-	postsRepo repository.RepositoryI
-	imageRepo imageRep.RepositoryI
-	userRepo  userRep.RepositoryI
+	postsRepo      repository.RepositoryI
+	attachmentRepo attachmentRep.RepositoryI
+	userRepo       userRep.RepositoryI
 }
 
-func NewPostUsecase(ps repository.RepositoryI, ir imageRep.RepositoryI, ur userRep.RepositoryI) PostUseCaseI {
+func NewPostUsecase(ps repository.RepositoryI, ir attachmentRep.RepositoryI, ur userRep.RepositoryI) PostUseCaseI {
 	return &postsUsecase{
-		postsRepo: ps,
-		imageRepo: ir,
-		userRepo:  ur,
+		postsRepo:      ps,
+		attachmentRepo: ir,
+		userRepo:       ur,
 	}
 }
 
@@ -68,6 +74,57 @@ func (p *postsUsecase) DeletePost(id uint64, userId uint64) error {
 
 	if err != nil {
 		return errors.Wrap(err, "post repository error in delete")
+	}
+
+	return nil
+}
+
+func (p *postsUsecase) DeleteComment(id uint64, userId uint64) error {
+	existedComment, err := p.postsRepo.GetCommentById(id)
+	if err != nil {
+		return err
+	}
+
+	if existedComment == nil {
+		return models.ErrNotFound
+	}
+
+	if existedComment.UserID != userId {
+		return errors.New("Permission denied")
+	}
+
+	err = p.postsRepo.DeleteComment(id)
+	if err != nil {
+		return errors.Wrap(err, "post repository error in delete comment")
+	}
+
+	return nil
+}
+
+func (p *postsUsecase) UpdateComment(comment *models.Comment) error {
+	existedComment, err := p.postsRepo.GetCommentById(comment.ID)
+	if err != nil {
+		return err
+	}
+
+	if existedComment == nil {
+		return models.ErrNotFound
+	}
+
+	if existedComment.UserID != comment.UserID {
+		return errors.New("Permission denied")
+	}
+
+	err = p.postsRepo.UpdateComment(comment)
+
+	if err != nil {
+		return errors.Wrap(err, "Error in func postsUsecase.UpdateComment")
+	}
+
+	err = addAuthorForComment(comment, p.userRepo)
+
+	if err != nil {
+		return errors.Wrap(err, "Error in func postsUsecase.UpdateComment")
 	}
 
 	return nil
@@ -131,6 +188,26 @@ func (p *postsUsecase) CreatePost(post *models.Post) error {
 	return nil
 }
 
+func (p *postsUsecase) AddComment(comment *models.Comment) error {
+	comment.CreateDate = time.Now()
+
+	err := p.postsRepo.AddComment(comment)
+	if err != nil {
+		return errors.Wrap(err, "Error in func postsUsecase.AddComment")
+	}
+
+	user, err := p.userRepo.SelectUserById(comment.UserID)
+	if err != nil {
+		return errors.Wrap(err, "Error in func postsUsecase.AddComment")
+	}
+
+	comment.UserFirstName = user.FirstName
+	comment.UserLastName = user.LastName
+	comment.AvatarID = user.Avatar
+
+	return nil
+}
+
 func (p *postsUsecase) UpdatePost(post *models.Post) error {
 	existedPost, err := p.postsRepo.GetPostById(post.ID)
 	if err != nil {
@@ -174,17 +251,17 @@ func addAuthorForPost(post *models.Post, repUsers userRep.RepositoryI) error {
 	return nil
 }
 
-func addImagesForPost(post *models.Post, repImg imageRep.RepositoryI) error {
-	images, err := repImg.GetPostImages(post.ID)
+func addAttachmentsForPost(post *models.Post, repImg attachmentRep.RepositoryI) error {
+	attachments, err := repImg.GetPostAttachments(post.ID)
 
 	if err != nil {
-		return errors.Wrap(err, "Error in func addPostImagesAuthors")
+		return errors.Wrap(err, "Error in func addPostAttachmentsAuthors")
 	}
 
-	post.Images = make([]models.Image, 0, 10)
+	post.Attachments = make([]models.Attachment, 0, 10)
 
-	for _, image := range images {
-		post.Images = append(post.Images, *image)
+	for _, att := range attachments {
+		post.Attachments = append(post.Attachments, *att)
 	}
 
 	return nil
@@ -194,7 +271,7 @@ func addCountLikesForPost(post *models.Post, postsRepo repository.RepositoryI) e
 	count, err := postsRepo.GetCountLikesPost(post.ID)
 
 	if err != nil {
-		return errors.Wrap(err, "Post repository error in func addPostImagesAuthors")
+		return errors.Wrap(err, "Post repository error in func addPostAttachmentsAuthors")
 	}
 
 	post.CountLikes = count
@@ -213,10 +290,10 @@ func addIsLikedForPost(post *models.Post, postRepo repository.RepositoryI, userI
 }
 
 func addAdditionalFieldsToPost(post *models.Post, postsUsecase *postsUsecase, userId uint64) error {
-	err := addImagesForPost(post, postsUsecase.imageRepo)
+	err := addAttachmentsForPost(post, postsUsecase.attachmentRepo)
 
 	if err != nil {
-		return errors.Wrap(err, "error while get images")
+		return errors.Wrap(err, "error while get attachments")
 	}
 
 	err = addAuthorForPost(post, postsUsecase.userRepo)
@@ -292,4 +369,39 @@ func (p *postsUsecase) GetCommunityPosts(communityID uint64, userId uint64) ([]*
 	}
 
 	return posts, nil
+}
+
+func (p *postsUsecase) GetComments(postId uint64) ([]*models.Comment, error) {
+	_, err := p.postsRepo.GetPostById(postId)
+	if err != nil {
+		return nil, models.ErrNotFound
+	}
+
+	comments, err := p.postsRepo.GetComments(postId)
+	if err != nil {
+		return nil, errors.Wrap(err, "Error in func postsUsecase.GetComments")
+	}
+
+	for idx := range comments {
+		err = addAuthorForComment(comments[idx], p.userRepo)
+		if err != nil {
+			return nil, errors.Wrap(err, "postsUsecase.GetComments error while add additional fields")
+		}
+	}
+
+	return comments, nil
+}
+
+func addAuthorForComment(comment *models.Comment, repUsers userRep.RepositoryI) error {
+	author, err := repUsers.SelectUserById(comment.UserID)
+
+	if err != nil {
+		return errors.Wrap(err, "Error in func addAuthorForComment")
+	}
+
+	comment.UserLastName = author.LastName
+	comment.UserFirstName = author.FirstName
+	comment.AvatarID = author.Avatar
+
+	return nil
 }

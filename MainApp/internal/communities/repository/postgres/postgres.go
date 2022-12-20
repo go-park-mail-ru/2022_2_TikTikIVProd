@@ -1,17 +1,18 @@
 package postgres
 
 import (
+	"time"
+
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/communities/repository"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
-	"time"
 )
 
 type Community struct {
 	ID          uint64
 	OwnerID     uint64
-	AvatarID    uint64 `gorm:"column:avatar_img_id"`
+	AvatarID    uint64 `gorm:"column:avatar_att_id"`
 	Name        string
 	Description string
 	CreateDate  time.Time `gorm:"column:created_at"`
@@ -73,7 +74,7 @@ func (dbcomm *communitiesRepository) GetCommunity(id uint64) (*models.Community,
 func (dbcomm *communitiesRepository) SearchCommunities(searchString string) ([]*models.Community, error) {
 	comms := make([]*Community, 0, 10)
 
-	tx := dbcomm.db.Where("name LIKE ?", "%"+searchString+"%").Find(&comms)
+	tx := dbcomm.db.Where("lower(name) LIKE lower(?)", "%"+searchString+"%").Find(&comms)
 	if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
 		return nil, models.ErrNotFound
 	} else if tx.Error != nil {

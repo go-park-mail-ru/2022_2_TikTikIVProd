@@ -1,131 +1,131 @@
 package usecase_test
 
-import (
-	"testing"
+// import (
+// 	"testing"
 
-	"github.com/bxcodec/faker"
-	postMocks "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/post/repository/mocks"
-	imageMocks "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/image/repository/mocks"
-	userMocks "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/user/repository/mocks"
-	postUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/post/usecase"
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-)
+// 	"github.com/bxcodec/faker"
+// 	attachmentMocks "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/attachment/repository/mocks"
+// 	postMocks "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/post/repository/mocks"
+// 	postUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/post/usecase"
+// 	userMocks "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/user/repository/mocks"
+// 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
+// 	"github.com/stretchr/testify/assert"
+// 	"github.com/stretchr/testify/require"
+// )
 
-type TestCaseGetPostById struct {
-	ArgData uint64
-	ExpectedRes *models.Post
-	Error error
-}
-func TestUsecaseGetPostById(t *testing.T) {
-	var mockPost models.Post
-	err := faker.FakeData(&mockPost)
-	assert.NoError(t, err)
-	mockPost.Images = nil
+// type TestCaseGetPostById struct {
+// 	ArgData     uint64
+// 	ExpectedRes *models.Post
+// 	Error       error
+// }
 
-	var mockUser models.User
-	err = faker.FakeData(&mockUser)
-	assert.NoError(t, err)
+// func TestUsecaseGetPostById(t *testing.T) {
+// 	var mockPost models.Post
+// 	err := faker.FakeData(&mockPost)
+// 	assert.NoError(t, err)
+// 	mockPost.Attachments = nil
 
-	mockImages := make([]*models.Image, 0, 10)
-	err = faker.FakeData(&mockImages)
-	assert.NoError(t, err)
-	for _, image := range mockImages {
-		mockPost.Images = append(mockPost.Images, *image)
-	}
+// 	var mockUser models.User
+// 	err = faker.FakeData(&mockUser)
+// 	assert.NoError(t, err)
 
-	mockPost.UserLastName = mockUser.LastName
-	mockPost.AvatarID = mockUser.Avatar
-	mockPost.UserFirstName = mockUser.FirstName
+// 	mockAttachments := make([]*models.Attachment, 0, 10)
+// 	err = faker.FakeData(&mockAttachments)
+// 	assert.NoError(t, err)
+// 	for _, Attachment := range mockAttachments {
+// 		mockPost.Attachments = append(mockPost.Attachments, *Attachment)
+// 	}
 
-	mockPostRepo := postMocks.NewRepositoryI(t)
-	mockImageRepo := imageMocks.NewRepositoryI(t)
-	mockUserRepo := userMocks.NewRepositoryI(t)
+// 	mockPost.UserLastName = mockUser.LastName
+// 	mockPost.AvatarID = mockUser.Avatar
+// 	mockPost.UserFirstName = mockUser.FirstName
 
-	var userId uint64 = mockPost.UserID
+// 	mockPostRepo := postMocks.NewRepositoryI(t)
+// 	mockAttachmentRepo := attachmentMocks.NewRepositoryI(t)
+// 	mockUserRepo := userMocks.NewRepositoryI(t)
 
-	mockPostRepo.On("GetPostById", mockPost.ID).Return(&mockPost, nil)
-	mockImageRepo.On("GetPostImages", mockPost.ID).Return(mockImages, nil)
-	mockUserRepo.On("SelectUserById", mockPost.UserID).Return(&mockUser, nil)
-	mockPostRepo.On("GetCountLikesPost", mockPost.ID).Return(uint64(50), nil)
-	mockPostRepo.On("CheckLikePost", mockPost.ID, mockPost.UserID).Return(true, nil)
+// 	var userId uint64 = mockPost.UserID
 
-	useCase := postUsecase.NewPostUsecase(mockPostRepo, mockImageRepo, mockUserRepo)
+// 	mockPostRepo.On("GetPostById", mockPost.ID).Return(&mockPost, nil)
+// 	mockAttachmentRepo.On("GetPostAttachments", mockPost.ID).Return(mockAttachments, nil)
+// 	mockUserRepo.On("SelectUserById", mockPost.UserID).Return(&mockUser, nil)
+// 	mockPostRepo.On("GetCountLikesPost", mockPost.ID).Return(uint64(50), nil)
+// 	mockPostRepo.On("CheckLikePost", mockPost.ID, mockPost.UserID).Return(true, nil)
 
-	cases := map[string]TestCaseGetPostById {
-		"success": {
-			ArgData:   mockPost.ID,
-			ExpectedRes: &mockPost,
-			Error: nil,
-		},
-	}
+// 	useCase := postUsecase.NewPostUsecase(mockPostRepo, mockAttachmentRepo, mockUserRepo)
 
-	for name, test := range cases {
-		t.Run(name, func(t *testing.T) {
-			post, err := useCase.GetPostById(test.ArgData, userId)
-			require.Equal(t, test.Error, err)
+// 	cases := map[string]TestCaseGetPostById{
+// 		"success": {
+// 			ArgData:     mockPost.ID,
+// 			ExpectedRes: &mockPost,
+// 			Error:       nil,
+// 		},
+// 	}
 
-			if err == nil {
-				assert.Equal(t, test.ExpectedRes, post)
-			}
-		})
-	}
-	mockPostRepo.AssertExpectations(t)
-}
+// 	for name, test := range cases {
+// 		t.Run(name, func(t *testing.T) {
+// 			post, err := useCase.GetPostById(test.ArgData, userId)
+// 			require.Equal(t, test.Error, err)
 
-func TestUsecaseGetUserPosts(t *testing.T) {
-	var mockPost models.Post
-	err := faker.FakeData(&mockPost)
-	assert.NoError(t, err)
-	mockPost.Images = nil
+// 			if err == nil {
+// 				assert.Equal(t, test.ExpectedRes, post)
+// 			}
+// 		})
+// 	}
+// 	mockPostRepo.AssertExpectations(t)
+// }
 
-	var mockUser models.User
-	err = faker.FakeData(&mockUser)
-	assert.NoError(t, err)
+// func TestUsecaseGetUserPosts(t *testing.T) {
+// 	var mockPost models.Post
+// 	err := faker.FakeData(&mockPost)
+// 	assert.NoError(t, err)
+// 	mockPost.Attachments = nil
 
-	mockImages := make([]*models.Image, 0, 10)
-	err = faker.FakeData(&mockImages)
-	assert.NoError(t, err)
-	for _, image := range mockImages {
-		mockPost.Images = append(mockPost.Images, *image)
-	}
+// 	var mockUser models.User
+// 	err = faker.FakeData(&mockUser)
+// 	assert.NoError(t, err)
 
-	mockPost.UserLastName = mockUser.LastName
-	mockPost.AvatarID = mockUser.Avatar
-	mockPost.UserFirstName = mockUser.FirstName
+// 	mockAttachments := make([]*models.Attachment, 0, 10)
+// 	err = faker.FakeData(&mockAttachments)
+// 	assert.NoError(t, err)
+// 	for _, Attachment := range mockAttachments {
+// 		mockPost.Attachments = append(mockPost.Attachments, *Attachment)
+// 	}
 
-	var mockPosts []*models.Post
-	mockPosts = append(mockPosts, &mockPost)
+// 	mockPost.UserLastName = mockUser.LastName
+// 	mockPost.AvatarID = mockUser.Avatar
+// 	mockPost.UserFirstName = mockUser.FirstName
 
-	mockPostRepo := postMocks.NewRepositoryI(t)
-	mockImageRepo := imageMocks.NewRepositoryI(t)
-	mockUserRepo := userMocks.NewRepositoryI(t)
+// 	var mockPosts []*models.Post
+// 	mockPosts = append(mockPosts, &mockPost)
 
-	var userId uint64 = mockPost.UserID
+// 	mockPostRepo := postMocks.NewRepositoryI(t)
+// 	mockAttachmentRepo := attachmentMocks.NewRepositoryI(t)
+// 	mockUserRepo := userMocks.NewRepositoryI(t)
 
-	mockPostRepo.On("GetUserPosts", mockPost.UserID).Return(mockPosts, nil)
-	mockImageRepo.On("GetPostImages", mockPost.ID).Return(mockImages, nil)
-	mockUserRepo.On("SelectUserById", mockPost.UserID).Return(&mockUser, nil)
-	mockPostRepo.On("GetCountLikesPost", mockPost.ID).Return(uint64(50), nil)
-	mockPostRepo.On("CheckLikePost", mockPost.ID, mockPost.UserID).Return(true, nil)
+// 	var userId uint64 = mockPost.UserID
 
-	useCase := postUsecase.NewPostUsecase(mockPostRepo, mockImageRepo, mockUserRepo)
+// 	mockPostRepo.On("GetUserPosts", mockPost.UserID).Return(mockPosts, nil)
+// 	mockAttachmentRepo.On("GetPostAttachments", mockPost.ID).Return(mockAttachments, nil)
+// 	mockUserRepo.On("SelectUserById", mockPost.UserID).Return(&mockUser, nil)
+// 	mockPostRepo.On("GetCountLikesPost", mockPost.ID).Return(uint64(50), nil)
+// 	mockPostRepo.On("CheckLikePost", mockPost.ID, mockPost.UserID).Return(true, nil)
 
-	cases := map[string]TestCaseGetPostById {
-		"success": {
-			ArgData:   mockPost.UserID,
-			ExpectedRes: &mockPost,
-			Error: nil,
-		},
-	}
+// 	useCase := postUsecase.NewPostUsecase(mockPostRepo, mockAttachmentRepo, mockUserRepo)
 
-	for name, test := range cases {
-		t.Run(name, func(t *testing.T) {
-			_, err := useCase.GetUserPosts(test.ArgData, userId)
-			require.Equal(t, test.Error, err)
-		})
-	}
-	mockPostRepo.AssertExpectations(t)
-}
+// 	cases := map[string]TestCaseGetPostById{
+// 		"success": {
+// 			ArgData:     mockPost.UserID,
+// 			ExpectedRes: &mockPost,
+// 			Error:       nil,
+// 		},
+// 	}
 
+// 	for name, test := range cases {
+// 		t.Run(name, func(t *testing.T) {
+// 			_, err := useCase.GetUserPosts(test.ArgData, userId)
+// 			require.Equal(t, test.Error, err)
+// 		})
+// 	}
+// 	mockPostRepo.AssertExpectations(t)
+// }
