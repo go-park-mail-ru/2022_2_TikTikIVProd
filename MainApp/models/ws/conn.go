@@ -31,6 +31,10 @@ type connection struct {
 	send chan models.Message
 }
 
+func SendMessage(cu chatUseCase.UseCaseI, msg *models.Message) {
+	_ = cu.SendMessage(msg)
+}
+
 func (s Subscription) readPump(hub *Hub, cu chatUseCase.UseCaseI) {
 	c := s.conn
 	defer func() {
@@ -38,8 +42,8 @@ func (s Subscription) readPump(hub *Hub, cu chatUseCase.UseCaseI) {
 		c.ws.Close()
 	}()
 	c.ws.SetReadLimit(maxMessageSize)
-	c.ws.SetReadDeadline(time.Now().Add(pongWait))
-	c.ws.SetPongHandler(func(string) error { c.ws.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+	_ = c.ws.SetReadDeadline(time.Now().Add(pongWait))
+	c.ws.SetPongHandler(func(string) error { _ = c.ws.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 	for {
 		msg := models.Message{
 			DialogID:  s.room,
@@ -54,18 +58,18 @@ func (s Subscription) readPump(hub *Hub, cu chatUseCase.UseCaseI) {
 			}
 			break
 		}
-		go cu.SendMessage(&msg)
+		go SendMessage(cu, &msg)
 		hub.broadcast <- msg
 	}
 }
 
 func (c *connection) write(msg models.Message) error {
-	c.ws.SetWriteDeadline(time.Now().Add(writeWait))
+	_ = c.ws.SetWriteDeadline(time.Now().Add(writeWait))
 	return c.ws.WriteJSON(msg)
 }
 
 func (c *connection) writeType(mt int) error {
-	c.ws.SetWriteDeadline(time.Now().Add(writeWait))
+	_ = c.ws.SetWriteDeadline(time.Now().Add(writeWait))
 	return c.ws.WriteMessage(mt, []byte{})
 }
 
@@ -80,7 +84,7 @@ func (s *Subscription) writePump(hub *Hub) {
 		select {
 		case message, ok := <-c.send:
 			if !ok {
-				c.writeType(websocket.CloseMessage)
+				_ = c.writeType(websocket.CloseMessage)
 				return
 			}
 			if err := c.write(message); err != nil {

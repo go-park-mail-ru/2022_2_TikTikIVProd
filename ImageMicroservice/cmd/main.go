@@ -35,5 +35,7 @@ func main() {
 	image.RegisterImagesServer(server, imageDelivery.New(imageUC))
 
 	log.Println("starting server at :8082")
-	server.Serve(lis)
+	if err := server.Serve(lis); err != nil {
+		log.Fatal(err)
+	}
 }

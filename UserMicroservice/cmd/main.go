@@ -35,6 +35,8 @@ func main() {
 	user.RegisterUsersServer(server, userDelivery.New(userUC))
 
 	log.Println("starting server at :8084")
-	server.Serve(lis)
+	if err := server.Serve(lis); err != nil {
+		log.Fatal(err)
+	}
 }
 
