@@ -38,27 +38,27 @@ jobs:
   #       cd ImageMicroservice && go test ./... -v && cd ..
   #       cd ChatMicroservice && go test ./... -v && cd ..
   
-  build:
-    # needs: tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - name: Login to Docker Registry
-        run: docker login -u anastasyakuznetsova -p inhfec767
-      - name: Build Docker image
-        run: |
-          cd ImageMicroservice && sudo docker build -t anastasyakuznetsova/image_mvs:latest -f ./Dockerfile . && cd ..
-          cd ChatMicroservice && sudo docker build -t anastasyakuznetsova/chat_mvs:latest -f ./Dockerfile . && cd ..
-          cd UserMicroservice && sudo docker build -t anastasyakuznetsova/user_mvs:latest -f ./Dockerfile . && cd ..
-          cd AuthMicroservice && sudo docker build -t anastasyakuznetsova/auth_mvs:latest -f ./Dockerfile . && cd ..
-          cd MainApp && sudo docker build -t anastasyakuznetsova/server:latest -f ./Dockerfile . && cd ..
-      - name: Push the image
-        run: |
-          docker push anastasyakuznetsova/image_mvs --all-tags
-          docker push anastasyakuznetsova/chat_mvs --all-tags
-          docker push anastasyakuznetsova/user_mvs --all-tags
-          docker push anastasyakuznetsova/auth_mvs --all-tags
-          docker push anastasyakuznetsova/server --all-tags
+  # build:
+  #   # needs: tests
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v1
+  #     - name: Login to Docker Registry
+  #       run: docker login -u anastasyakuznetsova -p inhfec767
+  #     - name: Build Docker image
+  #       run: |
+  #         cd ImageMicroservice && sudo docker build -t anastasyakuznetsova/image_mvs:latest -f ./Dockerfile . && cd ..
+  #         cd ChatMicroservice && sudo docker build -t anastasyakuznetsova/chat_mvs:latest -f ./Dockerfile . && cd ..
+  #         cd UserMicroservice && sudo docker build -t anastasyakuznetsova/user_mvs:latest -f ./Dockerfile . && cd ..
+  #         cd AuthMicroservice && sudo docker build -t anastasyakuznetsova/auth_mvs:latest -f ./Dockerfile . && cd ..
+  #         cd MainApp && sudo docker build -t anastasyakuznetsova/server:latest -f ./Dockerfile . && cd ..
+  #     - name: Push the image
+  #       run: |
+  #         docker push anastasyakuznetsova/image_mvs --all-tags
+  #         docker push anastasyakuznetsova/chat_mvs --all-tags
+  #         docker push anastasyakuznetsova/user_mvs --all-tags
+  #         docker push anastasyakuznetsova/auth_mvs --all-tags
+  #         docker push anastasyakuznetsova/server --all-tags
   deploy:
     runs-on: ubuntu-latest
     needs: build
