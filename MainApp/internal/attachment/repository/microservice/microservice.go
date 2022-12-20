@@ -40,7 +40,6 @@ func (attachmentMS *microService) GetPostAttachments(postID uint64) ([]*models.A
 			Type:    pbAttachments.Attachments[idx].Type,
 		}
 		attachments = append(attachments, att)
-		fmt.Println("attachments: ", att.Type, att.ID)
 	}
 
 	return attachments, nil

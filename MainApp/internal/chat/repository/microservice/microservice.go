@@ -202,6 +202,10 @@ func (chatMS *microService) CreateMessage(message *models.Message) error {
 		CreatedAt:  ts,
 	}
 
+	for idx := range message.Attachments {
+		pbMessage.AttachmentsIds = append(pbMessage.AttachmentsIds, message.Attachments[idx].ID)
+	}
+
 	_, err := chatMS.client.CreateMessage(ctx, &pbMessage)
 	if err != nil {
 		return errors.Wrap(err, "chat microservice error")

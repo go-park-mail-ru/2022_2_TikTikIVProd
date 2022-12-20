@@ -44,15 +44,15 @@ func (delivery *Delivery) GetPost(c echo.Context) error {
 	}
 
 	post, err := delivery.PUsecase.GetPostById(idP, userId)
-	fmt.Println("delivery: ", post.Attachments[0].Type, post.Attachments[0].ID)
+
 	if err != nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
 	}
 
-	fmt.Println("delivery 2", post)
+
 	data, _ := json.Marshal(post)
-	fmt.Println("delivery 3: ", string(data))
+
 	return c.JSON(http.StatusOK, pkg.Response{Body: post})
 }
 

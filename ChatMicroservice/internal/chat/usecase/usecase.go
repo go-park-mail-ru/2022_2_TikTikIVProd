@@ -190,6 +190,10 @@ func (uc *useCase) CreateMessage(pbMessage *chat.Message) (*chat.Nothing, error)
 		StickerID: pbMessage.StickerId,
 	}
 
+	for idx := range pbMessage.AttachmentsIds {
+		msg.Attachments = append(msg.Attachments, models.Attachment{ID: pbMessage.AttachmentsIds[idx]})
+	}
+
 	err := uc.chatRepository.CreateMessage(msg)
 	if err != nil {
 		return nil, errors.Wrap(err, "chat repository postgres error")
