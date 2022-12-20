@@ -17,7 +17,7 @@ jobs:
           cd MainApp && golangci-lint run ./... && cd ..
           cd UserMicroservice && golangci-lint run ./... && cd ..
           cd AuthMicroservice && golangci-lint run ./... && cd ..
-          cd AttachmentMicroservice && golangci-lint run ./... && cd ..
+          cd ImageMicroservice && golangci-lint run ./... && cd ..
           cd ChatMicroservice && golangci-lint run ./... && cd ..
 
   tests:
@@ -35,7 +35,7 @@ jobs:
         cd MainApp && go test ./... -v && cd ..
         cd UserMicroservice && go test ./... -v && cd ..
         cd AuthMicroservice && go test ./... -v && cd ..
-        cd AttachmentMicroservice && go test ./... -v && cd ..
+        cd ImageMicroservice && go test ./... -v && cd ..
         cd ChatMicroservice && go test ./... -v && cd ..
   build:
     needs: tests

@@ -64,7 +64,7 @@ func TestGetCookie(t *testing.T) {
 	for name, test := range cases {
 		t.Run(name, func(t *testing.T) {
 			if name == "success" {
-				s.Set(test.ArgData, test.ExpectedRes)
+				_ = s.Set(test.ArgData, test.ExpectedRes)
 			} else if name == "not_found" {
 				s.Del(test.ArgData)
 			}
