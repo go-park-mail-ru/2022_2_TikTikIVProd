@@ -47,11 +47,11 @@ jobs:
         run: docker login -u anastasyakuznetsova -p inhfec767
       - name: Build Docker image
         run: |
-          sudo docker build -t anastasyakuznetsova/image_mvs:latest -f ./ImageMicroservice/Dockerfile .
-          sudo docker build -t anastasyakuznetsova/chat_mvs:latest -f ./ChatMicroservice/Dockerfile .
-          sudo docker build -t anastasyakuznetsova/user_mvs:latest -f ./UserMicroservice/Dockerfile .
-          sudo docker build -t anastasyakuznetsova/auth_mvs:latest -f ./AuthMicroservice/Dockerfile .
-          sudo docker build -t anastasyakuznetsova/server:latest -f ./MainApp/Dockerfile .
+          cd ImageMicroservice && sudo docker build -t anastasyakuznetsova/image_mvs:latest -f ./Dockerfile . && cd ..
+          cd ChatMicroservice && sudo docker build -t anastasyakuznetsova/chat_mvs:latest -f ./Dockerfile . && cd ..
+          cd UserMicroservice && sudo docker build -t anastasyakuznetsova/user_mvs:latest -f ./Dockerfile . && cd ..
+          cd AuthMicroservice && sudo docker build -t anastasyakuznetsova/auth_mvs:latest -f ./Dockerfile . && cd ..
+          cd MainApp && sudo docker build -t anastasyakuznetsova/server:latest -f ./Dockerfile . && cd ..
       - name: Push the image
         run: |
           docker push anastasyakuznetsova/image_mvs --all-tags
