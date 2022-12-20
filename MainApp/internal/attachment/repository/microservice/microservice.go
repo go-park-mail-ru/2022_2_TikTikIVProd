@@ -2,7 +2,6 @@ package microservice
 
 import (
 	"context"
-	"fmt"
 	attachmentRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/attachment/repository"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
 	Attachment "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/proto/attachment"

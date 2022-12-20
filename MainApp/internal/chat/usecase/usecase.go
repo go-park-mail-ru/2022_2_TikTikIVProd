@@ -44,7 +44,7 @@ func (uc *useCase) SelectDialog(id uint64) (*models.Dialog, error) {
 		if err != nil {
 			return nil, errors.Wrap(err, "chat repository error")
 		}
-		messages[idx].Attachment = att
+		messages[idx].Attachments = att
 	}
 	dialog.Messages = messages
 
@@ -67,7 +67,7 @@ func (uc *useCase) SelectDialogByUsers(userId, friendId uint64) (*models.Dialog,
 		if err != nil {
 			return nil, errors.Wrap(err, "chat repository error")
 		}
-		messages[idx].Attachment = att
+		messages[idx].Attachments = att
 	}
 
 	dialog.Messages = messages

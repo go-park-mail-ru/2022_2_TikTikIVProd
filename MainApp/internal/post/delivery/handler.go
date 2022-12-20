@@ -1,8 +1,6 @@
 package delivery
 
 import (
-	"encoding/json"
-	"fmt"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/pkg"
 	"github.com/labstack/echo/v4"
@@ -49,9 +47,6 @@ func (delivery *Delivery) GetPost(c echo.Context) error {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
 	}
-
-
-	data, _ := json.Marshal(post)
 
 	return c.JSON(http.StatusOK, pkg.Response{Body: post})
 }

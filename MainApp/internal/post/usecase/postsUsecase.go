@@ -260,7 +260,7 @@ func addAttachmentsForPost(post *models.Post, repImg attachmentRep.RepositoryI) 
 
 	post.Attachments = make([]models.Attachment, 0, 10)
 
-	for idx, att := range attachments {
+	for _, att := range attachments {
 		post.Attachments = append(post.Attachments, *att)
 	}
 
