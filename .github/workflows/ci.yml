@@ -68,7 +68,8 @@ jobs:
         with:
           host: 89.208.197.127 
           # username: ${{ secrets.USERNAME }}
-          key: MIIEowIBAAKCAQEApbiwQhAUatwthJu5G6lgs9V7abxVyslhc9Ywz02mI3oVy+g/
+          key: -----BEGIN RSA PRIVATE KEY-----
+              MIIEowIBAAKCAQEApbiwQhAUatwthJu5G6lgs9V7abxVyslhc9Ywz02mI3oVy+g/
               nqWfA/nK18EMqPlw3nL8td/OOboYYs+inbVVdbcR2wtNLMc9adPZrCXkzTXussb/
               P1VolJDRVFtwXNRo0vcq45Xh/oLOcKNa8mQyCs0TXJRIyiuyyViLjW8Fksfapeic
               2pIjK9TkSnkHEj9tPEd91JjbhOarCJ85xVRASz70LiVZKJAs8vH7htVQ18bSSzFt
@@ -93,6 +94,7 @@ jobs:
               zFM7IQKBgGW92T1b1PD20kNNxvc2PIMInr2/ZnyBq9cDIHajtOtHSbTzCMdDYVMb
               3qmygaMGBUynVN1Vtyk65tzjJLMRz2nRkRpWRsh/YxVDMvCH7FxL97t6Lf3110u5
               IgbJdCzRpAAB8QpAvjxkRfAPTwka64Nrxb5d0pvKN2/5/86sFIWA
+              -----END RSA PRIVATE KEY-----
           script: |
             sudo docker rm -vf $(sudo docker ps -a -q)
             docker login -u anastasyakuznetsova -p inhfec767
@@ -107,7 +109,8 @@ jobs:
         with:
           host: 89.208.197.127 
           # username: ${{ secrets.USERNAME }}
-          key: MIIEowIBAAKCAQEApbiwQhAUatwthJu5G6lgs9V7abxVyslhc9Ywz02mI3oVy+g/
+          key: -----BEGIN RSA PRIVATE KEY-----
+              MIIEowIBAAKCAQEApbiwQhAUatwthJu5G6lgs9V7abxVyslhc9Ywz02mI3oVy+g/
               nqWfA/nK18EMqPlw3nL8td/OOboYYs+inbVVdbcR2wtNLMc9adPZrCXkzTXussb/
               P1VolJDRVFtwXNRo0vcq45Xh/oLOcKNa8mQyCs0TXJRIyiuyyViLjW8Fksfapeic
               2pIjK9TkSnkHEj9tPEd91JjbhOarCJ85xVRASz70LiVZKJAs8vH7htVQ18bSSzFt
@@ -132,6 +135,7 @@ jobs:
               zFM7IQKBgGW92T1b1PD20kNNxvc2PIMInr2/ZnyBq9cDIHajtOtHSbTzCMdDYVMb
               3qmygaMGBUynVN1Vtyk65tzjJLMRz2nRkRpWRsh/YxVDMvCH7FxL97t6Lf3110u5
               IgbJdCzRpAAB8QpAvjxkRfAPTwka64Nrxb5d0pvKN2/5/86sFIWA
+              -----END RSA PRIVATE KEY-----
           script: |
             cd 2022_2_TikTikIVProd/
             sudo docker-compose up -d --build --no-deps
