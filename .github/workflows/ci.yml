@@ -1,8 +1,8 @@
-name: Docker Compose Actions Workflow
-on:
-  push:
-    branches: [deploy]
-jobs:
+# name: Docker Compose Actions Workflow
+# on:
+#   push:
+#     branches: [deploy]
+# jobs:
   # golangci:
   #   name: linter
   #   runs-on: ubuntu-latest
@@ -59,86 +59,33 @@ jobs:
   #         docker push anastasyakuznetsova/user_mvs --all-tags
   #         docker push anastasyakuznetsova/auth_mvs --all-tags
   #         docker push anastasyakuznetsova/server --all-tags
-  deploy:
-    runs-on: ubuntu-latest
-    # needs: build
-    steps:
-      - name: pull project
-        uses: appleboy/ssh-action@master
-        with:
-          host: 89.208.197.127 
-          # username: ${{ secrets.USERNAME }}
-          key: -----BEGIN RSA PRIVATE KEY-----
-MIIEowIBAAKCAQEApbiwQhAUatwthJu5G6lgs9V7abxVyslhc9Ywz02mI3oVy+g/
-nqWfA/nK18EMqPlw3nL8td/OOboYYs+inbVVdbcR2wtNLMc9adPZrCXkzTXussb/
-P1VolJDRVFtwXNRo0vcq45Xh/oLOcKNa8mQyCs0TXJRIyiuyyViLjW8Fksfapeic
-2pIjK9TkSnkHEj9tPEd91JjbhOarCJ85xVRASz70LiVZKJAs8vH7htVQ18bSSzFt
-D2JF9RoA2a1PUESoFeSW8zm/VGkxl1X+uCOO8hvskKShvg6mr4YyhEq2DS1Yxb1C
-Q4TT8RJhS+YZ8mSNA5s2b3p2aHwaxFuon/x0fwIDAQABAoIBACThclBxdanGcFbX
-tR1j14KOGxYP9OPZZ1e5LkmkVToF/H3RpP7wiu/+klbrvp6ITMckvfrX4PRV5wFu
-hhkk9uzong+qdzVk7dT0cbfvAvlsbD/bK4jzv/94Ly3f36S5HM7+dMwLWi0i/UBy
-ClZxV/WxaAKteXmMuhA3JW+Haq0cc2Er6dyORKpDJSIMi6XWADC9xVEm3SpXDkqY
-fpYP68SdgcGjtwyq7eSi2MB7ZKbmCi+Vzs1RKzDhkFIkmmBrVSrtxfZRxdV0s45M
-4zPzbOOSOvftC0sbTur9jRA36GySUBhvW59mCxEE3xWRsmfoq/rUIekfzAJ8VFIj
-s1Z/z0ECgYEA1N7JIe0ohmUFWHZPpeisWXlt/JEqn6RgJIXvUT5kSzxP0ChrYlG4
-9SHXxDhNZB7g39wWf8j/i0rGafgJKwKgamVJiaZLezIcch59fHSf0Mb5J/bUXRLY
-wpk8tobn6bCMexfwEQ2YV1DKSnDCkhwt5NRm6QmMl/AP7G9y0275fd8CgYEAx0xf
-7nu94ITjQB9TfibuJ89z7cpejdw0KLecbA3aUXquyZumVCPyv2pxlaB/X9ewuh2F
-tUfuR0aZSTM+OWIYVsj4IjQiTlPtocYIavCIsgW61Nn8BbBFxn0Znkp+XJSbcrhB
-Njeh2KtONpUyYVn+oc3bfgxva4h6GnRK6BL+nWECgYEAgJARD7FpIUoP4W6LChut
-Q9inybtu773Z5xURBZNWBW5mkcRnnpjWyQ3of3S1oPtZOzp0SDb/x4Ogs81+1AAh
-HEESGdVajwwjy/SIO0tAXlpdjnpvpcrFKTpdRavSkvvyzEEX12TLliiQFEdn69Cj
-EyoJAUOoKvds1pI02meSvScCgYBNTJ8stYv46DHoLf5JQLpAcKMrSMGRziXg4Q5n
-jpvt3GKsyZUir2q4uYVinoSo3NSr60VwAX024fgUPy7UPOrpxjsPsR7ZOI5Dn7am
-G7M5MSW85utsHWmCygTEs2n9aJo+TZ7lc4BvtEm6u/V1ct1jTp/ibNpOX/nUBuUC
-zFM7IQKBgGW92T1b1PD20kNNxvc2PIMInr2/ZnyBq9cDIHajtOtHSbTzCMdDYVMb
-3qmygaMGBUynVN1Vtyk65tzjJLMRz2nRkRpWRsh/YxVDMvCH7FxL97t6Lf3110u5
-IgbJdCzRpAAB8QpAvjxkRfAPTwka64Nrxb5d0pvKN2/5/86sFIWA
------END RSA PRIVATE KEY-----
+  # deploy:
+  #   runs-on: ubuntu-latest
+  #   # needs: build
+  #   steps:
+  #     - name: pull project
+  #       uses: appleboy/ssh-action@master
+  #       with:
+  #         host: 89.208.197.127 
+  #         # username: ${{ secrets.USERNAME }}
+  #         key: -----BEGIN RSA PRIVATE KEY----------END RSA PRIVATE KEY-----
 
-
-          script: |
-            sudo docker rm -vf $(sudo docker ps -a -q)
-            docker login -u anastasyakuznetsova -p inhfec767
-            cd 2022_2_TikTikIVProd/
-            sudo docker pull anastasyakuznetsova/image_mvs
-            sudo docker pull anastasyakuznetsova/chat_mvs
-            sudo docker pull anastasyakuznetsova/user_mvs
-            sudo docker pull anastasyakuznetsova/auth_mvs
-            sudo docker pull anastasyakuznetsova/server
-      - name: run project
-        uses: appleboy/ssh-action@master
-        with:
-          host: 89.208.197.127 
-          # username: ${{ secrets.USERNAME }}
-          key: -----BEGIN RSA PRIVATE KEY-----
-              MIIEowIBAAKCAQEApbiwQhAUatwthJu5G6lgs9V7abxVyslhc9Ywz02mI3oVy+g/
-              nqWfA/nK18EMqPlw3nL8td/OOboYYs+inbVVdbcR2wtNLMc9adPZrCXkzTXussb/
-              P1VolJDRVFtwXNRo0vcq45Xh/oLOcKNa8mQyCs0TXJRIyiuyyViLjW8Fksfapeic
-              2pIjK9TkSnkHEj9tPEd91JjbhOarCJ85xVRASz70LiVZKJAs8vH7htVQ18bSSzFt
-              D2JF9RoA2a1PUESoFeSW8zm/VGkxl1X+uCOO8hvskKShvg6mr4YyhEq2DS1Yxb1C
-              Q4TT8RJhS+YZ8mSNA5s2b3p2aHwaxFuon/x0fwIDAQABAoIBACThclBxdanGcFbX
-              tR1j14KOGxYP9OPZZ1e5LkmkVToF/H3RpP7wiu/+klbrvp6ITMckvfrX4PRV5wFu
-              hhkk9uzong+qdzVk7dT0cbfvAvlsbD/bK4jzv/94Ly3f36S5HM7+dMwLWi0i/UBy
-              ClZxV/WxaAKteXmMuhA3JW+Haq0cc2Er6dyORKpDJSIMi6XWADC9xVEm3SpXDkqY
-              fpYP68SdgcGjtwyq7eSi2MB7ZKbmCi+Vzs1RKzDhkFIkmmBrVSrtxfZRxdV0s45M
-              4zPzbOOSOvftC0sbTur9jRA36GySUBhvW59mCxEE3xWRsmfoq/rUIekfzAJ8VFIj
-              s1Z/z0ECgYEA1N7JIe0ohmUFWHZPpeisWXlt/JEqn6RgJIXvUT5kSzxP0ChrYlG4
-              9SHXxDhNZB7g39wWf8j/i0rGafgJKwKgamVJiaZLezIcch59fHSf0Mb5J/bUXRLY
-              wpk8tobn6bCMexfwEQ2YV1DKSnDCkhwt5NRm6QmMl/AP7G9y0275fd8CgYEAx0xf
-              7nu94ITjQB9TfibuJ89z7cpejdw0KLecbA3aUXquyZumVCPyv2pxlaB/X9ewuh2F
-              tUfuR0aZSTM+OWIYVsj4IjQiTlPtocYIavCIsgW61Nn8BbBFxn0Znkp+XJSbcrhB
-              Njeh2KtONpUyYVn+oc3bfgxva4h6GnRK6BL+nWECgYEAgJARD7FpIUoP4W6LChut
-              Q9inybtu773Z5xURBZNWBW5mkcRnnpjWyQ3of3S1oPtZOzp0SDb/x4Ogs81+1AAh
-              HEESGdVajwwjy/SIO0tAXlpdjnpvpcrFKTpdRavSkvvyzEEX12TLliiQFEdn69Cj
-              EyoJAUOoKvds1pI02meSvScCgYBNTJ8stYv46DHoLf5JQLpAcKMrSMGRziXg4Q5n
-              jpvt3GKsyZUir2q4uYVinoSo3NSr60VwAX024fgUPy7UPOrpxjsPsR7ZOI5Dn7am
-              G7M5MSW85utsHWmCygTEs2n9aJo+TZ7lc4BvtEm6u/V1ct1jTp/ibNpOX/nUBuUC
-              zFM7IQKBgGW92T1b1PD20kNNxvc2PIMInr2/ZnyBq9cDIHajtOtHSbTzCMdDYVMb
-              3qmygaMGBUynVN1Vtyk65tzjJLMRz2nRkRpWRsh/YxVDMvCH7FxL97t6Lf3110u5
-              IgbJdCzRpAAB8QpAvjxkRfAPTwka64Nrxb5d0pvKN2/5/86sFIWA
-              -----END RSA PRIVATE KEY-----
-          script: |
-            cd 2022_2_TikTikIVProd/
-            sudo docker-compose up -d --build --no-deps
+  #         script: |
+  #           sudo docker rm -vf $(sudo docker ps -a -q)
+  #           docker login -u anastasyakuznetsova -p inhfec767
+  #           cd 2022_2_TikTikIVProd/
+  #           sudo docker pull anastasyakuznetsova/image_mvs
+  #           sudo docker pull anastasyakuznetsova/chat_mvs
+  #           sudo docker pull anastasyakuznetsova/user_mvs
+  #           sudo docker pull anastasyakuznetsova/auth_mvs
+  #           sudo docker pull anastasyakuznetsova/server
+  #     - name: run project
+  #       uses: appleboy/ssh-action@master
+  #       with:
+  #         host: 89.208.197.127 
+  #         # username: ${{ secrets.USERNAME }}
+  #         key: -----BEGIN RSA PRIVATE KEY----------END RSA PRIVATE KEY-----
+  #         script: |
+  #           cd 2022_2_TikTikIVProd/
+  #           sudo docker-compose up -d --build --no-deps
 
