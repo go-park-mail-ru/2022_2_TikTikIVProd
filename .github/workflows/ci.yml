@@ -37,8 +37,9 @@ jobs:
   #       cd AuthMicroservice && go test ./... -v && cd ..
   #       cd ImageMicroservice && go test ./... -v && cd ..
   #       cd ChatMicroservice && go test ./... -v && cd ..
+  
   build:
-    needs: tests
+    # needs: tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
