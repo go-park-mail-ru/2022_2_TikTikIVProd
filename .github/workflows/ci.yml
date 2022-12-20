@@ -20,23 +20,23 @@ jobs:
   #         cd ImageMicroservice && golangci-lint run ./... && cd ..
   #         cd ChatMicroservice && golangci-lint run ./... && cd ..
 
-  tests:
-    # needs: golangci
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.19
+  # tests:
+  #   # needs: golangci
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v2
+  #   - name: Set up Go
+  #     uses: actions/setup-go@v2
+  #     with:
+  #       go-version: 1.19
 
-    - name: tests
-      run: |
-        cd MainApp && go test ./... -v && cd ..
-        cd UserMicroservice && go test ./... -v && cd ..
-        cd AuthMicroservice && go test ./... -v && cd ..
-        cd ImageMicroservice && go test ./... -v && cd ..
-        cd ChatMicroservice && go test ./... -v && cd ..
+  #   - name: tests
+  #     run: |
+  #       cd MainApp && go test ./... -v && cd ..
+  #       cd UserMicroservice && go test ./... -v && cd ..
+  #       cd AuthMicroservice && go test ./... -v && cd ..
+  #       cd ImageMicroservice && go test ./... -v && cd ..
+  #       cd ChatMicroservice && go test ./... -v && cd ..
   build:
     needs: tests
     runs-on: ubuntu-latest
@@ -46,14 +46,14 @@ jobs:
         run: docker login -u anastasyakuznetsova -p inhfec767
       - name: Build Docker image
         run: |
-          sudo docker build -t anastasyakuznetsova/attachment_mvs:latest -f ./AttachmentMicroservice/Dockerfile .
+          sudo docker build -t anastasyakuznetsova/image_mvs:latest -f ./ImageMicroservice/Dockerfile .
           sudo docker build -t anastasyakuznetsova/chat_mvs:latest -f ./ChatMicroservice/Dockerfile .
           sudo docker build -t anastasyakuznetsova/user_mvs:latest -f ./UserMicroservice/Dockerfile .
           sudo docker build -t anastasyakuznetsova/auth_mvs:latest -f ./AuthMicroservice/Dockerfile .
           sudo docker build -t anastasyakuznetsova/server:latest -f ./MainApp/Dockerfile .
       - name: Push the image
         run: |
-          docker push anastasyakuznetsova/attachment_mvs --all-tags
+          docker push anastasyakuznetsova/image_mvs --all-tags
           docker push anastasyakuznetsova/chat_mvs --all-tags
           docker push anastasyakuznetsova/user_mvs --all-tags
           docker push anastasyakuznetsova/auth_mvs --all-tags
@@ -96,7 +96,7 @@ jobs:
             sudo docker rm -vf $(sudo docker ps -a -q)
             docker login -u anastasyakuznetsova -p inhfec767
             cd 2022_2_TikTikIVProd/
-            sudo docker pull anastasyakuznetsova/attachment_mvs
+            sudo docker pull anastasyakuznetsova/image_mvs
             sudo docker pull anastasyakuznetsova/chat_mvs
             sudo docker pull anastasyakuznetsova/user_mvs
             sudo docker pull anastasyakuznetsova/auth_mvs
