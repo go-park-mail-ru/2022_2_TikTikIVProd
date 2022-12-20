@@ -11,16 +11,13 @@ jobs:
         with:
           go-version: 1.19
       - uses: actions/checkout@v2
-      - name: golangci-lint MainApp
-        uses: golangci/golangci-lint-action@v3
-        with:
-          version: v1.29
-          working-directory: ./MainApp
-      - name: golangci-lint UserMicroservice
-        uses: golangci/golangci-lint-action@v3
-        with:
-          version: v1.29
-          working-directory: ./UserMicroservice
+      - name: golangci-lint
+        run: |
+          cd MainApp && golangci-lint run ./...
+          cd UserMicroservice && golangci-lint run ./...
+          cd AuthMicroservice && golangci-lint run ./...
+          cd AttachmentMicroservice && golangci-lint run ./...
+          cd ChatMicroservice && golangci-lint run ./...
 
   tests:
     needs: golangci
@@ -30,7 +27,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
-        go-version: 1.15
+        go-version: 1.19
 
     - name: tests
       run: |
