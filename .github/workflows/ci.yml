@@ -11,14 +11,14 @@ jobs:
         with:
           go-version: 1.19
       - uses: actions/checkout@v2
-      - name: golangci-lint
+      - name: run golangci-lint
         run: |
           go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.50.1
-          cd MainApp && golangci-lint run ./...
-          cd UserMicroservice && golangci-lint run ./...
-          cd AuthMicroservice && golangci-lint run ./...
-          cd AttachmentMicroservice && golangci-lint run ./...
-          cd ChatMicroservice && golangci-lint run ./...
+          cd MainApp && golangci-lint run ./... && cd ..
+          cd UserMicroservice && golangci-lint run ./... && cd ..
+          cd AuthMicroservice && golangci-lint run ./... && cd ..
+          cd AttachmentMicroservice && golangci-lint run ./... && cd ..
+          cd ChatMicroservice && golangci-lint run ./... && cd ..
 
   tests:
     needs: golangci
@@ -32,11 +32,11 @@ jobs:
 
     - name: tests
       run: |
-        cd MainApp && go test ./... -v
-        cd UserMicroservice && go test ./... -v
-        cd AuthMicroservice && go test ./... -v
-        cd AttachmentMicroservice && go test ./... -v
-        cd ChatMicroservice && go test ./... -v
+        cd MainApp && go test ./... -v && cd ..
+        cd UserMicroservice && go test ./... -v && cd ..
+        cd AuthMicroservice && go test ./... -v && cd ..
+        cd AttachmentMicroservice && go test ./... -v && cd ..
+        cd ChatMicroservice && go test ./... -v && cd ..
   build:
     needs: tests
     runs-on: ubuntu-latest
