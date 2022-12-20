@@ -52,16 +52,16 @@ func TestDeliverySignUp(t *testing.T) {
 	mockUserInvalid := models.User{}
 
 	mockUser.Id = 1
-	mockUser.CreatedAt = time.Unix(3, 3)
+	mockUser.CreatedAt = time.Date(2022, time.September, 5, 1, 12, 12, 12, time.Local)
 
 	mockUserConflictNickName.Id = 2
-	mockUserConflictNickName.CreatedAt = time.Unix(3, 3)
+	mockUserConflictNickName.CreatedAt = time.Date(2022, time.September, 5, 1, 12, 12, 12, time.Local)
 
 	mockUserConflictEmail.Id = 3
-	mockUserConflictEmail.CreatedAt = time.Unix(3, 3)
+	mockUserConflictEmail.CreatedAt = time.Date(2022, time.September, 5, 1, 12, 12, 12, time.Local)
 	
 	mockUserInternalErr.Id = 4
-	mockUserInternalErr.CreatedAt = time.Unix(3, 3)
+	mockUserInternalErr.CreatedAt = time.Date(2022, time.September, 5, 1, 12, 12, 12, time.Local)
 
 	var mockCookie models.Cookie
 	err = faker.FakeData(&mockCookie)
