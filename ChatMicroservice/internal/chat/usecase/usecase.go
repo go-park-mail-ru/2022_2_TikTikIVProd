@@ -187,7 +187,7 @@ func (uc *useCase) CreateMessage(pbMessage *chat.Message) (*chat.Nothing, error)
 		ReceiverID: pbMessage.ReceiverId,
 		Body:       pbMessage.Body,
 		CreatedAt:  pbMessage.CreatedAt.AsTime(),
-		StickerID: pbMessage.StickerId,
+		StickerID:  pbMessage.StickerId,
 	}
 
 	for idx := range pbMessage.AttachmentsIds {

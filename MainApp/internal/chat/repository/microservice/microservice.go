@@ -118,6 +118,7 @@ func (chatMS *microService) SelectAllDialogs(userId uint64) ([]models.Dialog, er
 				ReceiverID: pbDialogs.Dialogs[idx].Messages[idx2].ReceiverId,
 				Body:       pbDialogs.Dialogs[idx].Messages[idx2].Body,
 				CreatedAt:  pbDialogs.Dialogs[idx].Messages[idx2].CreatedAt.AsTime(),
+				StickerID: pbDialogs.Dialogs[idx].Messages[idx2].StickerId,
 			}
 			dialog.Messages = append(dialog.Messages, msg)
 		}
@@ -150,6 +151,7 @@ func (chatMS *microService) SelectMessages(id uint64) ([]models.Message, error) 
 			ReceiverID: pbMessages.Messages[idx].ReceiverId,
 			Body:       pbMessages.Messages[idx].Body,
 			CreatedAt:  pbMessages.Messages[idx].CreatedAt.AsTime(),
+			StickerID: pbMessages.Messages[idx].StickerId,
 		}
 		messages = append(messages, msg)
 	}
@@ -175,6 +177,7 @@ func (chatMS *microService) CreateDialog(dialog *models.Dialog) error {
 			ReceiverId: dialog.Messages[idx].ReceiverID,
 			Body:       dialog.Messages[idx].Body,
 			CreatedAt:  ts,
+			StickerId: dialog.Messages[idx].StickerID,
 		}
 		pbDialog.Messages = append(pbDialog.Messages, &pbMsg)
 	}
@@ -200,6 +203,7 @@ func (chatMS *microService) CreateMessage(message *models.Message) error {
 		ReceiverId: message.ReceiverID,
 		Body:       message.Body,
 		CreatedAt:  ts,
+		StickerId: message.StickerID,
 	}
 
 	for idx := range message.Attachments {

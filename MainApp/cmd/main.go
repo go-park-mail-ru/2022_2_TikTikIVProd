@@ -127,7 +127,7 @@ func main() {
 	p.Use(e)
 
 	e.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
-		AllowOrigins:     []string{"http://89.208.197.127"},
+		AllowOrigins:     []string{"http://writesend.online/"},
 		AllowHeaders:     []string{"Content-Type", "X-CSRF-Token"},
 		AllowCredentials: true,
 		ExposeHeaders:    []string{"X-CSRF-Token"},
