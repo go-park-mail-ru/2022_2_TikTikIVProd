@@ -1,86 +1,3 @@
-# name: Docker Compose Actions Workflow
-# on: push
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v2
-#       - name: Build the stack
-#         run: (docker rm -f $(docker ps -aq) || true) && docker-compose up -d
-
-
-
-
-
-
-
-
-
-name: Docker Build
-
-on:
-  push:
-    branches: [master]
-  pull_request:
-    branches: [master]
-
-# commit hash 435ab34
-# semver v1.2.3-beta.1
-# 202204282024-435ab34
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - name: Login to DockerHub Registry
-        run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-      - name: Build Docker image
-        run: docker build -t dmitrydorofeev/godeploy:${GITHUB_SHA::8} .
-      - name: Push the image
-        run: docker push dmitrydorofeev/godeploy:${GITHUB_SHA::8}
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: pull docker image
-        uses: appleboy/ssh-action@master
-        with:
-          envs: GITHUB_SHA
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.PRIVATE_KEY }}
-          script: sudo docker pull dmitrydorofeev/godeploy:${GITHUB_SHA::8}
-      - name: deploy docker image
-        uses: appleboy/ssh-action@master
-        with:
-          envs: GITHUB_SHA
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.PRIVATE_KEY }}
-          script: |
-            sudo docker rm -f $(sudo docker ps -aq)
-            sudo docker run -e VERSION=${GITHUB_SHA::8} -d -p 8080:8080 dmitrydorofeev/godeploy:${GITHUB_SHA::8}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 name: Docker Compose Actions Workflow
 on:
   push:
@@ -108,28 +25,32 @@ jobs:
 
     - name: tests
       run: |
-        go test ./... -v -coverpkg=./... -coverprofile=cover.out.tmp 
-        cat cover.out.tmp | grep -v "mock.go" | grep -v "pb.go" > cover.out
-        go tool cover -func=cover.out
+        cd MainApp && go test ./... -v -coverpkg=./...
+        cd UserMicroservice && go test ./... -v -coverpkg=./...
+        cd AuthMicroservice && go test ./... -v -coverpkg=./...
+        cd AttachmentMicroservice && go test ./... -v -coverpkg=./...
+        cd ChatMicroservice && go test ./... -v -coverpkg=./...
   build:
     needs: tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
       - name: Login to Docker Registry
-        run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
+        run: docker login -u anastasyakuznetsova -p inhfec767
       - name: Build Docker image
         run: |
-          sudo docker build -t ${{ secrets.DOCKER_USER }}/image_server:latest -f ./build/image.Dockerfile .
-          sudo docker build -t ${{ secrets.DOCKER_USER }}/pickleapp_server:latest -f ./build/pickleapp.Dockerfile .
-          sudo docker build -t ${{ secrets.DOCKER_USER }}/user_server:latest -f ./build/user.Dockerfile .
-          sudo docker build -t ${{ secrets.DOCKER_USER }}/auth_server:latest -f ./build/auth.Dockerfile .
+          sudo docker build -t anastasyakuznetsova/attachment_mvs:latest -f ./AttachmentMicroservice/Dockerfile .
+          sudo docker build -t anastasyakuznetsova/chat_mvs:latest -f ./ChatMicroservice/Dockerfile .
+          sudo docker build -t anastasyakuznetsova/user_mvs:latest -f ./UserMicroservice/Dockerfile .
+          sudo docker build -t anastasyakuznetsova/auth_mvs:latest -f ./AuthMicroservice/Dockerfile .
+          sudo docker build -t anastasyakuznetsova/server:latest -f ./MainApp/Dockerfile .
       - name: Push the image
         run: |
-          docker push ${{ secrets.DOCKER_USER }}/image_server --all-tags
-          docker push ${{ secrets.DOCKER_USER }}/pickleapp_server --all-tags
-          docker push ${{ secrets.DOCKER_USER }}/user_server --all-tags
-          docker push ${{ secrets.DOCKER_USER }}/auth_server --all-tags
+          docker push anastasyakuznetsova/attachment_mvs --all-tags
+          docker push anastasyakuznetsova/chat_mvs --all-tags
+          docker push anastasyakuznetsova/user_mvs --all-tags
+          docker push anastasyakuznetsova/auth_mvs --all-tags
+          docker push anastasyakuznetsova/server --all-tags
   deploy:
     runs-on: ubuntu-latest
     needs: build
@@ -137,24 +58,73 @@ jobs:
       - name: pull project
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
+          host: 89.208.197.127 
+          # username: ${{ secrets.USERNAME }}
+          key: MIIEowIBAAKCAQEApbiwQhAUatwthJu5G6lgs9V7abxVyslhc9Ywz02mI3oVy+g/
+              nqWfA/nK18EMqPlw3nL8td/OOboYYs+inbVVdbcR2wtNLMc9adPZrCXkzTXussb/
+              P1VolJDRVFtwXNRo0vcq45Xh/oLOcKNa8mQyCs0TXJRIyiuyyViLjW8Fksfapeic
+              2pIjK9TkSnkHEj9tPEd91JjbhOarCJ85xVRASz70LiVZKJAs8vH7htVQ18bSSzFt
+              D2JF9RoA2a1PUESoFeSW8zm/VGkxl1X+uCOO8hvskKShvg6mr4YyhEq2DS1Yxb1C
+              Q4TT8RJhS+YZ8mSNA5s2b3p2aHwaxFuon/x0fwIDAQABAoIBACThclBxdanGcFbX
+              tR1j14KOGxYP9OPZZ1e5LkmkVToF/H3RpP7wiu/+klbrvp6ITMckvfrX4PRV5wFu
+              hhkk9uzong+qdzVk7dT0cbfvAvlsbD/bK4jzv/94Ly3f36S5HM7+dMwLWi0i/UBy
+              ClZxV/WxaAKteXmMuhA3JW+Haq0cc2Er6dyORKpDJSIMi6XWADC9xVEm3SpXDkqY
+              fpYP68SdgcGjtwyq7eSi2MB7ZKbmCi+Vzs1RKzDhkFIkmmBrVSrtxfZRxdV0s45M
+              4zPzbOOSOvftC0sbTur9jRA36GySUBhvW59mCxEE3xWRsmfoq/rUIekfzAJ8VFIj
+              s1Z/z0ECgYEA1N7JIe0ohmUFWHZPpeisWXlt/JEqn6RgJIXvUT5kSzxP0ChrYlG4
+              9SHXxDhNZB7g39wWf8j/i0rGafgJKwKgamVJiaZLezIcch59fHSf0Mb5J/bUXRLY
+              wpk8tobn6bCMexfwEQ2YV1DKSnDCkhwt5NRm6QmMl/AP7G9y0275fd8CgYEAx0xf
+              7nu94ITjQB9TfibuJ89z7cpejdw0KLecbA3aUXquyZumVCPyv2pxlaB/X9ewuh2F
+              tUfuR0aZSTM+OWIYVsj4IjQiTlPtocYIavCIsgW61Nn8BbBFxn0Znkp+XJSbcrhB
+              Njeh2KtONpUyYVn+oc3bfgxva4h6GnRK6BL+nWECgYEAgJARD7FpIUoP4W6LChut
+              Q9inybtu773Z5xURBZNWBW5mkcRnnpjWyQ3of3S1oPtZOzp0SDb/x4Ogs81+1AAh
+              HEESGdVajwwjy/SIO0tAXlpdjnpvpcrFKTpdRavSkvvyzEEX12TLliiQFEdn69Cj
+              EyoJAUOoKvds1pI02meSvScCgYBNTJ8stYv46DHoLf5JQLpAcKMrSMGRziXg4Q5n
+              jpvt3GKsyZUir2q4uYVinoSo3NSr60VwAX024fgUPy7UPOrpxjsPsR7ZOI5Dn7am
+              G7M5MSW85utsHWmCygTEs2n9aJo+TZ7lc4BvtEm6u/V1ct1jTp/ibNpOX/nUBuUC
+              zFM7IQKBgGW92T1b1PD20kNNxvc2PIMInr2/ZnyBq9cDIHajtOtHSbTzCMdDYVMb
+              3qmygaMGBUynVN1Vtyk65tzjJLMRz2nRkRpWRsh/YxVDMvCH7FxL97t6Lf3110u5
+              IgbJdCzRpAAB8QpAvjxkRfAPTwka64Nrxb5d0pvKN2/5/86sFIWA
           script: |
             sudo docker rm -vf $(sudo docker ps -a -q)
-            docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
-            cd 2021_1_LonelyBoiz/
-            sudo docker pull ${{ secrets.DOCKER_USER }}/image_server
-            sudo docker pull ${{ secrets.DOCKER_USER }}/pickleapp_server
-            sudo docker pull ${{ secrets.DOCKER_USER }}/auth_server
-            sudo docker pull ${{ secrets.DOCKER_USER }}/user_server
+            docker login -u anastasyakuznetsova -p inhfec767
+            cd 2022_2_TikTikIVProd/
+            sudo docker pull anastasyakuznetsova/attachment_mvs
+            sudo docker pull anastasyakuznetsova/chat_mvs
+            sudo docker pull anastasyakuznetsova/user_mvs
+            sudo docker pull anastasyakuznetsova/auth_mvs
+            sudo docker pull anastasyakuznetsova/server
       - name: run project
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
+          host: 89.208.197.127 
+          # username: ${{ secrets.USERNAME }}
+          key: MIIEowIBAAKCAQEApbiwQhAUatwthJu5G6lgs9V7abxVyslhc9Ywz02mI3oVy+g/
+              nqWfA/nK18EMqPlw3nL8td/OOboYYs+inbVVdbcR2wtNLMc9adPZrCXkzTXussb/
+              P1VolJDRVFtwXNRo0vcq45Xh/oLOcKNa8mQyCs0TXJRIyiuyyViLjW8Fksfapeic
+              2pIjK9TkSnkHEj9tPEd91JjbhOarCJ85xVRASz70LiVZKJAs8vH7htVQ18bSSzFt
+              D2JF9RoA2a1PUESoFeSW8zm/VGkxl1X+uCOO8hvskKShvg6mr4YyhEq2DS1Yxb1C
+              Q4TT8RJhS+YZ8mSNA5s2b3p2aHwaxFuon/x0fwIDAQABAoIBACThclBxdanGcFbX
+              tR1j14KOGxYP9OPZZ1e5LkmkVToF/H3RpP7wiu/+klbrvp6ITMckvfrX4PRV5wFu
+              hhkk9uzong+qdzVk7dT0cbfvAvlsbD/bK4jzv/94Ly3f36S5HM7+dMwLWi0i/UBy
+              ClZxV/WxaAKteXmMuhA3JW+Haq0cc2Er6dyORKpDJSIMi6XWADC9xVEm3SpXDkqY
+              fpYP68SdgcGjtwyq7eSi2MB7ZKbmCi+Vzs1RKzDhkFIkmmBrVSrtxfZRxdV0s45M
+              4zPzbOOSOvftC0sbTur9jRA36GySUBhvW59mCxEE3xWRsmfoq/rUIekfzAJ8VFIj
+              s1Z/z0ECgYEA1N7JIe0ohmUFWHZPpeisWXlt/JEqn6RgJIXvUT5kSzxP0ChrYlG4
+              9SHXxDhNZB7g39wWf8j/i0rGafgJKwKgamVJiaZLezIcch59fHSf0Mb5J/bUXRLY
+              wpk8tobn6bCMexfwEQ2YV1DKSnDCkhwt5NRm6QmMl/AP7G9y0275fd8CgYEAx0xf
+              7nu94ITjQB9TfibuJ89z7cpejdw0KLecbA3aUXquyZumVCPyv2pxlaB/X9ewuh2F
+              tUfuR0aZSTM+OWIYVsj4IjQiTlPtocYIavCIsgW61Nn8BbBFxn0Znkp+XJSbcrhB
+              Njeh2KtONpUyYVn+oc3bfgxva4h6GnRK6BL+nWECgYEAgJARD7FpIUoP4W6LChut
+              Q9inybtu773Z5xURBZNWBW5mkcRnnpjWyQ3of3S1oPtZOzp0SDb/x4Ogs81+1AAh
+              HEESGdVajwwjy/SIO0tAXlpdjnpvpcrFKTpdRavSkvvyzEEX12TLliiQFEdn69Cj
+              EyoJAUOoKvds1pI02meSvScCgYBNTJ8stYv46DHoLf5JQLpAcKMrSMGRziXg4Q5n
+              jpvt3GKsyZUir2q4uYVinoSo3NSr60VwAX024fgUPy7UPOrpxjsPsR7ZOI5Dn7am
+              G7M5MSW85utsHWmCygTEs2n9aJo+TZ7lc4BvtEm6u/V1ct1jTp/ibNpOX/nUBuUC
+              zFM7IQKBgGW92T1b1PD20kNNxvc2PIMInr2/ZnyBq9cDIHajtOtHSbTzCMdDYVMb
+              3qmygaMGBUynVN1Vtyk65tzjJLMRz2nRkRpWRsh/YxVDMvCH7FxL97t6Lf3110u5
+              IgbJdCzRpAAB8QpAvjxkRfAPTwka64Nrxb5d0pvKN2/5/86sFIWA
           script: |
-            cd 2021_1_LonelyBoiz/
+            cd 2022_2_TikTikIVProd/
             sudo docker-compose up -d --build --no-deps
 

@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS user_posts (
 	user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 	community_id INT REFERENCES communities(id),
 	description TEXT NOT NULL DEFAULT '',
-	created_at DATE NOT NULL
+	created_at TIMESTAMP NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS comments (
@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS message (
     sender_id INT NOT NULL REFERENCES users(id),
 	receiver_id INT NOT NULL REFERENCES users(id),
 	chat_id INT NOT NULL REFERENCES chat(id) ON DELETE CASCADE,
-    created_at date NOT NULL,
+    created_at TIMESTAMP NOT NULL,
 	sticker_id int REFERENCES stickers(id) ON DELETE CASCADE
 );
 
