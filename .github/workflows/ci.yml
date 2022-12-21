@@ -89,5 +89,5 @@ jobs:
             cd 2022_2_TikTikIVProd/
             git pull
             git checkout deploy
-            sudo docker-compose up -d --pull always
+            sudo docker-compose up -d --pull always --force-recreate
 
