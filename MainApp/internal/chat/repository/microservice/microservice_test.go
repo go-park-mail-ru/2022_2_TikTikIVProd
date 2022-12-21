@@ -54,6 +54,7 @@ func TestMicroserviceCreateMessage(t *testing.T) {
 	err := faker.FakeData(&mockPbMessage)
 	assert.NoError(t, err)
 	mockPbMessage.Id = 1
+	mockPbMessage.AttachmentsIds = nil
 
 	message := &models.Message {
 		ID: mockPbMessage.Id,
@@ -62,12 +63,14 @@ func TestMicroserviceCreateMessage(t *testing.T) {
 		ReceiverID: mockPbMessage.ReceiverId,
 		Body: mockPbMessage.Body,
 		CreatedAt: mockPbMessage.CreatedAt.AsTime(),
+		StickerID: mockPbMessage.StickerId,
 	}
 
 	var mockPbMessageError chat.Message
 	err = faker.FakeData(&mockPbMessageError)
 	assert.NoError(t, err)
 	mockPbMessageError.Id = 2
+	mockPbMessageError.AttachmentsIds = nil
 
 	messageError := &models.Message {
 		ID: mockPbMessageError.Id,
@@ -76,6 +79,7 @@ func TestMicroserviceCreateMessage(t *testing.T) {
 		ReceiverID: mockPbMessageError.ReceiverId,
 		Body: mockPbMessageError.Body,
 		CreatedAt: mockPbMessageError.CreatedAt.AsTime(),
+		StickerID: mockPbMessageError.StickerId,
 	}
 
 	pbNothing := chat.Nothing{Dummy: true}
@@ -128,6 +132,7 @@ func TestMicroserviceCreateDialog(t *testing.T) {
 	}
 
 	for idx := range mockPbDialog.Messages {
+		mockPbDialog.Messages[idx].AttachmentsIds = nil
 		msg := models.Message {
 			ID: mockPbDialog.Messages[idx].Id,
 			DialogID: mockPbDialog.Messages[idx].DialogId,
@@ -135,6 +140,7 @@ func TestMicroserviceCreateDialog(t *testing.T) {
 			ReceiverID: mockPbDialog.Messages[idx].ReceiverId,
 			Body: mockPbDialog.Messages[idx].Body,
 			CreatedAt: mockPbDialog.Messages[idx].CreatedAt.AsTime(),
+			StickerID: mockPbDialog.Messages[idx].StickerId,
 		}
 		dialog.Messages = append(dialog.Messages, msg)
 	}
@@ -151,6 +157,7 @@ func TestMicroserviceCreateDialog(t *testing.T) {
 	}
 
 	for idx := range mockPbDialogError.Messages {
+		mockPbDialogError.Messages[idx].AttachmentsIds = nil
 		msg := models.Message {
 			ID: mockPbDialogError.Messages[idx].Id,
 			DialogID: mockPbDialogError.Messages[idx].DialogId,
@@ -158,6 +165,7 @@ func TestMicroserviceCreateDialog(t *testing.T) {
 			ReceiverID: mockPbDialogError.Messages[idx].ReceiverId,
 			Body: mockPbDialogError.Messages[idx].Body,
 			CreatedAt: mockPbDialogError.Messages[idx].CreatedAt.AsTime(),
+			StickerID: mockPbDialogError.Messages[idx].StickerId,
 		}
 		dialogError.Messages = append(dialogError.Messages, msg)
 	}
@@ -211,6 +219,7 @@ func TestMicroserviceSelectDialog(t *testing.T) {
 	}
 
 	for idx := range mockPbDialog.Messages {
+		mockPbDialog.Messages[idx].AttachmentsIds = nil
 		msg := models.Message {
 			ID: mockPbDialog.Messages[idx].Id,
 			DialogID: mockPbDialog.Messages[idx].DialogId,
@@ -218,6 +227,7 @@ func TestMicroserviceSelectDialog(t *testing.T) {
 			ReceiverID: mockPbDialog.Messages[idx].ReceiverId,
 			Body: mockPbDialog.Messages[idx].Body,
 			CreatedAt: mockPbDialog.Messages[idx].CreatedAt.AsTime(),
+			StickerID: mockPbDialog.Messages[idx].StickerId,
 		}
 		dialog.Messages = append(dialog.Messages, msg)
 	}
@@ -282,6 +292,7 @@ func TestMicroserviceSelectDialogByUsers(t *testing.T) {
 	}
 
 	for idx := range mockPbDialog.Messages {
+		mockPbDialog.Messages[idx].AttachmentsIds = nil
 		msg := models.Message {
 			ID: mockPbDialog.Messages[idx].Id,
 			DialogID: mockPbDialog.Messages[idx].DialogId,
@@ -289,6 +300,7 @@ func TestMicroserviceSelectDialogByUsers(t *testing.T) {
 			ReceiverID: mockPbDialog.Messages[idx].ReceiverId,
 			Body: mockPbDialog.Messages[idx].Body,
 			CreatedAt: mockPbDialog.Messages[idx].CreatedAt.AsTime(),
+			StickerID: mockPbDialog.Messages[idx].StickerId,
 		}
 		dialog.Messages = append(dialog.Messages, msg)
 	}
@@ -356,6 +368,7 @@ func TestMicroserviceSelectAllDialogs(t *testing.T) {
 		}
 	
 		for idx2 := range mockPbDialogs.Dialogs[idx].Messages {
+			mockPbDialogs.Dialogs[idx].Messages[idx2].AttachmentsIds = nil
 			msg := models.Message {
 				ID: mockPbDialogs.Dialogs[idx].Messages[idx2].Id,
 				DialogID: mockPbDialogs.Dialogs[idx].Messages[idx2].DialogId,
@@ -363,6 +376,7 @@ func TestMicroserviceSelectAllDialogs(t *testing.T) {
 				ReceiverID: mockPbDialogs.Dialogs[idx].Messages[idx2].ReceiverId,
 				Body: mockPbDialogs.Dialogs[idx].Messages[idx2].Body,
 				CreatedAt: mockPbDialogs.Dialogs[idx].Messages[idx2].CreatedAt.AsTime(),
+				StickerID: mockPbDialogs.Dialogs[idx].Messages[idx2].StickerId,
 			}
 			dialog.Messages = append(dialog.Messages, msg)
 		}
@@ -423,6 +437,7 @@ func TestMicroserviceSelectMessages(t *testing.T) {
 	messages := make([]models.Message, 0)
 
 	for idx := range mockPbMessages.Messages {
+		mockPbMessages.Messages[idx].AttachmentsIds = nil
 		msg := models.Message {
 			ID: mockPbMessages.Messages[idx].Id,
 			DialogID: mockPbMessages.Messages[idx].DialogId,
@@ -430,6 +445,7 @@ func TestMicroserviceSelectMessages(t *testing.T) {
 			ReceiverID: mockPbMessages.Messages[idx].ReceiverId,
 			Body: mockPbMessages.Messages[idx].Body,
 			CreatedAt: mockPbMessages.Messages[idx].CreatedAt.AsTime(),
+			StickerID: mockPbMessages.Messages[idx].StickerId,
 		}
 		messages = append(messages, msg)
 	}

@@ -16,7 +16,7 @@ type RepositoryI interface {
 	CheckLikePost(id uint64, userID uint64) (bool, error)
 	GetComments(postId uint64) ([]*models.Comment, error)
 	AddComment(comment *models.Comment) error
-	UpdateComment(comment *models.Comment) error
+	//UpdateComment(comment *models.Comment) error
 	DeleteComment(id uint64) error
 	GetCommentById(id uint64) (*models.Comment, error)
 }

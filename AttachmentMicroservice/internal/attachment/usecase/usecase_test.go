@@ -19,6 +19,12 @@ type TestCaseGetPostAttachments struct {
 	Error       error
 }
 
+type TestCaseGetMessageAttachments struct {
+	ArgData     *Attachment.GetMessageAttachmentsRequest
+	ExpectedRes *Attachment.GetMessageAttachmentsResponse
+	Error       error
+}
+
 type TestCaseGetAttachment struct {
 	ArgData     *Attachment.AttachmentId
 	ExpectedRes *Attachment.Attachment
@@ -190,3 +196,62 @@ func TestUsecaseGetPostAttachments(t *testing.T) {
 	}
 	mockAttachmentRepo.AssertExpectations(t)
 }
+
+func TestUsecaseGetMessageAttachments(t *testing.T) {
+	mockPbMessageIdSuccess := Attachment.GetMessageAttachmentsRequest{
+		MessageId: 1,
+	}
+
+	modelAttachments := make([]*models.Attachment, 0)
+	err := faker.FakeData(&modelAttachments)
+	assert.NoError(t, err)
+
+	mockPbAttachments := &Attachment.GetMessageAttachmentsResponse{}
+
+	for idx := range modelAttachments {
+		att := &Attachment.Attachment{
+			Id:      modelAttachments[idx].ID,
+			AttLink: modelAttachments[idx].AttLink,
+			Type: modelAttachments[idx].Type,
+		}
+		mockPbAttachments.Attachments = append(mockPbAttachments.Attachments, att)
+	}
+
+	mockPbMessageIdError := Attachment.GetMessageAttachmentsRequest{
+		MessageId: 2,
+	}
+
+	getErr := errors.New("error")
+
+	mockAttachmentRepo := attachmentMocks.NewRepositoryI(t)
+
+	mockAttachmentRepo.On("GetMessageAttachments", mockPbMessageIdSuccess.MessageId).Return(modelAttachments, nil)
+	mockAttachmentRepo.On("GetMessageAttachments", mockPbMessageIdError.MessageId).Return(nil, getErr)
+
+	useCase := attachmentUsecase.New(mockAttachmentRepo)
+
+	cases := map[string]TestCaseGetMessageAttachments{
+		"success": {
+			ArgData:     &mockPbMessageIdSuccess,
+			ExpectedRes: mockPbAttachments,
+			Error:       nil,
+		},
+		"error": {
+			ArgData: &mockPbMessageIdError,
+			Error:   getErr,
+		},
+	}
+
+	for name, test := range cases {
+		t.Run(name, func(t *testing.T) {
+			atts, err := useCase.GetMessageAttachments(test.ArgData)
+			require.Equal(t, test.Error, errors.Cause(err))
+
+			if err == nil {
+				assert.Equal(t, test.ExpectedRes, atts)
+			}
+		})
+	}
+	mockAttachmentRepo.AssertExpectations(t)
+}
+

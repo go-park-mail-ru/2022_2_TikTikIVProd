@@ -47,12 +47,12 @@ func TestRepositoryCreatePost(t *testing.T) {
 
 	mockPost.Attachments[0] = models.Attachment{
 		ID:      1,
-		ImgLink: "link1",
+		AttLink: "link1",
 	}
 
 	mockPost.Attachments[1] = models.Attachment{
 		ID:      2,
-		ImgLink: "link2",
+		AttLink: "link2",
 	}
 
 	mockPost.CreateDate = time.Now()
@@ -118,12 +118,12 @@ func TestRepositoryUpdatePost(t *testing.T) {
 
 	mockPost.Attachments[0] = models.Attachment{
 		ID:      1,
-		ImgLink: "link1",
+		AttLink: "link1",
 	}
 
 	mockPost.Attachments[1] = models.Attachment{
 		ID:      2,
-		ImgLink: "link2",
+		AttLink: "link2",
 	}
 
 	mockPost.CreateDate = time.Now()

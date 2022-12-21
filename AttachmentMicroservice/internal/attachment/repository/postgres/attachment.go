@@ -120,15 +120,3 @@ func (dbAttachment *attachmentRepository) CreateAttachment(attachment *models.At
 	return nil
 }
 
-func (dbAttachment *attachmentRepository) AddAttachmentsToMessage(messageId uint64, attachments []models.Attachment) error {
-	relations := make([]MessageAttachmentRelation, 10)
-	for idx := range attachments {
-		relations = append(relations, MessageAttachmentRelation{MessageID: messageId, AttID: attachments[idx].ID})
-	}
-	tx := dbAttachment.db.Table("message_attachments").Create(&relations)
-	if tx.Error != nil {
-		return errors.Wrap(tx.Error, "attachmentRepository.CreateAttachment error while insert relation")
-	}
-
-	return nil
-}

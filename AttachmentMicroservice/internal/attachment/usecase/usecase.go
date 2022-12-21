@@ -12,7 +12,6 @@ type UseCaseI interface {
 	GetMessageAttachments(request *Attachment.GetMessageAttachmentsRequest) (*Attachment.GetMessageAttachmentsResponse, error)
 	GetAttachment(*Attachment.AttachmentId) (*Attachment.Attachment, error)
 	CreateAttachment(*Attachment.Attachment) (*Attachment.Nothing, error)
-	AddAttachmentsToMessage(request *Attachment.AddAttachmentsToMessageRequest) (*Attachment.Nothing, error)
 }
 
 type useCase struct {
@@ -93,15 +92,3 @@ func (uc *useCase) CreateAttachment(pbAttachment *Attachment.Attachment) (*Attac
 	return &Attachment.Nothing{Dummy: true}, nil
 }
 
-func (uc *useCase) AddAttachmentsToMessage(pbAttachment *Attachment.AddAttachmentsToMessageRequest) (*Attachment.Nothing, error) {
-	modelAttachments := make([]models.Attachment, 10)
-	for _, elem := range pbAttachment.Attachments {
-		modelAttachments = append(modelAttachments, models.Attachment{ID: elem.Id})
-	}
-	err := uc.attachmentRepository.AddAttachmentsToMessage(pbAttachment.MessageId, modelAttachments)
-	if err != nil {
-		return nil, errors.Wrap(err, "Attachment repository postgres error")
-	}
-
-	return &Attachment.Nothing{Dummy: true}, nil
-}

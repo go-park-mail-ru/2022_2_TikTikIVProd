@@ -1,332 +1,470 @@
 package delivery_test
 
-// import (
-// 	"encoding/json"
-// 	"net/http"
-// 	"net/http/httptest"
-// 	"strconv"
-// 	"strings"
-// 	"testing"
+import (
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"strconv"
+	"strings"
+	"testing"
+	"time"
 
-// 	"github.com/bxcodec/faker"
-// 	postDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/post/delivery"
-// 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/post/usecase/mocks"
-// 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
-// 	"github.com/labstack/echo/v4"
-// 	"github.com/stretchr/testify/assert"
-// 	"github.com/stretchr/testify/require"
-// )
+	"github.com/bxcodec/faker"
+	postDelivery "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/post/delivery"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/post/usecase/mocks"
+	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
+	"github.com/labstack/echo/v4"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
 
-// type TestCaseGetPost struct {
-// 	ArgData        string
-// 	ArgDataContext uint64
-// 	Error          error
-// 	StatusCode     int
-// }
+type TestCaseGetPost struct {
+	ArgData        string
+	ArgDataContext uint64
+	Error          error
+	StatusCode     int
+}
 
-// type TestCaseCreatePost struct {
-// 	ArgDataBody    string
-// 	ArgDataContext uint64
-// 	Error          error
-// 	StatusCode     int
-// }
+type TestCaseCreatePost struct {
+	ArgDataBody    string
+	ArgDataContext uint64
+	Error          error
+	StatusCode     int
+}
 
-// type TestCaseDeletePost struct {
-// 	ArgDataContext uint64
-// 	Error          error
-// 	StatusCode     int
-// 	ID             uint64
-// }
+type TestCaseAddComment struct {
+	ArgDataBody    string
+	ArgDataContext uint64
+	Error          error
+	StatusCode     int
+}
 
-// type TestCaseFeed struct {
-// 	ArgDataContext uint64
-// 	Error          error
-// 	StatusCode     int
-// }
+type TestCaseDeletePost struct {
+	ArgDataContext uint64
+	Error          error
+	StatusCode     int
+	ID             uint64
+}
 
-// func TestDeliveryGetPost(t *testing.T) {
-// 	var post models.Post
-// 	err := faker.FakeData(&post)
-// 	assert.NoError(t, err)
+type TestCaseDeleteComment struct {
+	ArgDataContext uint64
+	Error          error
+	StatusCode     int
+	ID             uint64
+}
 
-// 	postIdBadRequest := "hgcv"
+type TestCaseFeed struct {
+	ArgDataContext uint64
+	Error          error
+	StatusCode     int
+}
 
-// 	mockUCase := mocks.NewPostUseCaseI(t)
+func TestDeliveryGetPost(t *testing.T) {
+	var post models.Post
+	err := faker.FakeData(&post)
+	assert.NoError(t, err)
 
-// 	var userId uint64 = 1
+	postIdBadRequest := "hgcv"
 
-// 	mockUCase.On("GetPostById", post.ID, userId).Return(&post, nil)
+	mockUCase := mocks.NewPostUseCaseI(t)
 
-// 	handler := postDelivery.Delivery{
-// 		PUsecase: mockUCase,
-// 	}
+	var userId uint64 = 1
 
-// 	e := echo.New()
-// 	postDelivery.NewDelivery(e, mockUCase)
+	mockUCase.On("GetPostById", post.ID, userId).Return(&post, nil)
 
-// 	cases := map[string]TestCaseGetPost{
-// 		"success": {
-// 			ArgData:        strconv.Itoa(int(post.ID)),
-// 			ArgDataContext: userId,
-// 			Error:          nil,
-// 			StatusCode:     http.StatusOK,
-// 		},
-// 		"bad_request": {
-// 			ArgData:        postIdBadRequest,
-// 			ArgDataContext: userId,
-// 			Error: &echo.HTTPError{
-// 				Code:    http.StatusBadRequest,
-// 				Message: "bad request",
-// 			},
-// 		},
-// 		"invalid_context": {
-// 			ArgData: strconv.Itoa(int(post.ID)),
-// 			Error: &echo.HTTPError{
-// 				Code:    http.StatusInternalServerError,
-// 				Message: models.ErrInternalServerError.Error(),
-// 			},
-// 		},
-// 	}
+	handler := postDelivery.Delivery{
+		PUsecase: mockUCase,
+	}
 
-// 	for name, test := range cases {
-// 		t.Run(name, func(t *testing.T) {
-// 			req := httptest.NewRequest(echo.GET, "/post/:id", strings.NewReader(""))
-// 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	e := echo.New()
+	postDelivery.NewDelivery(e, mockUCase)
 
-// 			rec := httptest.NewRecorder()
-// 			c := e.NewContext(req, rec)
-// 			c.SetPath("/post/:id")
-// 			c.SetParamNames("id")
-// 			c.SetParamValues(test.ArgData)
-// 			if name != "invalid_context" {
-// 				c.Set("user_id", test.ArgDataContext)
-// 			}
+	cases := map[string]TestCaseGetPost{
+		"success": {
+			ArgData:        strconv.Itoa(int(post.ID)),
+			ArgDataContext: userId,
+			Error:          nil,
+			StatusCode:     http.StatusOK,
+		},
+		"bad_request": {
+			ArgData:        postIdBadRequest,
+			ArgDataContext: userId,
+			Error: &echo.HTTPError{
+				Code:    http.StatusBadRequest,
+				Message: "bad request",
+			},
+		},
+		"invalid_context": {
+			ArgData: strconv.Itoa(int(post.ID)),
+			Error: &echo.HTTPError{
+				Code:    http.StatusInternalServerError,
+				Message: models.ErrInternalServerError.Error(),
+			},
+		},
+	}
 
-// 			err := handler.GetPost(c)
-// 			require.Equal(t, test.Error, err)
+	for name, test := range cases {
+		t.Run(name, func(t *testing.T) {
+			req := httptest.NewRequest(echo.GET, "/post/:id", strings.NewReader(""))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
-// 			if err == nil {
-// 				assert.Equal(t, test.StatusCode, rec.Code)
-// 			}
-// 		})
-// 	}
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.SetPath("/post/:id")
+			c.SetParamNames("id")
+			c.SetParamValues(test.ArgData)
+			if name != "invalid_context" {
+				c.Set("user_id", test.ArgDataContext)
+			}
 
-// 	mockUCase.AssertExpectations(t)
-// }
+			err := handler.GetPost(c)
+			require.Equal(t, test.Error, err)
 
-// func TestDeliveryCreatePost(t *testing.T) {
-// 	mockPostValid := models.Post{Message: "123", Attachments: []models.Attachment{}}
-// 	mockPostInValid := models.Post{Attachments: []models.Attachment{}}
+			if err == nil {
+				assert.Equal(t, test.StatusCode, rec.Code)
+			}
+		})
+	}
 
-// 	jsonPostValid, err := json.Marshal(mockPostValid)
-// 	assert.NoError(t, err)
-// 	jsonPostInValid, err := json.Marshal(mockPostInValid)
-// 	assert.NoError(t, err)
+	mockUCase.AssertExpectations(t)
+}
 
-// 	mockUCase := mocks.NewPostUseCaseI(t)
+func TestDeliveryCreatePost(t *testing.T) {
+	mockPostValid := models.Post{Message: "123", Attachments: []models.Attachment{}}
+	mockPostInValid := models.Post{Attachments: []models.Attachment{}}
 
-// 	mockUCase.On("CreatePost", &mockPostValid).Return(nil)
+	jsonPostValid, err := json.Marshal(mockPostValid)
+	assert.NoError(t, err)
+	jsonPostInValid, err := json.Marshal(mockPostInValid)
+	assert.NoError(t, err)
 
-// 	handler := postDelivery.Delivery{
-// 		PUsecase: mockUCase,
-// 	}
+	mockUCase := mocks.NewPostUseCaseI(t)
 
-// 	e := echo.New()
-// 	postDelivery.NewDelivery(e, mockUCase)
+	mockUCase.On("CreatePost", &mockPostValid).Return(nil)
 
-// 	cases := map[string]TestCaseCreatePost{
-// 		"success": {
-// 			ArgDataBody:    string(jsonPostValid),
-// 			ArgDataContext: mockPostValid.UserID,
-// 			Error:          nil,
-// 			StatusCode:     http.StatusOK,
-// 		},
-// 		"bad_request": {
-// 			ArgDataBody:    string(jsonPostInValid),
-// 			ArgDataContext: mockPostValid.UserID,
-// 			Error: &echo.HTTPError{
-// 				Code:    http.StatusInternalServerError,
-// 				Message: models.ErrInternalServerError.Error(),
-// 			},
-// 		},
-// 	}
+	handler := postDelivery.Delivery{
+		PUsecase: mockUCase,
+	}
 
-// 	for name, test := range cases {
-// 		t.Run(name, func(t *testing.T) {
-// 			req := httptest.NewRequest(echo.POST, "/post/create", strings.NewReader(test.ArgDataBody))
-// 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	e := echo.New()
+	postDelivery.NewDelivery(e, mockUCase)
 
-// 			rec := httptest.NewRecorder()
-// 			c := e.NewContext(req, rec)
-// 			c.SetPath("/post/create")
-// 			c.Set("user_id", test.ArgDataContext)
+	cases := map[string]TestCaseCreatePost{
+		"success": {
+			ArgDataBody:    string(jsonPostValid),
+			ArgDataContext: mockPostValid.UserID,
+			Error:          nil,
+			StatusCode:     http.StatusOK,
+		},
+		"bad_request": {
+			ArgDataBody:    string(jsonPostInValid),
+			ArgDataContext: mockPostValid.UserID,
+			Error: &echo.HTTPError{
+				Code:    http.StatusInternalServerError,
+				Message: models.ErrInternalServerError.Error(),
+			},
+		},
+	}
 
-// 			err := handler.CreatePost(c)
-// 			require.Equal(t, test.Error, err)
+	for name, test := range cases {
+		t.Run(name, func(t *testing.T) {
+			req := httptest.NewRequest(echo.POST, "/post/create", strings.NewReader(test.ArgDataBody))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
-// 			if err == nil {
-// 				assert.Equal(t, test.StatusCode, rec.Code)
-// 			}
-// 		})
-// 	}
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.SetPath("/post/create")
+			c.Set("user_id", test.ArgDataContext)
 
-// 	mockUCase.AssertExpectations(t)
-// }
+			err := handler.CreatePost(c)
+			require.Equal(t, test.Error, err)
 
-// func TestDeliveryUpdatePost(t *testing.T) {
-// 	mockPostValid := models.Post{ID: 2, Message: "123", Attachments: []models.Attachment{}}
-// 	mockPostInValid := models.Post{Attachments: []models.Attachment{}}
+			if err == nil {
+				assert.Equal(t, test.StatusCode, rec.Code)
+			}
+		})
+	}
 
-// 	jsonPostValid, err := json.Marshal(mockPostValid)
-// 	assert.NoError(t, err)
-// 	jsonPostInValid, err := json.Marshal(mockPostInValid)
-// 	assert.NoError(t, err)
+	mockUCase.AssertExpectations(t)
+}
 
-// 	mockUCase := mocks.NewPostUseCaseI(t)
+func TestDeliveryUpdatePost(t *testing.T) {
+	mockPostValid := models.Post{ID: 2, Message: "123", Attachments: []models.Attachment{}}
+	mockPostInValid := models.Post{Attachments: []models.Attachment{}}
 
-// 	mockUCase.On("UpdatePost", &mockPostValid).Return(nil)
+	jsonPostValid, err := json.Marshal(mockPostValid)
+	assert.NoError(t, err)
+	jsonPostInValid, err := json.Marshal(mockPostInValid)
+	assert.NoError(t, err)
 
-// 	handler := postDelivery.Delivery{
-// 		PUsecase: mockUCase,
-// 	}
+	mockUCase := mocks.NewPostUseCaseI(t)
 
-// 	e := echo.New()
-// 	postDelivery.NewDelivery(e, mockUCase)
+	mockUCase.On("UpdatePost", &mockPostValid).Return(nil)
 
-// 	cases := map[string]TestCaseCreatePost{
-// 		"success": {
-// 			ArgDataBody:    string(jsonPostValid),
-// 			ArgDataContext: mockPostValid.UserID,
-// 			Error:          nil,
-// 			StatusCode:     http.StatusOK,
-// 		},
-// 		"bad_request": {
-// 			ArgDataBody:    string(jsonPostInValid),
-// 			ArgDataContext: mockPostValid.UserID,
-// 			Error: &echo.HTTPError{
-// 				Code:    http.StatusBadRequest,
-// 				Message: models.ErrBadRequest.Error(),
-// 			},
-// 		},
-// 	}
+	handler := postDelivery.Delivery{
+		PUsecase: mockUCase,
+	}
 
-// 	for name, test := range cases {
-// 		t.Run(name, func(t *testing.T) {
-// 			req := httptest.NewRequest(echo.POST, "/post/edit", strings.NewReader(test.ArgDataBody))
-// 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	e := echo.New()
+	postDelivery.NewDelivery(e, mockUCase)
 
-// 			rec := httptest.NewRecorder()
-// 			c := e.NewContext(req, rec)
-// 			c.SetPath("/post/edit")
-// 			c.Set("user_id", test.ArgDataContext)
+	cases := map[string]TestCaseCreatePost{
+		"success": {
+			ArgDataBody:    string(jsonPostValid),
+			ArgDataContext: mockPostValid.UserID,
+			Error:          nil,
+			StatusCode:     http.StatusOK,
+		},
+		"bad_request": {
+			ArgDataBody:    string(jsonPostInValid),
+			ArgDataContext: mockPostValid.UserID,
+			Error: &echo.HTTPError{
+				Code:    http.StatusBadRequest,
+				Message: models.ErrBadRequest.Error(),
+			},
+		},
+	}
 
-// 			err := handler.UpdatePost(c)
-// 			require.Equal(t, test.Error, err)
+	for name, test := range cases {
+		t.Run(name, func(t *testing.T) {
+			req := httptest.NewRequest(echo.POST, "/post/edit", strings.NewReader(test.ArgDataBody))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
-// 			if err == nil {
-// 				assert.Equal(t, test.StatusCode, rec.Code)
-// 			}
-// 		})
-// 	}
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.SetPath("/post/edit")
+			c.Set("user_id", test.ArgDataContext)
 
-// 	mockUCase.AssertExpectations(t)
-// }
+			err := handler.UpdatePost(c)
+			require.Equal(t, test.Error, err)
 
-// func TestDeliveryDeletePost(t *testing.T) {
-// 	var validPostID uint64 = 1
-// 	var validUserID uint64 = 1
+			if err == nil {
+				assert.Equal(t, test.StatusCode, rec.Code)
+			}
+		})
+	}
 
-// 	mockUCase := mocks.NewPostUseCaseI(t)
-// 	mockUCase.On("DeletePost", validPostID, validUserID).Return(nil)
+	mockUCase.AssertExpectations(t)
+}
 
-// 	handler := postDelivery.Delivery{
-// 		PUsecase: mockUCase,
-// 	}
+func TestDeliveryDeletePost(t *testing.T) {
+	var validPostID uint64 = 1
+	var validUserID uint64 = 1
 
-// 	e := echo.New()
-// 	postDelivery.NewDelivery(e, mockUCase)
+	mockUCase := mocks.NewPostUseCaseI(t)
+	mockUCase.On("DeletePost", validPostID, validUserID).Return(nil)
 
-// 	cases := map[string]TestCaseDeletePost{
-// 		"success": {
-// 			ArgDataContext: validUserID,
-// 			Error:          nil,
-// 			StatusCode:     http.StatusNoContent,
-// 			ID:             validPostID,
-// 		},
-// 		"invalid_context": {
-// 			ID: validPostID,
-// 			Error: &echo.HTTPError{
-// 				Code:    http.StatusInternalServerError,
-// 				Message: models.ErrInternalServerError.Error(),
-// 			},
-// 		},
-// 	}
+	handler := postDelivery.Delivery{
+		PUsecase: mockUCase,
+	}
 
-// 	for name, test := range cases {
-// 		t.Run(name, func(t *testing.T) {
-// 			req := httptest.NewRequest(echo.DELETE, "/post/:id", strings.NewReader(""))
-// 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	e := echo.New()
+	postDelivery.NewDelivery(e, mockUCase)
 
-// 			rec := httptest.NewRecorder()
-// 			c := e.NewContext(req, rec)
-// 			c.SetPath("/post/:id")
-// 			c.SetParamNames("id")
-// 			c.SetParamValues(strconv.Itoa(int(test.ID)))
-// 			if name != "invalid_context" {
-// 				c.Set("user_id", test.ArgDataContext)
-// 			}
+	cases := map[string]TestCaseDeletePost{
+		"success": {
+			ArgDataContext: validUserID,
+			Error:          nil,
+			StatusCode:     http.StatusNoContent,
+			ID:             validPostID,
+		},
+		"invalid_context": {
+			ID: validPostID,
+			Error: &echo.HTTPError{
+				Code:    http.StatusInternalServerError,
+				Message: models.ErrInternalServerError.Error(),
+			},
+		},
+	}
 
-// 			err := handler.DeletePost(c)
-// 			require.Equal(t, test.Error, err)
+	for name, test := range cases {
+		t.Run(name, func(t *testing.T) {
+			req := httptest.NewRequest(echo.DELETE, "/post/:id", strings.NewReader(""))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
-// 			if err == nil {
-// 				assert.Equal(t, test.StatusCode, rec.Code)
-// 			}
-// 		})
-// 	}
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.SetPath("/post/:id")
+			c.SetParamNames("id")
+			c.SetParamValues(strconv.Itoa(int(test.ID)))
+			if name != "invalid_context" {
+				c.Set("user_id", test.ArgDataContext)
+			}
 
-// 	mockUCase.AssertExpectations(t)
-// }
+			err := handler.DeletePost(c)
+			require.Equal(t, test.Error, err)
 
-// func TestDeliveryFeed(t *testing.T) {
-// 	var validUserID uint64 = 1
+			if err == nil {
+				assert.Equal(t, test.StatusCode, rec.Code)
+			}
+		})
+	}
 
-// 	mockUCase := mocks.NewPostUseCaseI(t)
-// 	mockUCase.On("GetAllPosts", validUserID).Return([]*models.Post{}, nil)
+	mockUCase.AssertExpectations(t)
+}
 
-// 	handler := postDelivery.Delivery{
-// 		PUsecase: mockUCase,
-// 	}
+func TestDeliveryFeed(t *testing.T) {
+	var validUserID uint64 = 1
 
-// 	e := echo.New()
-// 	postDelivery.NewDelivery(e, mockUCase)
+	mockUCase := mocks.NewPostUseCaseI(t)
+	mockUCase.On("GetAllPosts", validUserID).Return([]*models.Post{}, nil)
 
-// 	cases := map[string]TestCaseFeed{
-// 		"success": {
-// 			ArgDataContext: validUserID,
-// 			Error:          nil,
-// 			StatusCode:     http.StatusOK,
-// 		},
-// 	}
+	handler := postDelivery.Delivery{
+		PUsecase: mockUCase,
+	}
 
-// 	for name, test := range cases {
-// 		t.Run(name, func(t *testing.T) {
-// 			req := httptest.NewRequest(echo.GET, "/feed", strings.NewReader(""))
-// 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	e := echo.New()
+	postDelivery.NewDelivery(e, mockUCase)
 
-// 			rec := httptest.NewRecorder()
-// 			c := e.NewContext(req, rec)
-// 			c.SetPath("/feed")
-// 			c.Set("user_id", test.ArgDataContext)
+	cases := map[string]TestCaseFeed{
+		"success": {
+			ArgDataContext: validUserID,
+			Error:          nil,
+			StatusCode:     http.StatusOK,
+		},
+	}
 
-// 			err := handler.Feed(c)
-// 			require.Equal(t, test.Error, err)
+	for name, test := range cases {
+		t.Run(name, func(t *testing.T) {
+			req := httptest.NewRequest(echo.GET, "/feed", strings.NewReader(""))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
-// 			if err == nil {
-// 				assert.Equal(t, test.StatusCode, rec.Code)
-// 			}
-// 		})
-// 	}
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.SetPath("/feed")
+			c.Set("user_id", test.ArgDataContext)
 
-// 	mockUCase.AssertExpectations(t)
-// }
+			err := handler.Feed(c)
+			require.Equal(t, test.Error, err)
+
+			if err == nil {
+				assert.Equal(t, test.StatusCode, rec.Code)
+			}
+		})
+	}
+
+	mockUCase.AssertExpectations(t)
+}
+
+func TestDeliveryAddComment(t *testing.T) {
+	mockCommentValid := models.Comment {
+		PostID: 1,
+		Message: "message1",
+		CreateDate: time.Date(2022, time.September, 5, 1, 12, 12, 12, time.UTC),
+	}
+	mockCommentInValid := models.Comment {
+		Message: "message2",
+		CreateDate: time.Date(2022, time.September, 5, 1, 12, 12, 12, time.UTC),
+	}
+
+	jsonCommentValid, err := json.Marshal(mockCommentValid)
+	assert.NoError(t, err)
+	jsonCommentInValid, err := json.Marshal(mockCommentInValid)
+	assert.NoError(t, err)
+
+	mockUCase := mocks.NewPostUseCaseI(t)
+
+	mockUCase.On("AddComment", &mockCommentValid).Return(nil)
+
+	handler := postDelivery.Delivery{
+		PUsecase: mockUCase,
+	}
+
+	e := echo.New()
+	postDelivery.NewDelivery(e, mockUCase)
+
+	cases := map[string]TestCaseAddComment{
+		"success": {
+			ArgDataBody:    string(jsonCommentValid),
+			ArgDataContext: mockCommentValid.UserID,
+			Error:          nil,
+			StatusCode:     http.StatusOK,
+		},
+		"bad_request": {
+			ArgDataBody:    string(jsonCommentInValid),
+			ArgDataContext: mockCommentInValid.UserID,
+			Error: &echo.HTTPError{
+				Code:    http.StatusBadRequest,
+				Message: models.ErrBadRequest.Error(),
+			},
+		},
+	}
+
+	for name, test := range cases {
+		t.Run(name, func(t *testing.T) {
+			req := httptest.NewRequest(echo.POST, "/post/comment/add", strings.NewReader(test.ArgDataBody))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.SetPath("/post/comment/add")
+			c.Set("user_id", test.ArgDataContext)
+
+			err := handler.AddComment(c)
+			require.Equal(t, test.Error, err)
+
+			if err == nil {
+				assert.Equal(t, test.StatusCode, rec.Code)
+			}
+		})
+	}
+
+	mockUCase.AssertExpectations(t)
+}
+
+func TestDeliveryDeleteComment(t *testing.T) {
+	var validCommentID uint64 = 1
+	var validUserID uint64 = 1
+
+	mockUCase := mocks.NewPostUseCaseI(t)
+	mockUCase.On("DeleteComment", validCommentID, validUserID).Return(nil)
+
+	handler := postDelivery.Delivery{
+		PUsecase: mockUCase,
+	}
+
+	e := echo.New()
+	postDelivery.NewDelivery(e, mockUCase)
+
+	cases := map[string]TestCaseDeleteComment{
+		"success": {
+			ArgDataContext: validUserID,
+			Error:          nil,
+			StatusCode:     http.StatusNoContent,
+			ID:             validCommentID,
+		},
+		"invalid_context": {
+			ID: validCommentID,
+			Error: &echo.HTTPError{
+				Code:    http.StatusInternalServerError,
+				Message: models.ErrInternalServerError.Error(),
+			},
+		},
+	}
+
+	for name, test := range cases {
+		t.Run(name, func(t *testing.T) {
+			req := httptest.NewRequest(echo.DELETE, "/post/comment/:id", strings.NewReader(""))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.SetPath("/post/comment/:id")
+			c.SetParamNames("id")
+			c.SetParamValues(strconv.Itoa(int(test.ID)))
+			if name != "invalid_context" {
+				c.Set("user_id", test.ArgDataContext)
+			}
+
+			err := handler.DeleteComment(c)
+			require.Equal(t, test.Error, err)
+
+			if err == nil {
+				assert.Equal(t, test.StatusCode, rec.Code)
+			}
+		})
+	}
+
+	mockUCase.AssertExpectations(t)
+}
+

@@ -36,7 +36,3 @@ func (im AttachmentManager) CreateAttachment(ctx context.Context, pbAttachment *
 	return &attachment.AttachmentId{AttachmentId: pbAttachment.Id}, err
 }
 
-func (im AttachmentManager) AddAttachmentsToPost(ctx context.Context, pbAttachment *attachment.AddAttachmentsToMessageRequest) (*attachment.Nothing, error) {
-	_, err := im.AttachmentUC.AddAttachmentsToMessage(pbAttachment)
-	return &attachment.Nothing{Dummy: true}, err
-}

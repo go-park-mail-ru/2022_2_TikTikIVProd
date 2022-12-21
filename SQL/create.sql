@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS comments (
 	user_id INT NOT NULL REFERENCES users(id),
 	post_id INT NOT NULL REFERENCES user_posts(id) ON DELETE CASCADE,
 	text TEXT NOT NULL,
-	created_at DATE NOT NULL
+	created_at TIMESTAMP NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS user_posts_attachments (

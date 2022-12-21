@@ -48,6 +48,5 @@ service Attachments {
     rpc GetMessageAttachments(GetMessageAttachmentsRequest) returns (GetMessageAttachmentsResponse) {}
     rpc GetAttachment(AttachmentId) returns (Attachment) {}
     rpc CreateAttachment(Attachment) returns (AttachmentId) {}
-    rpc AddAttachmentsToMessage(AddAttachmentsToMessageRequest) returns (Nothing) {}
 }
 

@@ -429,32 +429,32 @@ func (delivery *Delivery) AddComment(c echo.Context) error {
 // @Failure 401 {object} echo.HTTPError "no cookie"
 // @Failure 403 {object} echo.HTTPError "invalid csrf"
 // @Router   /post/comment/edit [post]
-func (delivery *Delivery) UpdateComment(c echo.Context) error {
-	var comment models.Comment
-	err := c.Bind(&comment)
-	if err != nil {
-		c.Logger().Error(err)
-		return c.JSON(http.StatusBadRequest, models.ErrBadRequest.Error())
-	}
+// func (delivery *Delivery) UpdateComment(c echo.Context) error {
+// 	var comment models.Comment
+// 	err := c.Bind(&comment)
+// 	if err != nil {
+// 		c.Logger().Error(err)
+// 		return c.JSON(http.StatusBadRequest, models.ErrBadRequest.Error())
+// 	}
 
-	requestSanitizeComment(&comment)
+// 	requestSanitizeComment(&comment)
 
-	userId, ok := c.Get("user_id").(uint64)
-	if !ok {
-		c.Logger().Error(models.ErrInternalServerError)
-		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
-	}
+// 	userId, ok := c.Get("user_id").(uint64)
+// 	if !ok {
+// 		c.Logger().Error(models.ErrInternalServerError)
+// 		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
+// 	}
 
-	comment.UserID = userId
+// 	comment.UserID = userId
 
-	err = delivery.PUsecase.UpdateComment(&comment)
-	if err != nil {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
-	}
+// 	err = delivery.PUsecase.UpdateComment(&comment)
+// 	if err != nil {
+// 		c.Logger().Error(err)
+// 		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
+// 	}
 
-	return c.JSON(http.StatusOK, pkg.Response{Body: comment})
-}
+// 	return c.JSON(http.StatusOK, pkg.Response{Body: comment})
+// }
 
 // DeleteComment godoc
 // @Summary      Delete a comment
@@ -536,6 +536,6 @@ func NewDelivery(e *echo.Echo, up postsUsecase.PostUseCaseI) {
 	e.DELETE("/post/:id", handler.DeletePost)
 	e.GET("/post/:id/comments", handler.GetComments)
 	e.POST("/post/comment/add", handler.AddComment)
-	e.POST("/post/comment/edit", handler.UpdateComment)
+	//e.POST("/post/comment/edit", handler.UpdateComment)
 	e.DELETE("/post/comment/:id", handler.DeleteComment)
 }

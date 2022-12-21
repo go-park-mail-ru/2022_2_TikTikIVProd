@@ -22,7 +22,7 @@ type PostUseCaseI interface {
 	UnLikePost(id uint64, userId uint64) error
 	GetComments(id uint64) ([]*models.Comment, error)
 	AddComment(comment *models.Comment) error
-	UpdateComment(comment *models.Comment) error
+	//UpdateComment(comment *models.Comment) error
 	DeleteComment(id uint64, userId uint64) error
 }
 
@@ -101,34 +101,34 @@ func (p *postsUsecase) DeleteComment(id uint64, userId uint64) error {
 	return nil
 }
 
-func (p *postsUsecase) UpdateComment(comment *models.Comment) error {
-	existedComment, err := p.postsRepo.GetCommentById(comment.ID)
-	if err != nil {
-		return err
-	}
+// func (p *postsUsecase) UpdateComment(comment *models.Comment) error {
+// 	existedComment, err := p.postsRepo.GetCommentById(comment.ID)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	if existedComment == nil {
-		return models.ErrNotFound
-	}
+// 	if existedComment == nil {
+// 		return models.ErrNotFound
+// 	}
 
-	if existedComment.UserID != comment.UserID {
-		return errors.New("Permission denied")
-	}
+// 	if existedComment.UserID != comment.UserID {
+// 		return errors.New("Permission denied")
+// 	}
 
-	err = p.postsRepo.UpdateComment(comment)
+// 	err = p.postsRepo.UpdateComment(comment)
 
-	if err != nil {
-		return errors.Wrap(err, "Error in func postsUsecase.UpdateComment")
-	}
+// 	if err != nil {
+// 		return errors.Wrap(err, "Error in func postsUsecase.UpdateComment")
+// 	}
 
-	err = addAuthorForComment(comment, p.userRepo)
+// 	err = addAuthorForComment(comment, p.userRepo)
 
-	if err != nil {
-		return errors.Wrap(err, "Error in func postsUsecase.UpdateComment")
-	}
+// 	if err != nil {
+// 		return errors.Wrap(err, "Error in func postsUsecase.UpdateComment")
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 func (p *postsUsecase) LikePost(id uint64, userId uint64) error {
 	existedPost, err := p.postsRepo.GetPostById(id)

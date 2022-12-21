@@ -12,29 +12,6 @@ type UseCaseI struct {
 	mock.Mock
 }
 
-// AddAttachmentsToMessage provides a mock function with given fields: request
-func (_m *UseCaseI) AddAttachmentsToMessage(request *__.AddAttachmentsToMessageRequest) (*__.Nothing, error) {
-	ret := _m.Called(request)
-
-	var r0 *__.Nothing
-	if rf, ok := ret.Get(0).(func(*__.AddAttachmentsToMessageRequest) *__.Nothing); ok {
-		r0 = rf(request)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*__.Nothing)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(*__.AddAttachmentsToMessageRequest) error); ok {
-		r1 = rf(request)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // CreateAttachment provides a mock function with given fields: _a0
 func (_m *UseCaseI) CreateAttachment(_a0 *__.Attachment) (*__.Nothing, error) {
 	ret := _m.Called(_a0)

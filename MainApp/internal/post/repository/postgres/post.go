@@ -257,14 +257,14 @@ func (dbPost *postRepository) AddComment(comment *models.Comment) error {
 	return nil
 }
 
-func (dbPost *postRepository) UpdateComment(comment *models.Comment) error {
-	tx := dbPost.db.Table("comments").Omit("id").Updates(comment)
-	if tx.Error != nil {
-		return errors.Wrap(tx.Error, "postRepository.UpdateComment error while UPDATE comment")
-	}
+// func (dbPost *postRepository) UpdateComment(comment *models.Comment) error {
+// 	tx := dbPost.db.Table("comments").Omit("id").Updates(comment)
+// 	if tx.Error != nil {
+// 		return errors.Wrap(tx.Error, "postRepository.UpdateComment error while UPDATE comment")
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 func (dbPost *postRepository) DeleteComment(id uint64) error {
 	tx := dbPost.db.Table("comments").Delete(&models.Comment{}, id)

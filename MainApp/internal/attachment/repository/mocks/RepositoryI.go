@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	models "github.com/go-park-mail-ru/2022_2_TikTikIVProd/AttachmentMicroservice/models"
+	models "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -12,13 +12,13 @@ type RepositoryI struct {
 	mock.Mock
 }
 
-// CreateAttachment provides a mock function with given fields: attachment
-func (_m *RepositoryI) CreateAttachment(attachment *models.Attachment) error {
-	ret := _m.Called(attachment)
+// CreateAttachment provides a mock function with given fields: Attachment
+func (_m *RepositoryI) CreateAttachment(Attachment *models.Attachment) error {
+	ret := _m.Called(Attachment)
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(*models.Attachment) error); ok {
-		r0 = rf(attachment)
+		r0 = rf(Attachment)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -49,22 +49,22 @@ func (_m *RepositoryI) GetAttachment(attachmentID uint64) (*models.Attachment, e
 	return r0, r1
 }
 
-// GetMessageAttachments provides a mock function with given fields: postID
-func (_m *RepositoryI) GetMessageAttachments(postID uint64) ([]*models.Attachment, error) {
-	ret := _m.Called(postID)
+// GetMessageAttachments provides a mock function with given fields: messageId
+func (_m *RepositoryI) GetMessageAttachments(messageId uint64) ([]models.Attachment, error) {
+	ret := _m.Called(messageId)
 
-	var r0 []*models.Attachment
-	if rf, ok := ret.Get(0).(func(uint64) []*models.Attachment); ok {
-		r0 = rf(postID)
+	var r0 []models.Attachment
+	if rf, ok := ret.Get(0).(func(uint64) []models.Attachment); ok {
+		r0 = rf(messageId)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*models.Attachment)
+			r0 = ret.Get(0).([]models.Attachment)
 		}
 	}
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(uint64) error); ok {
-		r1 = rf(postID)
+		r1 = rf(messageId)
 	} else {
 		r1 = ret.Error(1)
 	}
