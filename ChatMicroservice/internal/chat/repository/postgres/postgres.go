@@ -31,40 +31,6 @@ func (MessageAttachmentsRelation) TableName() string {
 	return "message_attachments"
 }
 
-func toPostgresMessage(p *models.Message) *Message {
-	return &Message{
-		ID:         p.ID,
-		DialogID:   p.DialogID,
-		SenderID:   p.SenderID,
-		ReceiverID: p.ReceiverID,
-		CreatedAt:  p.CreatedAt,
-		Body:       p.Body,
-		StickerID:  p.StickerID,
-	}
-}
-
-func toModelMessage(p *Message) *models.Message {
-	return &models.Message{
-		ID:         p.ID,
-		DialogID:   p.DialogID,
-		SenderID:   p.SenderID,
-		ReceiverID: p.ReceiverID,
-		CreatedAt:  p.CreatedAt,
-		Body:       p.Body,
-		StickerID:  p.StickerID,
-	}
-}
-
-func toModelMessages(posts []*Message) []*models.Message {
-	out := make([]*models.Message, len(posts))
-
-	for i, b := range posts {
-		out[i] = toModelMessage(b)
-	}
-
-	return out
-}
-
 type chatRepository struct {
 	db *gorm.DB
 }

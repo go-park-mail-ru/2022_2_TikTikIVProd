@@ -36,5 +36,7 @@ func main() {
 	attachment.RegisterAttachmentsServer(server, attachmentDelivery.New(attachmentUC))
 
 	log.Println("starting server at :8082")
-	server.Serve(lis)
+	if err := server.Serve(lis); err != nil {
+		log.Fatal(err)
+	}
 }
