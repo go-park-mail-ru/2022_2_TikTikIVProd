@@ -74,7 +74,7 @@ jobs:
             docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
             cd 2022_2_TikTikIVProd/
             sudo docker compose down
-            sudo docker images -a | grep ${{ secrets.DOCKER_USER }} | awk '{print $1}' | xargs docker rmi
+            sudo docker images -a | grep ${{ secrets.DOCKER_USER }} | awk '{print $1}' | xargs sudo docker rmi
             sudo docker pull ${{ secrets.DOCKER_USER }}/attachment_mvs
             sudo docker pull ${{ secrets.DOCKER_USER }}/chat_mvs
             sudo docker pull ${{ secrets.DOCKER_USER }}/user_mvs

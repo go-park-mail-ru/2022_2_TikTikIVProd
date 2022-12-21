@@ -120,6 +120,7 @@ func TestMicroserviceCreateDialog(t *testing.T) {
 	err := faker.FakeData(&mockPbDialog)
 	assert.NoError(t, err)
 	mockPbDialog.Id = 1
+	mockPbDialog.Messages = nil
 
 	dialogId := chat.DialogId {
 		Id: mockPbDialog.Id,
@@ -131,24 +132,25 @@ func TestMicroserviceCreateDialog(t *testing.T) {
 		UserId2: mockPbDialog.UserId2,
 	}
 
-	for idx := range mockPbDialog.Messages {
-		mockPbDialog.Messages[idx].AttachmentsIds = nil
-		msg := models.Message {
-			ID: mockPbDialog.Messages[idx].Id,
-			DialogID: mockPbDialog.Messages[idx].DialogId,
-			SenderID: mockPbDialog.Messages[idx].SenderId,
-			ReceiverID: mockPbDialog.Messages[idx].ReceiverId,
-			Body: mockPbDialog.Messages[idx].Body,
-			CreatedAt: mockPbDialog.Messages[idx].CreatedAt.AsTime(),
-			StickerID: mockPbDialog.Messages[idx].StickerId,
-		}
-		dialog.Messages = append(dialog.Messages, msg)
-	}
+	// for idx := range mockPbDialog.Messages {
+	// 	mockPbDialog.Messages[idx].AttachmentsIds = nil
+	// 	msg := models.Message {
+	// 		ID: mockPbDialog.Messages[idx].Id,
+	// 		DialogID: mockPbDialog.Messages[idx].DialogId,
+	// 		SenderID: mockPbDialog.Messages[idx].SenderId,
+	// 		ReceiverID: mockPbDialog.Messages[idx].ReceiverId,
+	// 		Body: mockPbDialog.Messages[idx].Body,
+	// 		CreatedAt: mockPbDialog.Messages[idx].CreatedAt.AsTime(),
+	// 		StickerID: mockPbDialog.Messages[idx].StickerId,
+	// 	}
+	// 	dialog.Messages = append(dialog.Messages, msg)
+	// }
 
 	var mockPbDialogError chat.Dialog
 	err = faker.FakeData(&mockPbDialogError)
 	assert.NoError(t, err)
 	mockPbDialogError.Id = 2
+	mockPbDialogError.Messages = nil
 
 	dialogError := &models.Dialog {
 		Id: mockPbDialogError.Id,
@@ -156,19 +158,19 @@ func TestMicroserviceCreateDialog(t *testing.T) {
 		UserId2: mockPbDialogError.UserId2,
 	}
 
-	for idx := range mockPbDialogError.Messages {
-		mockPbDialogError.Messages[idx].AttachmentsIds = nil
-		msg := models.Message {
-			ID: mockPbDialogError.Messages[idx].Id,
-			DialogID: mockPbDialogError.Messages[idx].DialogId,
-			SenderID: mockPbDialogError.Messages[idx].SenderId,
-			ReceiverID: mockPbDialogError.Messages[idx].ReceiverId,
-			Body: mockPbDialogError.Messages[idx].Body,
-			CreatedAt: mockPbDialogError.Messages[idx].CreatedAt.AsTime(),
-			StickerID: mockPbDialogError.Messages[idx].StickerId,
-		}
-		dialogError.Messages = append(dialogError.Messages, msg)
-	}
+	// for idx := range mockPbDialogError.Messages {
+	// 	mockPbDialogError.Messages[idx].AttachmentsIds = nil
+	// 	msg := models.Message {
+	// 		ID: mockPbDialogError.Messages[idx].Id,
+	// 		DialogID: mockPbDialogError.Messages[idx].DialogId,
+	// 		SenderID: mockPbDialogError.Messages[idx].SenderId,
+	// 		ReceiverID: mockPbDialogError.Messages[idx].ReceiverId,
+	// 		Body: mockPbDialogError.Messages[idx].Body,
+	// 		CreatedAt: mockPbDialogError.Messages[idx].CreatedAt.AsTime(),
+	// 		StickerID: mockPbDialogError.Messages[idx].StickerId,
+	// 	}
+	// 	dialogError.Messages = append(dialogError.Messages, msg)
+	// }
 
 	mockChatClient := chatMocks.NewChatClient(t)
 
