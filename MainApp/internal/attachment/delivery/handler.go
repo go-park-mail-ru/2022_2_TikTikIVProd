@@ -45,7 +45,7 @@ func (delivery *delivery) GetAttachmentByID(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
 	}
 
-	f, err := os.Open("attachments/" + att.AttLink)
+	f, err := os.Open(att.AttLink)
 	if err != nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
