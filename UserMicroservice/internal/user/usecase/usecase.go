@@ -6,6 +6,8 @@ import (
 	user "github.com/go-park-mail-ru/2022_2_TikTikIVProd/UserMicroservice/proto"
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"google.golang.org/grpc/status"
+	"google.golang.org/grpc/codes"
 )
 
 type UseCaseI interface {
@@ -35,7 +37,9 @@ func New(userRepository userRep.RepositoryI) UseCaseI {
 
 func (uc *useCase) SelectUserByNickName(nickName *user.SelectUserByNickNameRequest) (*user.User, error) {
 	usr, err := uc.userRepository.SelectUserByNickName(nickName.NickName)
-	if err != nil {
+	if err == models.ErrNotFound {
+		return nil, status.Error(codes.NotFound, models.ErrNotFound.Error())
+	} else if err != nil {
 		return nil, errors.Wrap(err, "user repository postgres error")
 	}
 
@@ -56,7 +60,9 @@ func (uc *useCase) SelectUserByNickName(nickName *user.SelectUserByNickNameReque
 
 func (uc *useCase) SelectUserByEmail(email *user.SelectUserByEmailRequest) (*user.User, error) {
 	usr, err := uc.userRepository.SelectUserByEmail(email.Email)
-	if err != nil {
+	if err == models.ErrNotFound {
+		return nil, status.Error(codes.NotFound, models.ErrNotFound.Error())
+	} else if err != nil {
 		return nil, errors.Wrap(err, "user repository postgres error")
 	}
 
@@ -77,7 +83,9 @@ func (uc *useCase) SelectUserByEmail(email *user.SelectUserByEmailRequest) (*use
 
 func (uc *useCase) SelectUserById(userId *user.UserId) (*user.User, error) {
 	usr, err := uc.userRepository.SelectUserById(userId.Id)
-	if err != nil {
+	if err == models.ErrNotFound {
+		return nil, status.Error(codes.NotFound, models.ErrNotFound.Error())
+	} else if err != nil {
 		return nil, errors.Wrap(err, "user repository postgres error")
 	}
 

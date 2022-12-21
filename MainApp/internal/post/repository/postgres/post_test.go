@@ -210,3 +210,146 @@ func TestRepositoryGetPostById(t *testing.T) {
 	err = mock.ExpectationsWereMet()
 	assert.NoError(t, err)
 }
+
+func TestRepositoryDeletePostById(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+
+	dialector := postgres.New(postgres.Config{
+		DSN:                  "sqlmock_db_0",
+		DriverName:           "postgres",
+		Conn:                 db,
+		PreferSimpleProtocol: true,
+	})
+	gdb, err := gorm.Open(dialector, &gorm.Config{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	gdb.Logger.LogMode(logger.Info)
+
+	mockPost := models.Post{
+		ID:          1,
+		UserID:      1,
+		Message:     "message",
+		CommunityID: 1,
+		CreateDate:  time.Now(),
+	}
+
+	mock.ExpectBegin()
+
+	mock.ExpectExec(regexp.QuoteMeta(
+		`DELETE FROM "user_posts" WHERE "user_posts"."id" = $1`)).
+		WithArgs(mockPost.ID).
+		WillReturnResult(sqlmock.NewResult(int64(1), 1))
+
+	mock.ExpectCommit()
+
+	repository := postRep.NewPostRepository(gdb)
+
+	err = repository.DeletePostById(mockPost.ID)
+	require.NoError(t, err)
+
+	err = mock.ExpectationsWereMet()
+	assert.NoError(t, err)
+}
+
+func TestRepositoryLikePost(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+
+	dialector := postgres.New(postgres.Config{
+		DSN:                  "sqlmock_db_0",
+		DriverName:           "postgres",
+		Conn:                 db,
+		PreferSimpleProtocol: true,
+	})
+	gdb, err := gorm.Open(dialector, &gorm.Config{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	gdb.Logger.LogMode(logger.Info)
+
+	mockPost := models.Post{
+		ID:          1,
+		UserID:      1,
+		Message:     "message",
+		CommunityID: 1,
+	}
+
+	var postId uint64 = 1
+
+	mock.ExpectBegin()
+
+	mock.ExpectExec(regexp.QuoteMeta(
+		`INSERT INTO "like_post" ("user_id","user_post_id") VALUES ($1,$2)`)).
+		WithArgs(mockPost.UserID, mockPost.ID).WillReturnResult(sqlmock.NewResult(int64(1), 1))
+
+	mock.ExpectCommit()
+
+	repository := postRep.NewPostRepository(gdb)
+
+	err = repository.LikePost(mockPost.ID, mockPost.UserID)
+	require.NoError(t, err)
+	assert.Equal(t, postId, mockPost.ID)
+
+	err = mock.ExpectationsWereMet()
+	assert.NoError(t, err)
+}
+
+func TestRepositoryUnLikePost(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+
+	dialector := postgres.New(postgres.Config{
+		DSN:                  "sqlmock_db_0",
+		DriverName:           "postgres",
+		Conn:                 db,
+		PreferSimpleProtocol: true,
+	})
+	gdb, err := gorm.Open(dialector, &gorm.Config{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	gdb.Logger.LogMode(logger.Info)
+
+	mockPost := models.Post{
+		ID:          1,
+		UserID:      1,
+		Message:     "message",
+		CommunityID: 1,
+	}
+
+	var postId uint64 = 1
+
+	mock.ExpectBegin()
+
+	mock.ExpectExec(regexp.QuoteMeta(
+		`DELETE FROM "like_post" WHERE "like_post"."user_id" = $1 AND "like_post"."user_post_id" = $2`)).
+		WithArgs(mockPost.UserID, mockPost.ID).
+		WillReturnResult(sqlmock.NewResult(int64(1), 1))
+
+	mock.ExpectCommit()
+
+	repository := postRep.NewPostRepository(gdb)
+
+	err = repository.UnLikePost(mockPost.ID, mockPost.UserID)
+	require.NoError(t, err)
+	assert.Equal(t, postId, mockPost.ID)
+
+	err = mock.ExpectationsWereMet()
+	assert.NoError(t, err)
+}
+
+

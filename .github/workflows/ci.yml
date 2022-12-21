@@ -32,11 +32,25 @@ jobs:
 
     - name: tests
       run: |
-        cd MainApp && go test ./... -v && cd ..
-        cd UserMicroservice && go test ./... -v && cd ..
-        cd AuthMicroservice && go test ./... -v && cd ..
-        cd AttachmentMicroservice && go test ./... -v && cd ..
-        cd ChatMicroservice && go test ./... -v && cd ..
+        cd MainApp && go test ./... -coverpkg ./... -coverprofile=c.out
+        cat c.out | grep -v -E ".*/mocks|.*/proto|.*easyjson*"  > c_res.out
+        go tool cover -func=c_res.out
+        cd ..
+        cd UserMicroservice && go test ./... -coverpkg ./... -coverprofile=c.out
+        cat c.out | grep -v -E ".*/mocks|.*/proto|.*easyjson*"  > c_res.out
+        go tool cover -func=c_res.out
+        cd ..
+        cd AuthMicroservice && go test ./... -coverpkg ./... -coverprofile=c.out
+        cat c.out | grep -v -E ".*/mocks|.*/proto|.*easyjson*"  > c_res.out
+        go tool cover -func=c_res.out
+        cd ..
+        cd AttachmentMicroservice && go test ./... -coverpkg ./... -coverprofile=c.out
+        cat c.out | grep -v -E ".*/mocks|.*/proto|.*easyjson*"  > c_res.out
+        go tool cover -func=c_res.out
+        cd ..
+        cd ChatMicroservice && go test ./... -coverpkg ./... -coverprofile=c.out
+        cat c.out | grep -v -E ".*/mocks|.*/proto|.*easyjson*"  > c_res.out
+        go tool cover -func=c_res.out
   
   build:
     needs: tests
@@ -74,7 +88,7 @@ jobs:
             docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
             cd 2022_2_TikTikIVProd/
             sudo docker compose down
-            sudo docker images -a | grep ${{ secrets.DOCKER_USER }} | awk '{print $1}' | xargs sudo docker rmi
+            sudo docker rmi $(sudo docker images -a | grep ${{ secrets.DOCKER_USER }} | awk '{print $3}')
             sudo docker pull ${{ secrets.DOCKER_USER }}/attachment_mvs
             sudo docker pull ${{ secrets.DOCKER_USER }}/chat_mvs
             sudo docker pull ${{ secrets.DOCKER_USER }}/user_mvs

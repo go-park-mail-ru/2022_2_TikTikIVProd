@@ -8,6 +8,8 @@ import (
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+	"google.golang.org/grpc/status"
+	"google.golang.org/grpc/codes"
 
 	authRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/auth/repository"
 	userRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/user/repository"
@@ -49,7 +51,10 @@ func (uc *useCase) DeleteCookie(value string) error {
 
 func (uc *useCase) SignIn(user models.UserSignIn) (*models.User, *models.Cookie, error) {
 	u, err := uc.userRepository.SelectUserByEmail(user.Email)
-	if err != nil {
+	st := status.Convert(err)
+	if st.Code() == codes.NotFound {
+		return nil, nil, models.ErrNotFound
+	} else if st.Code() != codes.OK {
 		return nil, nil, errors.Wrap(err, "user repository error")
 	}
 
@@ -77,18 +82,18 @@ func (uc *useCase) SignIn(user models.UserSignIn) (*models.User, *models.Cookie,
 
 func (uc *useCase) SignUp(user *models.User) (*models.Cookie, error) {
 	_, err := uc.userRepository.SelectUserByNickName(user.NickName)
-	// if err != nil && !models.ErrEq(err, models.ErrNotFound) {
-	// 	return nil, errors.Wrap(err, "user repository error")
-	// } else 
-	if err == nil {
+	st := status.Convert(err)
+	if st.Code() != codes.NotFound && err != nil {
+		return nil, errors.Wrap(err, "user repository error")
+	} else if st.Code() == codes.OK {
 		return nil, models.ErrConflictNickname
 	}
 
 	_, err = uc.userRepository.SelectUserByEmail(user.Email)
-	// if err != nil && !models.ErrEq(err, models.ErrNotFound) {
-	// 	return nil, errors.Wrap(err, "user repository error")
-	// } else 
-	if err == nil {
+	st = status.Convert(err)
+	if st.Code() != codes.NotFound && err != nil {
+		return nil, errors.Wrap(err, "user repository error")
+	} else if st.Code() == codes.OK {
 		return nil, models.ErrConflictEmail
 	}
 

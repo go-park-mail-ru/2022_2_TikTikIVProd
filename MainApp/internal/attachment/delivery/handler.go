@@ -82,8 +82,7 @@ func (delivery *delivery) UploadAttachmentImage(c echo.Context) error {
 	defer src.Close()
 
 	// Destination
-	path := file.Filename
-	dst, err := os.Create(path)
+	dst, err := os.Create(file.Filename)
 	if err != nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
@@ -97,7 +96,7 @@ func (delivery *delivery) UploadAttachmentImage(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
 	}
 
-	attachment := models.Attachment{AttLink: path, Type: models.ImageAtt}
+	attachment := models.Attachment{AttLink: file.Filename, Type: models.ImageAtt}
 	err = delivery.attUsecase.CreateAttachment(&attachment)
 	if err != nil {
 		c.Logger().Error(err)
@@ -136,8 +135,7 @@ func (delivery *delivery) UploadAttachmentFile(c echo.Context) error {
 	defer src.Close()
 
 	// Destination
-	path := f.Filename
-	dst, err := os.Create(path)
+	dst, err := os.Create(f.Filename)
 	if err != nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
@@ -151,7 +149,7 @@ func (delivery *delivery) UploadAttachmentFile(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
 	}
 
-	attachment := models.Attachment{AttLink: path, Type: models.FileAtt}
+	attachment := models.Attachment{AttLink: f.Filename, Type: models.FileAtt}
 	err = delivery.attUsecase.CreateAttachment(&attachment)
 	if err != nil {
 		c.Logger().Error(err)
