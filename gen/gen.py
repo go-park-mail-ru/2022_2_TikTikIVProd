@@ -5,7 +5,7 @@ import datetime
 
 
 COUNT_USERS = 30
-COUNT_POSTS = 100
+COUNT_POSTS = 20
 COUNT_IMAGES = 30
 COUNT_FILES = 10
 COUNT_COMMUNITIES = 30
@@ -29,18 +29,19 @@ def gen_users():
             f.write(_gen_users_string() + "\n")
 
 def gen_posts():
+    date = faker.date_this_year()
     def _gen_post_string():
         faker = Faker()
         user_id = randint(1, COUNT_USERS)
         description = str(faker.text()).replace('\n', ' ')
-        created_at = faker.date_this_year()
+        created_at = date
         return f"{user_id};;{description};{created_at}"
     def _gen_post_string_communities():
         faker = Faker()
         user_id = randint(1, COUNT_USERS)
         community_id = randint(1, COUNT_COMMUNITIES)
         description = str(faker.text()).replace('\n', ' ')
-        created_at = faker.date_this_year()
+        created_at = date
         return f"{user_id};{community_id};{description};{created_at}"
 
     with open("user_posts.csv", "w") as f: 

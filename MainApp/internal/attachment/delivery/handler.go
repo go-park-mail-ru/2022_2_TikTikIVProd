@@ -45,7 +45,7 @@ func (delivery *delivery) GetAttachmentByID(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
 	}
 
-	f, err := os.Open(att.AttLink)
+	f, err := os.Open("attachments/" + att.AttLink)
 	if err != nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
@@ -82,7 +82,7 @@ func (delivery *delivery) UploadAttachmentImage(c echo.Context) error {
 	defer src.Close()
 
 	// Destination
-	path := "attachments/" + file.Filename
+	path := file.Filename
 	dst, err := os.Create(path)
 	if err != nil {
 		c.Logger().Error(err)
@@ -136,7 +136,7 @@ func (delivery *delivery) UploadAttachmentFile(c echo.Context) error {
 	defer src.Close()
 
 	// Destination
-	path := "attachments/" + f.Filename
+	path := f.Filename
 	dst, err := os.Create(path)
 	if err != nil {
 		c.Logger().Error(err)
