@@ -51,7 +51,12 @@ func (dbChat *chatRepository) CreateDialog(dialog *models.Dialog) error {
 }
 
 func (dbChat *chatRepository) CreateMessage(message *models.Message) error {
-	tx := dbChat.db.Table("message").Create(message)
+	var tx *gorm.DB
+	if message.StickerID == 0 {
+		tx = dbChat.db.Table("message").Omit("sticker_id").Create(message)
+	} else {
+		tx = dbChat.db.Omit("Body").Table("message").Create(message)
+	}
 	if tx.Error != nil {
 		return errors.Wrap(tx.Error, "database error (table message)")
 	}

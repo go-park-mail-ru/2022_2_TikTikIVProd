@@ -82,7 +82,7 @@ func (delivery *delivery) UploadAttachmentImage(c echo.Context) error {
 	defer src.Close()
 
 	// Destination
-	dst, err := os.Create(file.Filename)
+	dst, err := os.Create("attachments/" + file.Filename)
 	if err != nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
@@ -135,7 +135,7 @@ func (delivery *delivery) UploadAttachmentFile(c echo.Context) error {
 	defer src.Close()
 
 	// Destination
-	dst, err := os.Create(f.Filename)
+	dst, err := os.Create("attachments/" + f.Filename)
 	if err != nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")

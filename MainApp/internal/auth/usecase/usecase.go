@@ -84,7 +84,7 @@ func (uc *useCase) SignUp(user *models.User) (*models.Cookie, error) {
 	_, err := uc.userRepository.SelectUserByNickName(user.NickName)
 	st := status.Convert(err)
 	if st.Code() != codes.NotFound && err != nil {
-		return nil, errors.Wrap(err, "user repository error")
+		return nil, errors.Wrap(err, "nick user repository error")
 	} else if st.Code() == codes.OK {
 		return nil, models.ErrConflictNickname
 	}
@@ -92,7 +92,7 @@ func (uc *useCase) SignUp(user *models.User) (*models.Cookie, error) {
 	_, err = uc.userRepository.SelectUserByEmail(user.Email)
 	st = status.Convert(err)
 	if st.Code() != codes.NotFound && err != nil {
-		return nil, errors.Wrap(err, "user repository error")
+		return nil, errors.Wrap(err, "email user repository error")
 	} else if st.Code() == codes.OK {
 		return nil, models.ErrConflictEmail
 	}

@@ -6,7 +6,6 @@ import (
 	userRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/user/repository"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
 	user "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/proto/user"
-	"github.com/pkg/errors"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -29,7 +28,7 @@ func (userMS *microService) SelectUserByNickName(name string) (*models.User, err
 
 	pbUser, err := userMS.client.SelectUserByNickName(ctx, &pbSelectUserByNickNameRequest)
 	if err != nil {
-		return nil, errors.Wrap(err, "user microservice error")
+		return nil, err
 	}
 
 	usr := &models.User {
@@ -55,7 +54,7 @@ func (userMS *microService) SelectUserByEmail(email string) (*models.User, error
 
 	pbUser, err := userMS.client.SelectUserByEmail(ctx, &pbSelectUserByEmailRequest)
 	if err != nil {
-		return nil, errors.Wrap(err, "user microservice error")
+		return nil, err
 	}
 
 	usr := &models.User {
@@ -81,7 +80,7 @@ func (userMS *microService) SelectUserById(id uint64) (*models.User, error) {
 
 	pbUser, err := userMS.client.SelectUserById(ctx, &pbUserId)
 	if err != nil {
-		return nil, errors.Wrap(err, "user microservice error")
+		return nil, err
 	}
 
 	usr := &models.User {
@@ -107,7 +106,7 @@ func (userMS *microService) SelectAllUsers() ([]models.User, error) {
 
 	pbUsers, err := userMS.client.SelectAllUsers(ctx, &pbNothing)
 	if err != nil {
-		return nil, errors.Wrap(err, "user microservice error")
+		return nil, err
 	}
 
 	users := make([]models.User, 0)
@@ -139,7 +138,7 @@ func (userMS *microService) SearchUsers(name string) ([]models.User, error) {
 
 	pbUsers, err := userMS.client.SearchUsers(ctx, &pbSearchUsers)
 	if err != nil {
-		return nil, errors.Wrap(err, "user microservice error")
+		return nil, err
 	}
 
 	users := make([]models.User, 0)
@@ -179,7 +178,7 @@ func (userMS *microService) CreateUser(u *models.User) (error) {
 
 	userId, err := userMS.client.CreateUser(ctx, &pbUser)
 	if err != nil {
-		return errors.Wrap(err, "user microservice error")
+		return err
 	}
 
 	u.Id = userId.Id
@@ -204,7 +203,7 @@ func (userMS *microService) UpdateUser(usr models.User) (error) {
 
 	_, err := userMS.client.UpdateUser(ctx, &pbUser)
 	if err != nil {
-		return errors.Wrap(err, "user microservice error")
+		return err
 	}
 
 	return nil
