@@ -87,6 +87,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd 2022_2_TikTikIVProd/
+            git pull
             git checkout deploy
             sudo docker-compose up -d --parallel
 
