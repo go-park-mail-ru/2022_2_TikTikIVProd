@@ -182,12 +182,10 @@ func TestUsecaseSelectDialogByUsers(t *testing.T) {
 }
 
 func TestUsecaseSelectAllDialogs(t *testing.T) {
-	var mockPbUserId chat.SelectAllDialogsRequest
-	err := faker.FakeData(&mockPbUserId)
-	assert.NoError(t, err)
+	mockPbUserId := chat.SelectAllDialogsRequest{UserId: 1}
 
 	var mockPbDialogs chat.SelectAllDialogsResponse
-	err = faker.FakeData(&mockPbDialogs)
+	err := faker.FakeData(&mockPbDialogs)
 	assert.NoError(t, err)
 
 	dialogs := make([]models.Dialog, 0)
@@ -216,9 +214,7 @@ func TestUsecaseSelectAllDialogs(t *testing.T) {
 		dialogs = append(dialogs, dialog)
 	}
 
-	var mockPbUserIdError chat.SelectAllDialogsRequest
-	err = faker.FakeData(&mockPbUserIdError)
-	assert.NoError(t, err)
+	mockPbUserIdError := chat.SelectAllDialogsRequest{UserId: 2}
 
 	selectErr := errors.New("error")
 

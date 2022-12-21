@@ -23,7 +23,7 @@ func (Message) TableName() string {
 }
 
 type MessageAttachmentsRelation struct {
-	messageID    uint64 `gorm:"column:message_id"`
+	MessageID    uint64 `gorm:"column:message_id"`
 	AttachmentID uint64 `gorm:"column:att_id"`
 }
 
@@ -92,7 +92,7 @@ func (dbChat *chatRepository) CreateMessage(message *models.Message) error {
 
 	messageAttachments := make([]MessageAttachmentsRelation, 0, 10)
 	for _, elem := range message.Attachments {
-		messageAttachments = append(messageAttachments, MessageAttachmentsRelation{messageID: message.ID, AttachmentID: elem.ID})
+		messageAttachments = append(messageAttachments, MessageAttachmentsRelation{MessageID: message.ID, AttachmentID: elem.ID})
 	}
 
 	if len(messageAttachments) > 0 {

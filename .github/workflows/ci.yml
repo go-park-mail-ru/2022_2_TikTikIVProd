@@ -1,8 +1,8 @@
-# name: Docker Compose Actions Workflow
-# on:
-#   push:
-#     branches: [deploy]
-# jobs:
+name: Docker Compose Actions Workflow
+on:
+  push:
+    branches: [deploy]
+jobs:
   # golangci:
   #   name: linter
   #   runs-on: ubuntu-latest
@@ -17,7 +17,7 @@
   #         cd MainApp && golangci-lint run ./... && cd ..
   #         cd UserMicroservice && golangci-lint run ./... && cd ..
   #         cd AuthMicroservice && golangci-lint run ./... && cd ..
-  #         cd ImageMicroservice && golangci-lint run ./... && cd ..
+  #         cd AttachmentMicroservice && golangci-lint run ./... && cd ..
   #         cd ChatMicroservice && golangci-lint run ./... && cd ..
 
   # tests:
@@ -35,57 +35,57 @@
   #       cd MainApp && go test ./... -v && cd ..
   #       cd UserMicroservice && go test ./... -v && cd ..
   #       cd AuthMicroservice && go test ./... -v && cd ..
-  #       cd ImageMicroservice && go test ./... -v && cd ..
+  #       cd AttachmentMicroservice && go test ./... -v && cd ..
   #       cd ChatMicroservice && go test ./... -v && cd ..
   
-  # build:
-  #   # needs: tests
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v1
-  #     - name: Login to Docker Registry
-  #       run: docker login -u anastasyakuznetsova -p inhfec767
-  #     - name: Build Docker image
-  #       run: |
-  #         cd ImageMicroservice && sudo docker build -t anastasyakuznetsova/image_mvs:latest -f ./Dockerfile . && cd ..
-  #         cd ChatMicroservice && sudo docker build -t anastasyakuznetsova/chat_mvs:latest -f ./Dockerfile . && cd ..
-  #         cd UserMicroservice && sudo docker build -t anastasyakuznetsova/user_mvs:latest -f ./Dockerfile . && cd ..
-  #         cd AuthMicroservice && sudo docker build -t anastasyakuznetsova/auth_mvs:latest -f ./Dockerfile . && cd ..
-  #         cd MainApp && sudo docker build -t anastasyakuznetsova/server:latest -f ./Dockerfile . && cd ..
-  #     - name: Push the image
-  #       run: |
-  #         docker push anastasyakuznetsova/image_mvs --all-tags
-  #         docker push anastasyakuznetsova/chat_mvs --all-tags
-  #         docker push anastasyakuznetsova/user_mvs --all-tags
-  #         docker push anastasyakuznetsova/auth_mvs --all-tags
-  #         docker push anastasyakuznetsova/server --all-tags
-  # deploy:
-  #   runs-on: ubuntu-latest
-  #   # needs: build
-  #   steps:
-  #     - name: pull project
-  #       uses: appleboy/ssh-action@master
-  #       with:
-  #         host: 89.208.197.127 
-  #         # username: ${{ secrets.USERNAME }}
-  #         key: -----BEGIN RSA PRIVATE KEY----------END RSA PRIVATE KEY-----
+  build:
+    # needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Login to Docker Registry
+        run: docker login -u anastasyakuznetsova -p inhfec767
+      - name: Build Docker image
+        run: |
+          cd AttachmentMicroservice && sudo docker build -t anastasyakuznetsova/attachment_mvs:latest -f ./Dockerfile . && cd ..
+          cd ChatMicroservice && sudo docker build -t anastasyakuznetsova/chat_mvs:latest -f ./Dockerfile . && cd ..
+          cd UserMicroservice && sudo docker build -t anastasyakuznetsova/user_mvs:latest -f ./Dockerfile . && cd ..
+          cd AuthMicroservice && sudo docker build -t anastasyakuznetsova/auth_mvs:latest -f ./Dockerfile . && cd ..
+          cd MainApp && sudo docker build -t anastasyakuznetsova/server:latest -f ./Dockerfile . && cd ..
+      - name: Push the image
+        run: |
+          docker push anastasyakuznetsova/attachment_mvs --all-tags
+          docker push anastasyakuznetsova/chat_mvs --all-tags
+          docker push anastasyakuznetsova/user_mvs --all-tags
+          docker push anastasyakuznetsova/auth_mvs --all-tags
+          docker push anastasyakuznetsova/server --all-tags
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: pull project
+        uses: appleboy/ssh-action@master
+        with:
+          host: 89.208.197.127 
+          # username: ${{ secrets.USERNAME }}
+          key: 
 
-  #         script: |
-  #           sudo docker rm -vf $(sudo docker ps -a -q)
-  #           docker login -u anastasyakuznetsova -p inhfec767
-  #           cd 2022_2_TikTikIVProd/
-  #           sudo docker pull anastasyakuznetsova/image_mvs
-  #           sudo docker pull anastasyakuznetsova/chat_mvs
-  #           sudo docker pull anastasyakuznetsova/user_mvs
-  #           sudo docker pull anastasyakuznetsova/auth_mvs
-  #           sudo docker pull anastasyakuznetsova/server
-  #     - name: run project
-  #       uses: appleboy/ssh-action@master
-  #       with:
-  #         host: 89.208.197.127 
-  #         # username: ${{ secrets.USERNAME }}
-  #         key: -----BEGIN RSA PRIVATE KEY----------END RSA PRIVATE KEY-----
-  #         script: |
-  #           cd 2022_2_TikTikIVProd/
-  #           sudo docker-compose up -d --build --no-deps
+          script: |
+            sudo docker rm -vf $(sudo docker ps -a -q)
+            docker login -u anastasyakuznetsova -p inhfec767
+            cd 2022_2_TikTikIVProd/
+            sudo docker pull anastasyakuznetsova/attachment_mvs
+            sudo docker pull anastasyakuznetsova/chat_mvs
+            sudo docker pull anastasyakuznetsova/user_mvs
+            sudo docker pull anastasyakuznetsova/auth_mvs
+            sudo docker pull anastasyakuznetsova/server
+      - name: run project
+        uses: appleboy/ssh-action@master
+        with:
+          host: 89.208.197.127 
+          # username: ${{ secrets.USERNAME }}
+          key: 
+          script: |
+            cd 2022_2_TikTikIVProd/
+            sudo docker-compose up -d --build --no-deps
 

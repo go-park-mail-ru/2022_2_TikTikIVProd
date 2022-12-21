@@ -82,7 +82,7 @@ func (delivery *delivery) UploadAttachmentImage(c echo.Context) error {
 	defer src.Close()
 
 	// Destination
-	path := "attachments/images" + file.Filename
+	path := "attachments/" + file.Filename
 	dst, err := os.Create(path)
 	if err != nil {
 		c.Logger().Error(err)
@@ -136,7 +136,7 @@ func (delivery *delivery) UploadAttachmentFile(c echo.Context) error {
 	defer src.Close()
 
 	// Destination
-	path := "attachments/files" + f.Filename
+	path := "attachments/" + f.Filename
 	dst, err := os.Create(path)
 	if err != nil {
 		c.Logger().Error(err)

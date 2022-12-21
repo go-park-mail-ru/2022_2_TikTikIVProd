@@ -3,7 +3,7 @@ package postgres_test
 import (
 	"regexp"
 	"testing"
-	//"time"
+	"time"
 
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 
@@ -65,79 +65,79 @@ func TestRepositoryCreateDialog(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-// func TestRepositoryCreateMessage(t *testing.T) {
-// 	db, mock, err := sqlmock.New()
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	defer db.Close()
+func TestRepositoryCreateMessage(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
 
-// 	dialector := postgres.New(postgres.Config{
-// 		DSN:                  "sqlmock_db_0",
-// 		DriverName:           "postgres",
-// 		Conn:                 db,
-// 		PreferSimpleProtocol: true,
-// 	})
-// 	gdb, err := gorm.Open(dialector, &gorm.Config{})
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
+	dialector := postgres.New(postgres.Config{
+		DSN:                  "sqlmock_db_0",
+		DriverName:           "postgres",
+		Conn:                 db,
+		PreferSimpleProtocol: true,
+	})
+	gdb, err := gorm.Open(dialector, &gorm.Config{})
+	if err != nil {
+		t.Fatal(err)
+	}
 
-// 	gdb.Logger.LogMode(logger.Info)
+	gdb.Logger.LogMode(logger.Info)
 
-// 	mock.ExpectBegin()
+	mock.ExpectBegin()
 
-// 	mockMessage := models.Message{
-// 		ID:         1,
-// 		DialogID:   1,
-// 		SenderID:   1,
-// 		ReceiverID: 1,
-// 		Body:       "body",
-// 	}
+	mockMessage := models.Message{
+		ID:         1,
+		DialogID:   1,
+		SenderID:   1,
+		ReceiverID: 1,
+		Body:       "body",
+	}
 
-// 	mockMessage.Attachments = make([]models.Attachment, 2)
+	mockMessage.Attachments = make([]models.Attachment, 2)
 
-// 	mockMessage.Attachments[0] = models.Attachment{
-// 		ID:      1,
-// 		AttLink: "link1",
-// 	}
+	mockMessage.Attachments[0] = models.Attachment{
+		ID:      1,
+		AttLink: "link1",
+	}
 
-// 	mockMessage.Attachments[1] = models.Attachment{
-// 		ID:      2,
-// 		AttLink: "link2",
-// 	}
+	mockMessage.Attachments[1] = models.Attachment{
+		ID:      2,
+		AttLink: "link2",
+	}
 
-// 	mockMessage.CreatedAt = time.Now()
+	mockMessage.CreatedAt = time.Now()
 
-// 	var mockId uint64 = 1
+	var mockId uint64 = 1
 
-// 	mock.ExpectQuery(regexp.QuoteMeta(
-// 		`INSERT INTO "message" ("chat_id","sender_id","receiver_id","text","created_at","sticker_id","id")`+
-// 			` VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING "id"`)).WithArgs(
-// 		mockMessage.DialogID, mockMessage.SenderID, mockMessage.ReceiverID, mockMessage.Body,
-// 		mockMessage.CreatedAt, mockMessage.StickerID, mockMessage.ID).
-// 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(mockId))
+	mock.ExpectQuery(regexp.QuoteMeta(
+		`INSERT INTO "message" ("chat_id","sender_id","receiver_id","text","created_at","sticker_id","id")`+
+			` VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING "id"`)).WithArgs(
+		mockMessage.DialogID, mockMessage.SenderID, mockMessage.ReceiverID, mockMessage.Body,
+		mockMessage.CreatedAt, mockMessage.StickerID, mockMessage.ID).
+		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(mockId))
 
-// 	mock.ExpectCommit()
+	mock.ExpectCommit()
 
-// 	mock.ExpectBegin()
+	mock.ExpectBegin()
 
-// 	mock.ExpectExec(regexp.QuoteMeta(
-// 		`INSERT INTO "message_attachments" ("message_id","att_id") VALUES ($1,$2),($3,$4)`)).
-// 		WithArgs(mockMessage.ID, mockMessage.Attachments[0].ID, mockMessage.ID, mockMessage.Attachments[1].ID).
-// 		WillReturnResult(sqlmock.NewResult(int64(1), 1))
+	mock.ExpectExec(regexp.QuoteMeta(
+		`INSERT INTO "message_attachments" ("message_id","att_id") VALUES ($1,$2),($3,$4)`)).
+		WithArgs(mockMessage.ID, mockMessage.Attachments[0].ID, mockMessage.ID, mockMessage.Attachments[1].ID).
+		WillReturnResult(sqlmock.NewResult(int64(1), 1))
 
-// 	mock.ExpectCommit()
+	mock.ExpectCommit()
 
-// 	repository := chatRep.NewChatRepository(gdb)
+	repository := chatRep.NewChatRepository(gdb)
 
-// 	err = repository.CreateMessage(&mockMessage)
-// 	require.NoError(t, err)
-// 	assert.Equal(t, mockId, mockMessage.ID)
+	err = repository.CreateMessage(&mockMessage)
+	require.NoError(t, err)
+	assert.Equal(t, mockId, mockMessage.ID)
 
-// 	err = mock.ExpectationsWereMet()
-// 	assert.NoError(t, err)
-// }
+	err = mock.ExpectationsWereMet()
+	assert.NoError(t, err)
+}
 
 func TestRepositorySelectDialog(t *testing.T) {
 	db, mock, err := sqlmock.New()
