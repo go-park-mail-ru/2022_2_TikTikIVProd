@@ -23,9 +23,10 @@ services:
       - mynetwork
 
   server:
-    build: ./MainApp
+    # build: ./MainApp
+    image: "anastasyakuznetsova/server"
     restart: always
-    container_name: server
+    # container_name: server
     volumes:
       - ./files:/files
       - ./attachments:/attachments
@@ -42,7 +43,8 @@ services:
       - mynetwork
 
   auth_mvs:
-    build: ./AuthMicroservice
+    # build: ./AuthMicroservice
+    image: "anastasyakuznetsova/auth_mvs"
     restart: always
     depends_on:
       - redis
@@ -52,7 +54,8 @@ services:
       - mynetwork
 
   attachment_mvs:
-    build: ./AttachmentMicroservice
+    # build: ./AttachmentMicroservice
+    image: "anastasyakuznetsova/attachment_mvs"
     restart: always
     volumes:
       - ./attachments:/attachments
@@ -64,7 +67,8 @@ services:
       - mynetwork
 
   chat_mvs:
-    build: ./ChatMicroservice
+    # build: ./ChatMicroservice
+    image: "anastasyakuznetsova/chat_mvs"
     restart: always
     depends_on:
       - ws_pg
@@ -74,7 +78,8 @@ services:
       - mynetwork
 
   user_mvs:
-    build: ./UserMicroservice
+    # build: ./UserMicroservice
+    image: "anastasyakuznetsova/user_mvs"
     restart: always
     depends_on:
       - ws_pg

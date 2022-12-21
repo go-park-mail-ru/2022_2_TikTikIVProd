@@ -47,10 +47,19 @@ jobs:
         run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
       - name: Build Docker image
         run: |
-          sudo docker compose build
+          cd AttachmentMicroservice && sudo docker build -t ${{ secrets.DOCKER_USER }}/attachment_mvs:latest -f ./Dockerfile . && cd ..
+          cd ChatMicroservice && sudo docker build -t ${{ secrets.DOCKER_USER }}/chat_mvs:latest -f ./Dockerfile . && cd ..
+          cd UserMicroservice && sudo docker build -t ${{ secrets.DOCKER_USER }}/user_mvs:latest -f ./Dockerfile . && cd ..
+          cd AuthMicroservice && sudo docker build -t ${{ secrets.DOCKER_USER }}/auth_mvs:latest -f ./Dockerfile . && cd ..
+          cd MainApp && sudo docker build -t ${{ secrets.DOCKER_USER }}/server:latest -f ./Dockerfile . && cd ..
       - name: Push the image
         run: |
-          sudo docker compose push
+          docker push ${{ secrets.DOCKER_USER }}/attachment_mvs --all-tags
+          docker push ${{ secrets.DOCKER_USER }}/chat_mvs --all-tags
+          docker push ${{ secrets.DOCKER_USER }}/user_mvs --all-tags
+          docker push ${{ secrets.DOCKER_USER }}/auth_mvs --all-tags
+          docker push ${{ secrets.DOCKER_USER }}/server --all-tags
+
   deploy:
     runs-on: ubuntu-latest
     needs: build
@@ -66,7 +75,11 @@ jobs:
             sudo docker rm -vf $(sudo docker ps -a -q)
             docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
             cd 2022_2_TikTikIVProd/
-            sudo docker compose pull
+            sudo docker pull ${{ secrets.DOCKER_USER }}/attachment_mvs
+            sudo docker pull ${{ secrets.DOCKER_USER }}/chat_mvs
+            sudo docker pull ${{ secrets.DOCKER_USER }}/user_mvs
+            sudo docker pull ${{ secrets.DOCKER_USER }}/auth_mvs
+            sudo docker pull ${{ secrets.DOCKER_USER }}/server
       - name: run project
         uses: appleboy/ssh-action@master
         with:
@@ -75,7 +88,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd 2022_2_TikTikIVProd/
-            git pull
             git checkout deploy
+            git pull
             sudo docker-compose up -d
 
