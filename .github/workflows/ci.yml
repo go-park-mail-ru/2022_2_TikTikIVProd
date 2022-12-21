@@ -88,6 +88,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd 2022_2_TikTikIVProd/
+            git pull
             sudo docker-compose up -d
             make create_tables
 
