@@ -86,6 +86,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
+            sudo docker rm -vf $(sudo docker ps -a -q)
             cd 2022_2_TikTikIVProd/
             git pull
             git checkout deploy
