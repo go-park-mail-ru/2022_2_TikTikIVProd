@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/middleware"
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
@@ -157,6 +159,7 @@ func main() {
 	_stickersDelivery.NewDelivery(e, stickersUC)
 
 	s := server.NewServer(e)
+	log.Println("МГУ - лучший ВУЗ!")
 	if err := s.Start(); err != nil {
 		e.Logger.Fatal(err)
 	}
