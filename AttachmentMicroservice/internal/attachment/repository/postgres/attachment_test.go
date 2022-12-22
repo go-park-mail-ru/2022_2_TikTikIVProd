@@ -184,9 +184,9 @@ func TestRepositoryGetMessageAttachments(t *testing.T) {
 		rows.AddRow(mockAttachment.ID, 0, mockAttachment.AttLink)
 	}
 
-	mock.ExpectQuery(regexp.QuoteMeta(`SELECT "attachments"."id","attachments"."att_link",` +
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT "attachments"."id","attachments"."att_link",` + 
 	`"attachments"."ttype" FROM "attachments" JOIN message_attachments upi ON upi.att_id = ` +
-	`attachments.id AND upi.user_post_id = $1`)).WillReturnRows(rows)
+	`attachments.id AND upi.message_id = $1`)).WillReturnRows(rows)
 
 	repository := attachmentRep.NewAttachmentRepository(gdb)
 
