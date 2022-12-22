@@ -159,7 +159,6 @@ func main() {
 	_stickersDelivery.NewDelivery(e, stickersUC)
 
 	s := server.NewServer(e)
-	log.Println("МГУ - лучший ВУЗ!")
 	if err := s.Start(); err != nil {
 		e.Logger.Fatal(err)
 	}
