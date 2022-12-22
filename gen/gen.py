@@ -3,6 +3,7 @@ from faker import Faker
 from random import randint 
 import datetime
 
+faker = Faker('ru')
 
 COUNT_USERS = 30
 COUNT_POSTS = 20
@@ -11,7 +12,6 @@ COUNT_FILES = 10
 COUNT_COMMUNITIES = 30
 
 def gen_users():
-    faker = Faker()
     def _gen_users_string():
         first_name = faker.first_name()
         last_name = faker.last_name()
@@ -29,15 +29,13 @@ def gen_users():
             f.write(_gen_users_string() + "\n")
 
 def gen_posts():
-    date = Faker().date_this_year()
+    date = faker.date_this_year()
     def _gen_post_string():
-        faker = Faker()
         user_id = randint(1, COUNT_USERS)
         description = str(faker.text()).replace('\n', ' ')
         created_at = date
         return f"{user_id};;{description};{created_at}"
     def _gen_post_string_communities():
-        faker = Faker()
         user_id = randint(1, COUNT_USERS)
         community_id = randint(1, COUNT_COMMUNITIES)
         description = str(faker.text()).replace('\n', ' ')
@@ -114,7 +112,6 @@ def gen_messages_for_user(user_id: int):
     def _gen_user_chat(i: int):
         return f"{i};{i}"
     def _gen_message():
-        faker = Faker()
         body = str(faker.text()).replace('\n', ' ')
         sender_id = randint(1, COUNT_USERS)
         chat_id = randint(1, COUNT_CHATS)
@@ -144,10 +141,14 @@ def gen_messages_for_user(user_id: int):
             row = _gen_message()
             f.write(row + "\n" if row != "" else "")
 
+def capitalize(str):
+    return str.capitalize()
+
 def gen_communities():
-    faker = Faker()
     def _gen_communities_string():
-        name = faker.first_name()
+        words = faker.words()
+        words = ' '.join(words)
+        name = capitalize(words)
         owner_id = randint(1, COUNT_USERS)
         avatar_att_id = faker.pyint(1, COUNT_IMAGES)
         description = str(faker.text()).replace('\n', ' ')
