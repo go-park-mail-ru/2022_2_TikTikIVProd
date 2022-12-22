@@ -6,7 +6,7 @@ import (
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/middleware"
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
-	"github.com/labstack/gommon/log"
+	elog "github.com/labstack/gommon/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"gorm.io/driver/postgres"
@@ -121,7 +121,7 @@ func main() {
 
 	e.Logger.SetHeader(`time=${time_rfc3339} level=${level} prefix=${prefix} ` +
 		`file=${short_file} line=${line} message:`)
-	e.Logger.SetLevel(log.INFO)
+	e.Logger.SetLevel(elog.INFO)
 
 	p := prometheus.NewPrometheus("echo", nil)
 	p.MetricsPath = "/prometheus"
