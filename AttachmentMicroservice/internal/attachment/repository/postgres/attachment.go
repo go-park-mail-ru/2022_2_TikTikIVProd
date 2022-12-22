@@ -87,7 +87,7 @@ func (dbAttachment *attachmentRepository) GetPostAttachments(postID uint64) ([]*
 
 func (dbAttachment *attachmentRepository) GetMessageAttachments(messageID uint64) ([]*models.Attachment, error) {
 	var attachments []*Attachment
-	tx := dbAttachment.db.Model(Attachment{}).Joins("JOIN message_attachments upi ON upi.att_id = attachments.id AND upi.user_post_id = ?", messageID).Scan(&attachments)
+	tx := dbAttachment.db.Model(Attachment{}).Joins("JOIN message_attachments upi ON upi.att_id = attachments.id AND upi.message_id = ?", messageID).Scan(&attachments)
 
 	if tx.Error != nil {
 		return nil, tx.Error

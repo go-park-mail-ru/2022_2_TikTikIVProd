@@ -29,7 +29,7 @@ def gen_users():
             f.write(_gen_users_string() + "\n")
 
 def gen_posts():
-    date = faker.date_this_year()
+    date = Faker().date_this_year()
     def _gen_post_string():
         faker = Faker()
         user_id = randint(1, COUNT_USERS)
