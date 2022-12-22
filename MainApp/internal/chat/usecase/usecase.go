@@ -1,8 +1,9 @@
 package usecase
 
 import (
-	attachmentRepository "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/attachment/repository"
 	"time"
+
+	attachmentRepository "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/attachment/repository"
 
 	chatRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/chat/repository"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
