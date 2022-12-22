@@ -4,7 +4,8 @@ import (
 	"testing"
 
 	"github.com/bxcodec/faker"
-	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/chat/repository/mocks"
+	chatMocks "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/chat/repository/mocks"
+	attMocks "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/attachment/repository/mocks"
 	chatUsecase "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/chat/usecase"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
 	"github.com/stretchr/testify/assert"
@@ -42,12 +43,17 @@ func TestUsecaseSelectDialog(t *testing.T) {
 	err := faker.FakeData(&mockDialog)
 	assert.NoError(t, err)
 
-	mockChatRepo := mocks.NewRepositoryI(t)
+	mockChatRepo := chatMocks.NewRepositoryI(t)
+	mockAttRepo := attMocks.NewRepositoryI(t)
 
 	mockChatRepo.On("SelectDialog", mockDialog.Id).Return(&mockDialog, nil)
 	mockChatRepo.On("SelectMessages", mockDialog.Id).Return(mockDialog.Messages, nil)
 
-	useCase := chatUsecase.New(mockChatRepo)
+	for idx := range mockDialog.Messages {
+		mockAttRepo.On("GetMessageAttachments", mockDialog.Messages[idx].ID).Return(mockDialog.Messages[idx].Attachments, nil)
+	}
+
+	useCase := chatUsecase.New(mockChatRepo, mockAttRepo)
 
 	cases := map[string]TestCaseSelectDialog{
 		"success": {
@@ -75,12 +81,17 @@ func TestUsecaseSelectDialogByUsers(t *testing.T) {
 	err := faker.FakeData(&mockDialog)
 	assert.NoError(t, err)
 
-	mockChatRepo := mocks.NewRepositoryI(t)
+	mockChatRepo := chatMocks.NewRepositoryI(t)
+	mockAttRepo := attMocks.NewRepositoryI(t)
 
 	mockChatRepo.On("SelectDialogByUsers", mockDialog.UserId1, mockDialog.UserId2).Return(&mockDialog, nil)
 	mockChatRepo.On("SelectMessages", mockDialog.Id).Return(mockDialog.Messages, nil)
 
-	useCase := chatUsecase.New(mockChatRepo)
+	for idx := range mockDialog.Messages {
+		mockAttRepo.On("GetMessageAttachments", mockDialog.Messages[idx].ID).Return(mockDialog.Messages[idx].Attachments, nil)
+	}
+
+	useCase := chatUsecase.New(mockChatRepo, mockAttRepo)
 
 	cases := map[string]TestCaseSelectDialogByUsers{
 		"success": {
@@ -109,13 +120,14 @@ func TestUsecaseSelectAllDialogs(t *testing.T) {
 	err := faker.FakeData(&mockDialogs)
 	assert.NoError(t, err)
 
-	mockChatRepo := mocks.NewRepositoryI(t)
+	mockChatRepo := chatMocks.NewRepositoryI(t)
+	mockAttRepo := attMocks.NewRepositoryI(t)
 
 	var userId uint64 = 1
 
 	mockChatRepo.On("SelectAllDialogs", userId).Return(mockDialogs, nil)
 
-	useCase := chatUsecase.New(mockChatRepo)
+	useCase := chatUsecase.New(mockChatRepo, mockAttRepo)
 
 	cases := map[string]TestCaseSelectAllDialogs{
 		"success": {
@@ -155,7 +167,8 @@ func TestUsecaseSendMessage(t *testing.T) {
 		Messages: []models.Message{mockMessageNewDialog},
 	}
 
-	mockChatRepo := mocks.NewRepositoryI(t)
+	mockChatRepo := chatMocks.NewRepositoryI(t)
+	mockAttRepo := attMocks.NewRepositoryI(t)
 
 	mockChatRepo.On("SelectDialog", mockMessage.DialogID).Return(nil, nil)
 	mockChatRepo.On("CreateMessage", mock.AnythingOfType("*models.Message")).Return(nil)
@@ -164,7 +177,7 @@ func TestUsecaseSendMessage(t *testing.T) {
 	mockChatRepo.On("CreateDialog", &mockDialog).Return(nil)
 	mockChatRepo.On("CreateMessage", mock.AnythingOfType("*models.Message")).Return(nil)
 
-	useCase := chatUsecase.New(mockChatRepo)
+	useCase := chatUsecase.New(mockChatRepo, mockAttRepo)
 
 	cases := map[string]TestCaseSendMessage{
 		"success": {

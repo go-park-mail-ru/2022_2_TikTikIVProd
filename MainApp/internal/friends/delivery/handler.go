@@ -127,9 +127,9 @@ func (del *Delivery) DeleteFriend(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
-func isRequestValid(user interface{}) (bool, error) {
+func isRequestValid(friends interface{}) (bool, error) {
 	validate := validator.New()
-	err := validate.Struct(user)
+	err := validate.Struct(friends)
 	if err != nil {
 		return false, err
 	}

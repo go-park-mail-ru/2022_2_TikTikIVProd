@@ -23,15 +23,18 @@ services:
       - mynetwork
 
   server:
-    build: ./MainApp
+    # build: ./MainApp
+    image: "anastasyakuznetsova/server"
     restart: always
-    container_name: server
+    # container_name: server
     volumes:
-      - ./images:/images
+      - ./files:/files
+      - ./attachments:/attachments
+      - ./stickers:/stickers
     depends_on:
       - ws_pg
       - auth_mvs
-      - image_mvs
+      - attachment_mvs
       - chat_mvs
       - user_mvs
     ports:
@@ -40,10 +43,9 @@ services:
       - mynetwork
 
   auth_mvs:
-    build: ./AuthMicroservice
+    # build: ./AuthMicroservice
+    image: "anastasyakuznetsova/auth_mvs"
     restart: always
-    volumes:
-      - ./images:/images
     depends_on:
       - redis
     ports:
@@ -51,11 +53,12 @@ services:
     networks:
       - mynetwork
 
-  image_mvs:
-    build: ./ImageMicroservice
+  attachment_mvs:
+    # build: ./AttachmentMicroservice
+    image: "anastasyakuznetsova/attachment_mvs"
     restart: always
     volumes:
-      - ./images:/images
+      - ./attachments:/attachments
     depends_on:
       - ws_pg
     ports:
@@ -64,10 +67,9 @@ services:
       - mynetwork
 
   chat_mvs:
-    build: ./ChatMicroservice
+    # build: ./ChatMicroservice
+    image: "anastasyakuznetsova/chat_mvs"
     restart: always
-    volumes:
-      - ./images:/images
     depends_on:
       - ws_pg
     ports:
@@ -76,16 +78,16 @@ services:
       - mynetwork
 
   user_mvs:
-    build: ./UserMicroservice
+    # build: ./UserMicroservice
+    image: "anastasyakuznetsova/user_mvs"
     restart: always
-    volumes:
-      - ./images:/images
     depends_on:
       - ws_pg
     ports:
       - "8084:8084"
     networks:
       - mynetwork
+      
   grafana:
     image: "grafana/grafana-oss"
     restart: always

@@ -14,6 +14,8 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/bcrypt"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 )
 
 type TestCaseSignUp struct {
@@ -56,14 +58,14 @@ func TestUsecaseSignUp(t *testing.T) {
 	mockAuthRepo := authMocks.NewRepositoryI(t)
 	mockUserRepo := userMocks.NewRepositoryI(t)
 
-	mockUserRepo.On("SelectUserByNickName", mockUserSuccess.NickName).Return(nil, models.ErrNotFound)
-	mockUserRepo.On("SelectUserByEmail", mockUserSuccess.Email).Return(nil, models.ErrNotFound)
+	mockUserRepo.On("SelectUserByNickName", mockUserSuccess.NickName).Return(nil, status.Error(codes.NotFound, models.ErrNotFound.Error()))
+	mockUserRepo.On("SelectUserByEmail", mockUserSuccess.Email).Return(nil, status.Error(codes.NotFound, models.ErrNotFound.Error()))
 	mockUserRepo.On("CreateUser", &mockUserSuccess).Return(nil)
 	mockAuthRepo.On("CreateCookie", mock.AnythingOfType("*models.Cookie")).Return(nil)
 
 	mockUserRepo.On("SelectUserByNickName", mockUserConflictNickName.NickName).Return(&mockUserConflictNickName, nil)
 	
-	mockUserRepo.On("SelectUserByNickName", mockUserConflictEmail.NickName).Return(nil, models.ErrNotFound)
+	mockUserRepo.On("SelectUserByNickName", mockUserConflictEmail.NickName).Return(nil, status.Error(codes.NotFound, models.ErrNotFound.Error()))
 	mockUserRepo.On("SelectUserByEmail", mockUserConflictEmail.Email).Return(&mockUserConflictEmail, nil)
 
 	useCase := authUsecase.New(mockAuthRepo, mockUserRepo)

@@ -24,10 +24,16 @@ fill_msg:
 drop_tables:
 	psql postgresql://postgres:postgres@localhost:13080/postgres -f SQL/drop_all.sql
 
-fill_images:
-	./images/download.sh
+fill_attachments:
+	./attachments/download.sh
 
-drop_images:
-	./images/delete.sh
+drop_attachments:
+	./attachments/delete.sh
+
+fill_files:
+	./files/download.sh
+
+drop_files:
+	./files/delete.sh
 
 

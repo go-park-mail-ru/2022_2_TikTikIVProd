@@ -3,6 +3,8 @@ package usecase
 import (
 	"time"
 
+	attachmentRepository "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/attachment/repository"
+
 	chatRep "github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/chat/repository"
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/models"
 	"github.com/pkg/errors"
@@ -17,11 +19,13 @@ type UseCaseI interface {
 
 type useCase struct {
 	chatRepository chatRep.RepositoryI
+	attachmentRep  attachmentRepository.RepositoryI
 }
 
-func New(rep chatRep.RepositoryI) UseCaseI {
+func New(rep chatRep.RepositoryI, repAttachments attachmentRepository.RepositoryI) UseCaseI {
 	return &useCase{
 		chatRepository: rep,
+		attachmentRep:  repAttachments,
 	}
 }
 
@@ -36,6 +40,13 @@ func (uc *useCase) SelectDialog(id uint64) (*models.Dialog, error) {
 		return nil, errors.Wrap(err, "chat repository error")
 	}
 
+	for idx := range messages {
+		att, err := uc.attachmentRep.GetMessageAttachments(messages[idx].ID)
+		if err != nil {
+			return nil, errors.Wrap(err, "chat repository error")
+		}
+		messages[idx].Attachments = att
+	}
 	dialog.Messages = messages
 
 	return dialog, nil
@@ -50,6 +61,14 @@ func (uc *useCase) SelectDialogByUsers(userId, friendId uint64) (*models.Dialog,
 	messages, err := uc.chatRepository.SelectMessages(dialog.Id)
 	if err != nil {
 		return nil, errors.Wrap(err, "chat repository error")
+	}
+
+	for idx := range messages {
+		att, err := uc.attachmentRep.GetMessageAttachments(messages[idx].ID)
+		if err != nil {
+			return nil, errors.Wrap(err, "chat repository error")
+		}
+		messages[idx].Attachments = att
 	}
 
 	dialog.Messages = messages
@@ -68,7 +87,7 @@ func (uc *useCase) SelectAllDialogs(userId uint64) ([]models.Dialog, error) {
 
 func (uc *useCase) SendMessage(message *models.Message) error {
 	if _, err := uc.chatRepository.SelectDialog(message.DialogID); err != nil {
-		dialog := models.Dialog {
+		dialog := models.Dialog{
 			UserId1: message.SenderID,
 			UserId2: message.ReceiverID,
 		}

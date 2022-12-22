@@ -1,9 +1,109 @@
 name: Docker Compose Actions Workflow
-on: push
+on:
+  push:
+    branches: [deploy]
 jobs:
-  build:
+  golangci:
+    name: linter
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/setup-go@v2
+        with:
+          go-version: 1.19
       - uses: actions/checkout@v2
-      - name: Build the stack
-        run: (docker rm -f $(docker ps -aq) || true) && docker-compose up -d
+      - name: run golangci-lint
+        run: |
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.50.1
+          cd MainApp && golangci-lint run ./... && cd ..
+          cd UserMicroservice && golangci-lint run ./... && cd ..
+          cd AuthMicroservice && golangci-lint run ./... && cd ..
+          cd AttachmentMicroservice && golangci-lint run ./... && cd ..
+          cd ChatMicroservice && golangci-lint run ./... && cd ..
+
+  tests:
+    needs: golangci
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.19
+
+    - name: tests
+      run: |
+        cd MainApp && go test ./... -coverpkg ./... -coverprofile=c.out
+        cat c.out | grep -v -E ".*/mocks|.*/proto|.*easyjson*"  > c_res.out
+        go tool cover -func=c_res.out
+        cd ..
+        cd UserMicroservice && go test ./... -coverpkg ./... -coverprofile=c.out
+        cat c.out | grep -v -E ".*/mocks|.*/proto|.*easyjson*"  > c_res.out
+        go tool cover -func=c_res.out
+        cd ..
+        cd AuthMicroservice && go test ./... -coverpkg ./... -coverprofile=c.out
+        cat c.out | grep -v -E ".*/mocks|.*/proto|.*easyjson*"  > c_res.out
+        go tool cover -func=c_res.out
+        cd ..
+        cd AttachmentMicroservice && go test ./... -coverpkg ./... -coverprofile=c.out
+        cat c.out | grep -v -E ".*/mocks|.*/proto|.*easyjson*"  > c_res.out
+        go tool cover -func=c_res.out
+        cd ..
+        cd ChatMicroservice && go test ./... -coverpkg ./... -coverprofile=c.out
+        cat c.out | grep -v -E ".*/mocks|.*/proto|.*easyjson*"  > c_res.out
+        go tool cover -func=c_res.out
+  
+  build:
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Login to Docker Registry
+        run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build Docker image
+        run: |
+          cd AttachmentMicroservice && sudo docker build -t ${{ secrets.DOCKER_USER }}/attachment_mvs:latest -f ./Dockerfile . && cd ..
+          cd ChatMicroservice && sudo docker build -t ${{ secrets.DOCKER_USER }}/chat_mvs:latest -f ./Dockerfile . && cd ..
+          cd UserMicroservice && sudo docker build -t ${{ secrets.DOCKER_USER }}/user_mvs:latest -f ./Dockerfile . && cd ..
+          cd AuthMicroservice && sudo docker build -t ${{ secrets.DOCKER_USER }}/auth_mvs:latest -f ./Dockerfile . && cd ..
+          cd MainApp && sudo docker build -t ${{ secrets.DOCKER_USER }}/server:latest -f ./Dockerfile . && cd ..
+      - name: Push the image
+        run: |
+          docker push ${{ secrets.DOCKER_USER }}/attachment_mvs --all-tags
+          docker push ${{ secrets.DOCKER_USER }}/chat_mvs --all-tags
+          docker push ${{ secrets.DOCKER_USER }}/user_mvs --all-tags
+          docker push ${{ secrets.DOCKER_USER }}/auth_mvs --all-tags
+          docker push ${{ secrets.DOCKER_USER }}/server --all-tags
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: pull project
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }} 
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
+            cd 2022_2_TikTikIVProd/
+            sudo docker compose down
+            sudo docker rmi $(sudo docker images -a | grep ${{ secrets.DOCKER_USER }} | awk '{print $3}')
+            sudo docker pull ${{ secrets.DOCKER_USER }}/attachment_mvs
+            sudo docker pull ${{ secrets.DOCKER_USER }}/chat_mvs
+            sudo docker pull ${{ secrets.DOCKER_USER }}/user_mvs
+            sudo docker pull ${{ secrets.DOCKER_USER }}/auth_mvs
+            sudo docker pull ${{ secrets.DOCKER_USER }}/server
+      - name: run project
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }} 
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd 2022_2_TikTikIVProd/
+            git pull
+            sudo docker-compose up -d
+            make create_tables
+
+

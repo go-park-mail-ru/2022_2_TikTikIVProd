@@ -35,5 +35,7 @@ func main() {
 	auth.RegisterAuthServer(server, authDelivery.New(authUC))
 
 	log.Println("starting server at :8081")
-	server.Serve(lis)
+	if err := server.Serve(lis); err != nil {
+		log.Fatal(err)
+	}
 }

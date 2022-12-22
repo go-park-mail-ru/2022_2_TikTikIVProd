@@ -191,13 +191,14 @@ func TestUsecaseSelectUserByEmail(t *testing.T) {
 }
 
 func TestUsecaseSelectUserById(t *testing.T) {
-	var mockPbUserId user.UserId
-	err := faker.FakeData(&mockPbUserId)
-	assert.NoError(t, err)
+	mockPbUserId := user.UserId {
+		Id: 1,
+	}
 
 	var mockPbUser user.User
-	err = faker.FakeData(&mockPbUser)
+	err := faker.FakeData(&mockPbUser)
 	assert.NoError(t, err)
+	mockPbUser.Id = mockPbUserId.Id
 
 	usr := models.User {
 		Id: mockPbUser.Id,
@@ -210,9 +211,9 @@ func TestUsecaseSelectUserById(t *testing.T) {
 		CreatedAt: mockPbUser.CreatedAt.AsTime(),
 	}
 
-	var mockPbUserIdError user.UserId
-	err = faker.FakeData(&mockPbUserIdError)
-	assert.NoError(t, err)
+	mockPbUserIdError := user.UserId {
+		Id: 2,
+	}
 
 	selectErr := errors.New("error")
 

@@ -23,7 +23,7 @@ func New(client chat.ChatClient) chatRep.RepositoryI {
 func (chatMS *microService) SelectDialog(id uint64) (*models.Dialog, error) {
 	ctx := context.Background()
 
-	pbDialogId := chat.DialogId {
+	pbDialogId := chat.DialogId{
 		Id: id,
 	}
 
@@ -32,20 +32,21 @@ func (chatMS *microService) SelectDialog(id uint64) (*models.Dialog, error) {
 		return nil, errors.Wrap(err, "chat microservice error")
 	}
 
-	dialog := &models.Dialog {
-		Id: pbDialog.Id,
+	dialog := &models.Dialog{
+		Id:      pbDialog.Id,
 		UserId1: pbDialog.UserId1,
 		UserId2: pbDialog.UserId2,
 	}
 
 	for idx := range pbDialog.Messages {
-		msg := models.Message {
-			ID: pbDialog.Messages[idx].Id,
-			DialogID: pbDialog.Messages[idx].DialogId,
-			SenderID: pbDialog.Messages[idx].SenderId,
+		msg := models.Message{
+			ID:         pbDialog.Messages[idx].Id,
+			DialogID:   pbDialog.Messages[idx].DialogId,
+			SenderID:   pbDialog.Messages[idx].SenderId,
 			ReceiverID: pbDialog.Messages[idx].ReceiverId,
-			Body: pbDialog.Messages[idx].Body,
-			CreatedAt: pbDialog.Messages[idx].CreatedAt.AsTime(),
+			Body:       pbDialog.Messages[idx].Body,
+			CreatedAt:  pbDialog.Messages[idx].CreatedAt.AsTime(),
+			StickerID:  pbDialog.Messages[idx].StickerId,
 		}
 		dialog.Messages = append(dialog.Messages, msg)
 	}
@@ -56,8 +57,8 @@ func (chatMS *microService) SelectDialog(id uint64) (*models.Dialog, error) {
 func (chatMS *microService) SelectDialogByUsers(userId, friendId uint64) (*models.Dialog, error) {
 	ctx := context.Background()
 
-	pbSelectDialogByUsersRequest := chat.SelectDialogByUsersRequest {
-		UserId: userId,
+	pbSelectDialogByUsersRequest := chat.SelectDialogByUsersRequest{
+		UserId:   userId,
 		FriendId: friendId,
 	}
 
@@ -66,20 +67,21 @@ func (chatMS *microService) SelectDialogByUsers(userId, friendId uint64) (*model
 		return nil, errors.Wrap(err, "chat microservice error")
 	}
 
-	dialog := &models.Dialog {
-		Id: pbDialog.Id,
+	dialog := &models.Dialog{
+		Id:      pbDialog.Id,
 		UserId1: pbDialog.UserId1,
 		UserId2: pbDialog.UserId2,
 	}
 
 	for idx := range pbDialog.Messages {
-		msg := models.Message {
-			ID: pbDialog.Messages[idx].Id,
-			DialogID: pbDialog.Messages[idx].DialogId,
-			SenderID: pbDialog.Messages[idx].SenderId,
+		msg := models.Message{
+			ID:         pbDialog.Messages[idx].Id,
+			DialogID:   pbDialog.Messages[idx].DialogId,
+			SenderID:   pbDialog.Messages[idx].SenderId,
 			ReceiverID: pbDialog.Messages[idx].ReceiverId,
-			Body: pbDialog.Messages[idx].Body,
-			CreatedAt: pbDialog.Messages[idx].CreatedAt.AsTime(),
+			Body:       pbDialog.Messages[idx].Body,
+			CreatedAt:  pbDialog.Messages[idx].CreatedAt.AsTime(),
+			StickerID:  pbDialog.Messages[idx].StickerId,
 		}
 		dialog.Messages = append(dialog.Messages, msg)
 	}
@@ -90,7 +92,7 @@ func (chatMS *microService) SelectDialogByUsers(userId, friendId uint64) (*model
 func (chatMS *microService) SelectAllDialogs(userId uint64) ([]models.Dialog, error) {
 	ctx := context.Background()
 
-	pbSelectAllDialogsRequest := chat.SelectAllDialogsRequest {
+	pbSelectAllDialogsRequest := chat.SelectAllDialogsRequest{
 		UserId: userId,
 	}
 
@@ -102,20 +104,21 @@ func (chatMS *microService) SelectAllDialogs(userId uint64) ([]models.Dialog, er
 	dialogs := make([]models.Dialog, 0)
 
 	for idx := range pbDialogs.Dialogs {
-		dialog := models.Dialog {
-			Id: pbDialogs.Dialogs[idx].Id,
+		dialog := models.Dialog{
+			Id:      pbDialogs.Dialogs[idx].Id,
 			UserId1: pbDialogs.Dialogs[idx].UserId1,
 			UserId2: pbDialogs.Dialogs[idx].UserId2,
 		}
-	
+
 		for idx2 := range pbDialogs.Dialogs[idx].Messages {
-			msg := models.Message {
-				ID: pbDialogs.Dialogs[idx].Messages[idx2].Id,
-				DialogID: pbDialogs.Dialogs[idx].Messages[idx2].DialogId,
-				SenderID: pbDialogs.Dialogs[idx].Messages[idx2].SenderId,
+			msg := models.Message{
+				ID:         pbDialogs.Dialogs[idx].Messages[idx2].Id,
+				DialogID:   pbDialogs.Dialogs[idx].Messages[idx2].DialogId,
+				SenderID:   pbDialogs.Dialogs[idx].Messages[idx2].SenderId,
 				ReceiverID: pbDialogs.Dialogs[idx].Messages[idx2].ReceiverId,
-				Body: pbDialogs.Dialogs[idx].Messages[idx2].Body,
-				CreatedAt: pbDialogs.Dialogs[idx].Messages[idx2].CreatedAt.AsTime(),
+				Body:       pbDialogs.Dialogs[idx].Messages[idx2].Body,
+				CreatedAt:  pbDialogs.Dialogs[idx].Messages[idx2].CreatedAt.AsTime(),
+				StickerID: pbDialogs.Dialogs[idx].Messages[idx2].StickerId,
 			}
 			dialog.Messages = append(dialog.Messages, msg)
 		}
@@ -129,7 +132,7 @@ func (chatMS *microService) SelectAllDialogs(userId uint64) ([]models.Dialog, er
 func (chatMS *microService) SelectMessages(id uint64) ([]models.Message, error) {
 	ctx := context.Background()
 
-	pbDialogId := chat.DialogId {
+	pbDialogId := chat.DialogId{
 		Id: id,
 	}
 
@@ -139,15 +142,16 @@ func (chatMS *microService) SelectMessages(id uint64) ([]models.Message, error) 
 	}
 
 	messages := make([]models.Message, 0)
-	
+
 	for idx := range pbMessages.Messages {
-		msg := models.Message {
-			ID: pbMessages.Messages[idx].Id,
-			DialogID: pbMessages.Messages[idx].DialogId,
-			SenderID: pbMessages.Messages[idx].SenderId,
+		msg := models.Message{
+			ID:         pbMessages.Messages[idx].Id,
+			DialogID:   pbMessages.Messages[idx].DialogId,
+			SenderID:   pbMessages.Messages[idx].SenderId,
 			ReceiverID: pbMessages.Messages[idx].ReceiverId,
-			Body: pbMessages.Messages[idx].Body,
-			CreatedAt: pbMessages.Messages[idx].CreatedAt.AsTime(),
+			Body:       pbMessages.Messages[idx].Body,
+			CreatedAt:  pbMessages.Messages[idx].CreatedAt.AsTime(),
+			StickerID: pbMessages.Messages[idx].StickerId,
 		}
 		messages = append(messages, msg)
 	}
@@ -155,24 +159,25 @@ func (chatMS *microService) SelectMessages(id uint64) ([]models.Message, error) 
 	return messages, nil
 }
 
-func (chatMS *microService) CreateDialog(dialog *models.Dialog) (error) {
+func (chatMS *microService) CreateDialog(dialog *models.Dialog) error {
 	ctx := context.Background()
 
-	pbDialog := chat.Dialog {
-		Id: dialog.Id,
+	pbDialog := chat.Dialog{
+		Id:      dialog.Id,
 		UserId1: dialog.UserId1,
 		UserId2: dialog.UserId2,
 	}
 
 	for idx := range dialog.Messages {
 		ts := timestamppb.New(dialog.Messages[idx].CreatedAt)
-		pbMsg := chat.Message {
-			Id: dialog.Messages[idx].ID,
-			DialogId: dialog.Messages[idx].DialogID,
-			SenderId: dialog.Messages[idx].SenderID,
+		pbMsg := chat.Message{
+			Id:         dialog.Messages[idx].ID,
+			DialogId:   dialog.Messages[idx].DialogID,
+			SenderId:   dialog.Messages[idx].SenderID,
 			ReceiverId: dialog.Messages[idx].ReceiverID,
-			Body: dialog.Messages[idx].Body,
-			CreatedAt: ts,
+			Body:       dialog.Messages[idx].Body,
+			CreatedAt:  ts,
+			StickerId: dialog.Messages[idx].StickerID,
 		}
 		pbDialog.Messages = append(pbDialog.Messages, &pbMsg)
 	}
@@ -187,17 +192,22 @@ func (chatMS *microService) CreateDialog(dialog *models.Dialog) (error) {
 	return nil
 }
 
-func (chatMS *microService) CreateMessage(message *models.Message) (error) {
+func (chatMS *microService) CreateMessage(message *models.Message) error {
 	ctx := context.Background()
 
 	ts := timestamppb.New(message.CreatedAt)
-	pbMessage := chat.Message {
-		Id: message.ID,
-		DialogId: message.DialogID,
-		SenderId: message.SenderID,
+	pbMessage := chat.Message{
+		Id:         message.ID,
+		DialogId:   message.DialogID,
+		SenderId:   message.SenderID,
 		ReceiverId: message.ReceiverID,
-		Body: message.Body,
-		CreatedAt: ts,
+		Body:       message.Body,
+		CreatedAt:  ts,
+		StickerId: message.StickerID,
+	}
+
+	for idx := range message.Attachments {
+		pbMessage.AttachmentsIds = append(pbMessage.AttachmentsIds, message.Attachments[idx].ID)
 	}
 
 	_, err := chatMS.client.CreateMessage(ctx, &pbMessage)
@@ -207,4 +217,3 @@ func (chatMS *microService) CreateMessage(message *models.Message) (error) {
 
 	return nil
 }
-

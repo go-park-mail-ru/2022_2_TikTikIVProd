@@ -3,6 +3,40 @@ definitions:
     properties:
       message: {}
     type: object
+  models.Attachment:
+    properties:
+      id:
+        type: integer
+      type:
+        type: string
+    type: object
+  models.Comment:
+    properties:
+      avatar_id:
+        readOnly: true
+        type: integer
+      create_date:
+        readOnly: true
+        type: string
+      id:
+        type: integer
+      message:
+        type: string
+      post_id:
+        type: integer
+      user_first_name:
+        readOnly: true
+        type: string
+      user_id:
+        readOnly: true
+        type: integer
+      user_last_name:
+        readOnly: true
+        type: string
+    required:
+    - message
+    - post_id
+    type: object
   models.Community:
     properties:
       avatar_id:
@@ -34,13 +68,12 @@ definitions:
       userId2:
         type: integer
     type: object
-  models.Image:
-    properties:
-      id:
-        type: integer
-    type: object
   models.Message:
     properties:
+      attachments:
+        items:
+          $ref: '#/definitions/models.Attachment'
+        type: array
       body:
         type: string
       created_at:
@@ -55,9 +88,15 @@ definitions:
       sender_id:
         readOnly: true
         type: integer
+      sticker:
+        type: integer
     type: object
   models.Post:
     properties:
+      attachments:
+        items:
+          $ref: '#/definitions/models.Attachment'
+        type: array
       avatar_id:
         readOnly: true
         type: integer
@@ -70,10 +109,6 @@ definitions:
         type: string
       id:
         type: integer
-      images:
-        items:
-          $ref: '#/definitions/models.Image'
-        type: array
       is_liked:
         type: boolean
       message:
@@ -101,6 +136,11 @@ definitions:
     - avatar_id
     - description
     - name
+    type: object
+  models.Sticker:
+    properties:
+      id:
+        type: integer
     type: object
   models.User:
     properties:
@@ -148,6 +188,105 @@ info:
   title: WS Swagger API
   version: "1.0"
 paths:
+  /attachment/{id}:
+    get:
+      description: Get Attachment by id
+      parameters:
+      - description: Attachment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - Attachment/png
+      responses:
+        "200":
+          description: success get Attachment
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Get Attachment by id
+      tags:
+      - Attachment
+  /attachment/file/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload file
+      parameters:
+      - description: file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success upload file
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Upload file
+      tags:
+      - file
+  /attachment/image/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload image
+      parameters:
+      - description: image file
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success upload Attachment
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Upload image
+      tags:
+      - Attachment
   /auth:
     get:
       description: check user auth
@@ -836,70 +975,6 @@ paths:
       summary: DeleteFriend
       tags:
       - friends
-  /image/{id}:
-    get:
-      description: Get image by id
-      parameters:
-      - description: image ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - image/png
-      responses:
-        "200":
-          description: success get image
-        "401":
-          description: no cookie
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "405":
-          description: invalid http method
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "500":
-          description: internal server error
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-      summary: Get image by id
-      tags:
-      - image
-  /image/upload:
-    post:
-      consumes:
-      - multipart/form-data
-      description: Upload image
-      parameters:
-      - description: image file
-        in: formData
-        name: image
-        required: true
-        type: file
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: success upload image
-        "401":
-          description: no cookie
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "403":
-          description: invalid csrf
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "405":
-          description: invalid http method
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "500":
-          description: internal server error
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-      summary: Upload image
-      tags:
-      - image
   /logout:
     post:
       description: user logout
@@ -995,6 +1070,175 @@ paths:
           schema:
             $ref: '#/definitions/echo.HTTPError'
       summary: Show a post
+      tags:
+      - posts
+  /post/{id}/comments:
+    get:
+      description: Get all comments by post
+      parameters:
+      - description: Post ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get post comments
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  items:
+                    $ref: '#/definitions/models.Comment'
+                  type: array
+              type: object
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Post not found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Get comments
+      tags:
+      - posts
+  /post/comment/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a comment
+      parameters:
+      - description: Comment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: item not found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Delete a comment
+      tags:
+      - posts
+  /post/comment/add:
+    post:
+      consumes:
+      - application/json
+      description: Add a comment
+      parameters:
+      - description: comment info
+        in: body
+        name: comment
+        required: true
+        schema:
+          $ref: '#/definitions/models.Comment'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get post
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  $ref: '#/definitions/models.Comment'
+              type: object
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Add a comment
+      tags:
+      - posts
+  /post/comment/edit:
+    post:
+      consumes:
+      - application/json
+      description: Update a comment
+      parameters:
+      - description: comment info
+        in: body
+        name: comment
+        required: true
+        schema:
+          $ref: '#/definitions/models.Comment'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success update comment
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  $ref: '#/definitions/models.Comment'
+              type: object
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: invalid csrf
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Update a comment
       tags:
       - posts
   /post/create:
@@ -1239,6 +1483,75 @@ paths:
       summary: SignUp
       tags:
       - auth
+  /sticker/{id}:
+    get:
+      description: Get sticker by id
+      parameters:
+      - description: sticker ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - Attachment/png
+      responses:
+        "200":
+          description: success get sticker
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Get sticker by id
+      tags:
+      - stickers
+  /stickers:
+    get:
+      description: Get all stickers
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get sticker
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  items:
+                    $ref: '#/definitions/models.Sticker'
+                  type: array
+              type: object
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: invalid http method
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Get all stickers
+      tags:
+      - stickers
   /users:
     get:
       description: get all users

@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+option go_package = ".";
+
+package attachment;
+
+message Nothing {
+  bool dummy = 1;
+}
+
+message GetPostAttachmentsRequest {
+    uint64 postId = 1;
+}
+
+message GetPostAttachmentsResponse {
+    repeated Attachment attachments = 1;
+}
+
+message GetMessageAttachmentsRequest {
+  uint64 messageId = 1;
+}
+
+message GetMessageAttachmentsResponse {
+  repeated Attachment attachments = 1;
+}
+
+message AddAttachmentsToMessageRequest {
+  uint64 messageId = 1;
+  repeated Attachment attachments = 2;
+}
+
+message AddAttachmentsToMessageResponse {
+  uint32 err = 1;
+}
+
+message AttachmentId {
+    uint64 attachmentId = 1;
+}
+
+message Attachment {
+	uint64 id = 1;
+	string attLink = 2;
+  string type = 3;
+}
+
+service Attachments {
+    rpc GetPostAttachments(GetPostAttachmentsRequest) returns (GetPostAttachmentsResponse) {}
+    rpc GetMessageAttachments(GetMessageAttachmentsRequest) returns (GetMessageAttachmentsResponse) {}
+    rpc GetAttachment(AttachmentId) returns (Attachment) {}
+    rpc CreateAttachment(Attachment) returns (AttachmentId) {}
+}
+

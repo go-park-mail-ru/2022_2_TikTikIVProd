@@ -35,5 +35,7 @@ func main() {
 	chat.RegisterChatServer(server, chatDelivery.New(chatUC))
 
 	log.Println("starting server at :8083")
-	server.Serve(lis)
+	if err := server.Serve(lis); err != nil {
+		log.Fatal(err)
+	}
 }

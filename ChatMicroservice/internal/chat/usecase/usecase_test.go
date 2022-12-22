@@ -63,6 +63,7 @@ func TestUsecaseSelectDialog(t *testing.T) {
 	}
 
 	for idx := range mockPbDialog.Messages {
+		mockPbDialog.Messages[idx].AttachmentsIds = nil
 		msg := models.Message {
 			ID: mockPbDialog.Messages[idx].Id,
 			DialogID: mockPbDialog.Messages[idx].DialogId,
@@ -70,6 +71,7 @@ func TestUsecaseSelectDialog(t *testing.T) {
 			ReceiverID: mockPbDialog.Messages[idx].ReceiverId,
 			Body: mockPbDialog.Messages[idx].Body,
 			CreatedAt: mockPbDialog.Messages[idx].CreatedAt.AsTime(),
+			StickerID: mockPbDialog.Messages[idx].StickerId,
 		}
 		dialog.Messages = append(dialog.Messages, msg)
 	}
@@ -128,6 +130,7 @@ func TestUsecaseSelectDialogByUsers(t *testing.T) {
 	}
 
 	for idx := range mockPbDialog.Messages {
+		mockPbDialog.Messages[idx].AttachmentsIds = nil
 		msg := models.Message {
 			ID: mockPbDialog.Messages[idx].Id,
 			DialogID: mockPbDialog.Messages[idx].DialogId,
@@ -135,6 +138,7 @@ func TestUsecaseSelectDialogByUsers(t *testing.T) {
 			ReceiverID: mockPbDialog.Messages[idx].ReceiverId,
 			Body: mockPbDialog.Messages[idx].Body,
 			CreatedAt: mockPbDialog.Messages[idx].CreatedAt.AsTime(),
+			StickerID: mockPbDialog.Messages[idx].StickerId,
 		}
 		dialog.Messages = append(dialog.Messages, msg)
 	}
@@ -178,12 +182,10 @@ func TestUsecaseSelectDialogByUsers(t *testing.T) {
 }
 
 func TestUsecaseSelectAllDialogs(t *testing.T) {
-	var mockPbUserId chat.SelectAllDialogsRequest
-	err := faker.FakeData(&mockPbUserId)
-	assert.NoError(t, err)
+	mockPbUserId := chat.SelectAllDialogsRequest{UserId: 1}
 
 	var mockPbDialogs chat.SelectAllDialogsResponse
-	err = faker.FakeData(&mockPbDialogs)
+	err := faker.FakeData(&mockPbDialogs)
 	assert.NoError(t, err)
 
 	dialogs := make([]models.Dialog, 0)
@@ -196,6 +198,7 @@ func TestUsecaseSelectAllDialogs(t *testing.T) {
 		}
 	
 		for idx2 := range mockPbDialogs.Dialogs[idx].Messages {
+			mockPbDialogs.Dialogs[idx].Messages[idx2].AttachmentsIds = nil
 			msg := models.Message {
 				ID: mockPbDialogs.Dialogs[idx].Messages[idx2].Id,
 				DialogID: mockPbDialogs.Dialogs[idx].Messages[idx2].DialogId,
@@ -203,6 +206,7 @@ func TestUsecaseSelectAllDialogs(t *testing.T) {
 				ReceiverID: mockPbDialogs.Dialogs[idx].Messages[idx2].ReceiverId,
 				Body: mockPbDialogs.Dialogs[idx].Messages[idx2].Body,
 				CreatedAt: mockPbDialogs.Dialogs[idx].Messages[idx2].CreatedAt.AsTime(),
+				StickerID: mockPbDialogs.Dialogs[idx].Messages[idx2].StickerId,
 			}
 			dialog.Messages = append(dialog.Messages, msg)
 		}
@@ -210,9 +214,7 @@ func TestUsecaseSelectAllDialogs(t *testing.T) {
 		dialogs = append(dialogs, dialog)
 	}
 
-	var mockPbUserIdError chat.SelectAllDialogsRequest
-	err = faker.FakeData(&mockPbUserIdError)
-	assert.NoError(t, err)
+	mockPbUserIdError := chat.SelectAllDialogsRequest{UserId: 2}
 
 	selectErr := errors.New("error")
 
@@ -260,6 +262,7 @@ func TestUsecaseSelectMessages(t *testing.T) {
 	messages := make([]models.Message, 0)
 	
 	for idx := range mockPbMessages.Messages {
+		mockPbMessages.Messages[idx].AttachmentsIds = nil
 		msg := models.Message {
 			ID: mockPbMessages.Messages[idx].Id,
 			DialogID: mockPbMessages.Messages[idx].DialogId,
@@ -267,6 +270,7 @@ func TestUsecaseSelectMessages(t *testing.T) {
 			ReceiverID: mockPbMessages.Messages[idx].ReceiverId,
 			Body: mockPbMessages.Messages[idx].Body,
 			CreatedAt: mockPbMessages.Messages[idx].CreatedAt.AsTime(),
+			StickerID: mockPbMessages.Messages[idx].StickerId,
 		}
 		messages = append(messages, msg)
 	}
@@ -322,6 +326,7 @@ func TestUsecaseCreateDialog(t *testing.T) {
 	}
 
 	for idx := range mockPbDialog.Messages {
+		mockPbDialog.Messages[idx].AttachmentsIds = nil
 		msg := models.Message {
 			ID: mockPbDialog.Messages[idx].Id,
 			DialogID: mockPbDialog.Messages[idx].DialogId,
@@ -329,6 +334,7 @@ func TestUsecaseCreateDialog(t *testing.T) {
 			ReceiverID: mockPbDialog.Messages[idx].ReceiverId,
 			Body: mockPbDialog.Messages[idx].Body,
 			CreatedAt: mockPbDialog.Messages[idx].CreatedAt.AsTime(),
+			StickerID: mockPbDialog.Messages[idx].StickerId,
 		}
 		dialog.Messages = append(dialog.Messages, msg)
 	}
@@ -345,6 +351,7 @@ func TestUsecaseCreateDialog(t *testing.T) {
 	}
 
 	for idx := range mockPbDialogError.Messages {
+		mockPbDialogError.Messages[idx].AttachmentsIds = nil
 		msg := models.Message {
 			ID: mockPbDialogError.Messages[idx].Id,
 			DialogID: mockPbDialogError.Messages[idx].DialogId,
@@ -352,6 +359,7 @@ func TestUsecaseCreateDialog(t *testing.T) {
 			ReceiverID: mockPbDialogError.Messages[idx].ReceiverId,
 			Body: mockPbDialogError.Messages[idx].Body,
 			CreatedAt: mockPbDialogError.Messages[idx].CreatedAt.AsTime(),
+			StickerID: mockPbDialogError.Messages[idx].StickerId,
 		}
 		dialogError.Messages = append(dialogError.Messages, msg)
 	}

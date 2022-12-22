@@ -62,7 +62,7 @@ func (del *Delivery) SignUp(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusConflict, models.ErrConflictEmail.Error())
 		default:
 			c.Logger().Error(err)
-			return echo.NewHTTPError(http.StatusInternalServerError, causeErr.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 	}
 
