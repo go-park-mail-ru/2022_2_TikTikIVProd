@@ -112,10 +112,10 @@ func TestRepositoryCreateMessage(t *testing.T) {
 	var mockId uint64 = 1
 
 	mock.ExpectQuery(regexp.QuoteMeta(
-		`INSERT INTO "message" ("chat_id","sender_id","receiver_id","text","created_at","sticker_id","id")`+
-			` VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING "id"`)).WithArgs(
+		`INSERT INTO "message" ("chat_id","sender_id","receiver_id","text","created_at","id") ` +
+		`VALUES ($1,$2,$3,$4,$5,$6) RETURNING "id"`)).WithArgs(
 		mockMessage.DialogID, mockMessage.SenderID, mockMessage.ReceiverID, mockMessage.Body,
-		mockMessage.CreatedAt, mockMessage.StickerID, mockMessage.ID).
+		mockMessage.CreatedAt, mockMessage.ID).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(mockId))
 
 	mock.ExpectCommit()
