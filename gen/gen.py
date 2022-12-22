@@ -13,8 +13,8 @@ COUNT_COMMUNITIES = 30
 
 def gen_users():
     def _gen_users_string():
-        first_name = faker.first_name()
-        last_name = faker.last_name()
+        first_name = faker.first_name_male()
+        last_name = faker.last_name_male()
         nick_name = faker.unique.word()
         avatar_att_id = faker.pyint(1, COUNT_IMAGES)
         email = faker.email()
