@@ -50,6 +50,8 @@ definitions:
         type: string
       id:
         type: integer
+      is_subscriber:
+        type: boolean
       name:
         type: string
       owner_id:
@@ -507,7 +509,9 @@ paths:
             - $ref: '#/definitions/pkg.Response'
             - properties:
                 body:
-                  $ref: '#/definitions/models.Community'
+                  items:
+                    $ref: '#/definitions/models.Community'
+                  type: array
               type: object
         "400":
           description: bad request
@@ -820,6 +824,42 @@ paths:
           schema:
             $ref: '#/definitions/echo.HTTPError'
       summary: leave from community
+      tags:
+      - communities
+  /communities/usr:
+    get:
+      description: Get user all communities
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get community
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.Response'
+            - properties:
+                body:
+                  items:
+                    $ref: '#/definitions/models.Community'
+                  type: array
+              type: object
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: no cookie
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Get user all communities
       tags:
       - communities
   /create_csrf:
