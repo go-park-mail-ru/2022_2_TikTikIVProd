@@ -11,5 +11,7 @@ type RepositoryI interface {
 	JoinCommunity(id uint64, userId uint64) error
 	LeaveCommunity(id uint64, userId uint64) error
 	GetAllCommunities() ([]*models.Community, error)
+	GetAllUserCommunities(userID uint64) ([]*models.Community, error)
 	GetCountUserCommunity(id uint64) (uint64, error)
+	CheckSubscriptionCommunity(id uint64, userID uint64) (bool, error)
 }

@@ -3,13 +3,14 @@ package models
 import "time"
 
 type Community struct {
-	ID          uint64    `json:"id"`
-	OwnerID     uint64    `json:"owner_id"`
-	AvatarID    uint64    `json:"avatar_id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	CreateDate  time.Time `json:"create_date" readonly:"true"`
-	CountSubs   uint64    `json:"count_subs"`
+	ID           uint64    `json:"id"`
+	OwnerID      uint64    `json:"owner_id"`
+	AvatarID     uint64    `json:"avatar_id"`
+	Name         string    `json:"name"`
+	Description  string    `json:"description"`
+	CreateDate   time.Time `json:"create_date" readonly:"true"`
+	CountSubs    uint64    `json:"count_subs"`
+	IsSubscriber bool      `json:"is_subscriber"`
 }
 
 type ReqCommunityCreate struct {

@@ -134,7 +134,13 @@ func (delivery *Delivery) GetCommunity(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
 	}
 
-	community, err := delivery.CommUC.GetCommunity(id)
+	userId, ok := c.Get("user_id").(uint64)
+	if !ok {
+		c.Logger().Error(models.ErrInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
+	}
+
+	community, err := delivery.CommUC.GetCommunity(id, userId)
 
 	if err != nil {
 		c.Logger().Error(err)
@@ -149,14 +155,48 @@ func (delivery *Delivery) GetCommunity(c echo.Context) error {
 // @Description  Get all communities
 // @Tags     communities
 // @Produce  application/json
-// @Success  200 {object} pkg.Response{body=models.Community} "success get community"
+// @Success  200 {object} pkg.Response{body=[]models.Community} "success get community"
 // @Failure 405 {object} echo.HTTPError "Method Not Allowed"
 // @Failure 400 {object} echo.HTTPError "bad request"
 // @Failure 500 {object} echo.HTTPError "internal server error"
 // @Failure 401 {object} echo.HTTPError "no cookie"
 // @Router   /communities [get]
 func (delivery *Delivery) GetAllCommunities(c echo.Context) error {
-	communities, err := delivery.CommUC.GetAllCommunities()
+	userId, ok := c.Get("user_id").(uint64)
+	if !ok {
+		c.Logger().Error(models.ErrInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
+	}
+
+	communities, err := delivery.CommUC.GetAllCommunities(userId)
+
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+	}
+
+	return c.JSON(http.StatusOK, pkg.Response{Body: communities})
+}
+
+// GetAllUserCommunities godoc
+// @Summary      Get user all communities
+// @Description  Get user all communities
+// @Tags     communities
+// @Produce  application/json
+// @Success  200 {object} pkg.Response{body=[]models.Community} "success get community"
+// @Failure 405 {object} echo.HTTPError "Method Not Allowed"
+// @Failure 400 {object} echo.HTTPError "bad request"
+// @Failure 500 {object} echo.HTTPError "internal server error"
+// @Failure 401 {object} echo.HTTPError "no cookie"
+// @Router   /communities/usr [get]
+func (delivery *Delivery) GetAllUserCommunities(c echo.Context) error {
+	userId, ok := c.Get("user_id").(uint64)
+	if !ok {
+		c.Logger().Error(models.ErrInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
+	}
+
+	communities, err := delivery.CommUC.GetAllUserCommunities(userId)
 
 	if err != nil {
 		c.Logger().Error(err)
@@ -332,5 +372,6 @@ func NewDelivery(e *echo.Echo, cu communitiesUsecase.UseCaseI) {
 	e.GET("/communities/:id", handler.GetCommunity)
 	e.GET("/communities/search", handler.SearchCommunity)
 	e.GET("/communities", handler.GetAllCommunities)
+	e.GET("/communities/usr", handler.GetAllUserCommunities)
 	e.DELETE("/communities/:id", handler.DeleteCommunity)
 }

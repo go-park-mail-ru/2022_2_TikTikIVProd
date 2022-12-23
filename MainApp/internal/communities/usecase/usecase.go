@@ -8,13 +8,14 @@ import (
 
 type UseCaseI interface {
 	CreateCommunity(p *models.Community) error
-	GetCommunity(id uint64) (*models.Community, error)
+	GetCommunity(id uint64, userId uint64) (*models.Community, error)
 	SearchCommunities(searchString string) ([]*models.Community, error)
 	UpdateCommunity(p *models.Community) error
 	DeleteCommunity(id uint64, userId uint64) error
 	LeaveCommunity(id uint64, userId uint64) error
 	JoinCommunity(id uint64, userId uint64) error
-	GetAllCommunities() ([]*models.Community, error)
+	GetAllCommunities(userId uint64) ([]*models.Community, error)
+	GetAllUserCommunities(userID uint64) ([]*models.Community, error)
 }
 
 type useCase struct {
@@ -31,8 +32,14 @@ func (u useCase) CreateCommunity(comm *models.Community) error {
 	return nil
 }
 
-func (u useCase) GetCommunity(id uint64) (*models.Community, error) {
+func (u *useCase) GetCommunity(id uint64, userId uint64) (*models.Community, error) {
 	community, err := u.communitiesRep.GetCommunity(id)
+
+	err = addAdditionalFieldsToСommunity(community, u, userId)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "community repository error while add count subs")
+	}
 
 	err = addCountUsersCommunity(community, u.communitiesRep)
 
@@ -153,11 +160,55 @@ func addCountUsersCommunity(comm *models.Community, commRepo communitiesRep.Repo
 	return nil
 }
 
-func (u *useCase) GetAllCommunities() ([]*models.Community, error) {
+func addIsSubscribedForCommunity(comm *models.Community, commRepo communitiesRep.RepositoryI, userId uint64) error {
+	isSub, err := commRepo.CheckSubscriptionCommunity(comm.ID, userId)
+	if err != nil {
+		return errors.Wrap(err, "postsUsecase.GetPostById error while check sub")
+	}
+
+	comm.IsSubscriber = isSub
+	return nil
+}
+
+func addAdditionalFieldsToСommunity(comm *models.Community, commUsecase *useCase, userId uint64) error {
+	err := addCountUsersCommunity(comm, commUsecase.communitiesRep)
+
+	if err != nil {
+		return errors.Wrap(err, "error while get count users for community")
+	}
+
+	err = addIsSubscribedForCommunity(comm, commUsecase.communitiesRep, userId)
+
+	if err != nil {
+		return errors.Wrap(err, "error while get users")
+	}
+
+	return nil
+}
+
+func (u *useCase) GetAllCommunities(userID uint64) ([]*models.Community, error) {
 	communities, err := u.communitiesRep.GetAllCommunities()
 
 	for idx := range communities {
-		err = addCountUsersCommunity(communities[idx], u.communitiesRep)
+		err = addAdditionalFieldsToСommunity(communities[idx], u, userID)
+
+		if err != nil {
+			return nil, errors.Wrap(err, "community repository error while add count subs")
+		}
+	}
+
+	if err != nil {
+		return nil, errors.Wrap(err, "community repository error")
+	}
+
+	return communities, nil
+}
+
+func (u *useCase) GetAllUserCommunities(userID uint64) ([]*models.Community, error) {
+	communities, err := u.communitiesRep.GetAllUserCommunities(userID)
+
+	for idx := range communities {
+		err = addAdditionalFieldsToСommunity(communities[idx], u, userID)
 
 		if err != nil {
 			return nil, errors.Wrap(err, "community repository error while add count subs")

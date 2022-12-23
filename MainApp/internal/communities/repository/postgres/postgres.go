@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/go-park-mail-ru/2022_2_TikTikIVProd/MainApp/internal/communities/repository"
@@ -65,6 +66,17 @@ func (Community) TableName() string {
 
 type communitiesRepository struct {
 	db *gorm.DB
+}
+
+func (dbcomm *communitiesRepository) CheckSubscriptionCommunity(id uint64, userID uint64) (bool, error) {
+	var count int64
+	tx := dbcomm.db.Model(&CommunityUserRelation{}).Where(&CommunityUserRelation{UserID: userID, CommunityID: id}).Count(&count)
+
+	if tx.Error != nil {
+		return false, errors.Wrap(tx.Error, "database error (table communities_users) on check")
+	}
+
+	return count > 0, nil
 }
 
 func (dbcomm *communitiesRepository) GetCommunity(id uint64) (*models.Community, error) {
@@ -166,6 +178,30 @@ func (dbcomm *communitiesRepository) GetAllCommunities() ([]*models.Community, e
 
 	if tx.Error != nil {
 		return nil, errors.Wrap(tx.Error, "database error (table communities) on GetAllCommunities")
+	}
+
+	return toModelCommunities(communities), nil
+}
+
+func (dbcomm *communitiesRepository) GetAllUserCommunities(userID uint64) ([]*models.Community, error) {
+	communitiesUsersRel := make([]*CommunityUserRelation, 0, 10)
+	tx := dbcomm.db.Where(&CommunityUserRelation{UserID: userID}).Find(&communitiesUsersRel)
+
+	if tx.Error != nil {
+		return nil, errors.Wrap(tx.Error, "database error (table communities) on GetAllCommunities")
+	}
+
+	communities := make([]*Community, 0, 10)
+	for idx := range communitiesUsersRel {
+		var comm Community
+
+		tx := dbcomm.db.Where("id = ?", communitiesUsersRel[idx].CommunityID).Take(&comm)
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			return nil, models.ErrNotFound
+		} else if tx.Error != nil {
+			return nil, errors.Wrap(tx.Error, "database error (table communities)")
+		}
+		communities = append(communities, &comm)
 	}
 
 	return toModelCommunities(communities), nil
