@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS communities (
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     owner_id INT REFERENCES users(id),
     avatar_att_id INT REFERENCES attachments(id),
-    name VARCHAR(30) NOT NULL,
+    name VARCHAR(100) NOT NULL,
     description TEXT DEFAULT '',
     created_at date NOT NULL
 );
