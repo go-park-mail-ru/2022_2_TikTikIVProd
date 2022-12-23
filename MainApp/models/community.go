@@ -9,6 +9,7 @@ type Community struct {
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	CreateDate  time.Time `json:"create_date" readonly:"true"`
+	CountSubs   uint64    `json:"count_subs"`
 }
 
 type ReqCommunityCreate struct {

@@ -18,6 +18,15 @@ type Community struct {
 	CreateDate  time.Time `gorm:"column:created_at"`
 }
 
+type CommunityUserRelation struct {
+	CommunityID uint64 `gorm:"column:community_id"`
+	UserID      uint64 `gorm:"column:user_id"`
+}
+
+func (CommunityUserRelation) TableName() string {
+	return "communities_users"
+}
+
 func toPostgresCommunity(c *models.Community) *Community {
 	return &Community{
 		ID:          c.ID,
@@ -118,6 +127,37 @@ func (dbcomm *communitiesRepository) DeleteCommunity(id uint64) error {
 	}
 
 	return nil
+}
+
+func (dbcomm *communitiesRepository) JoinCommunity(id uint64, userId uint64) error {
+	tx := dbcomm.db.Create(&CommunityUserRelation{CommunityID: id, UserID: userId})
+
+	if tx.Error != nil {
+		return errors.Wrap(tx.Error, "database error (table communities_users) on create")
+	}
+
+	return nil
+}
+
+func (dbcomm *communitiesRepository) LeaveCommunity(id uint64, userId uint64) error {
+	tx := dbcomm.db.Where(&CommunityUserRelation{CommunityID: id, UserID: userId}).Delete(&CommunityUserRelation{})
+
+	if tx.Error != nil {
+		return errors.Wrap(tx.Error, "\"database error (table communities_users) on delete")
+	}
+
+	return nil
+}
+
+func (dbcomm *communitiesRepository) GetCountUserCommunity(id uint64) (uint64, error) {
+	var count int64
+	tx := dbcomm.db.Model(&CommunityUserRelation{}).Where("community_id = ?", id).Count(&count)
+
+	if tx.Error != nil {
+		return 0, errors.Wrap(tx.Error, "database error (table communities_users) on count")
+	}
+
+	return uint64(count), nil
 }
 
 func (dbcomm *communitiesRepository) GetAllCommunities() ([]*models.Community, error) {

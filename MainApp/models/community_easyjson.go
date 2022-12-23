@@ -130,6 +130,8 @@ func easyjson798dd0c9DecodeGithubComGoParkMailRu20222TikTikIVProdMainAppModels1(
 			if data := in.Raw(); in.Ok() {
 				in.AddError((out.CreateDate).UnmarshalJSON(data))
 			}
+		case "count_subs":
+			out.CountSubs = uint64(in.Uint64())
 		default:
 			in.SkipRecursive()
 		}
@@ -173,6 +175,11 @@ func easyjson798dd0c9EncodeGithubComGoParkMailRu20222TikTikIVProdMainAppModels1(
 		const prefix string = ",\"create_date\":"
 		out.RawString(prefix)
 		out.Raw((in.CreateDate).MarshalJSON())
+	}
+	{
+		const prefix string = ",\"count_subs\":"
+		out.RawString(prefix)
+		out.Uint64(uint64(in.CountSubs))
 	}
 	out.RawByte('}')
 }
