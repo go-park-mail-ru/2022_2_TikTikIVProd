@@ -13,6 +13,7 @@ type RepositoryI interface {
 	LikePost(id uint64, userId uint64) error
 	UnLikePost(id uint64, userId uint64) error
 	GetCountLikesPost(id uint64) (uint64, error)
+	GetCountCommentsPost(id uint64) (int64, error)
 	CheckLikePost(id uint64, userID uint64) (bool, error)
 	GetComments(postId uint64) ([]*models.Comment, error)
 	AddComment(comment *models.Comment) error

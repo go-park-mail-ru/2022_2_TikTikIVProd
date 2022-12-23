@@ -14,6 +14,7 @@ type Post struct {
 	Message       string       `json:"message" validate:"required"`
 	CreateDate    time.Time    `json:"create_date" readonly:"true"`
 	Attachments   []Attachment `json:"attachments"`
+	CountComments int64        `json:"count_comments"`
 }
 
 type Comment struct {

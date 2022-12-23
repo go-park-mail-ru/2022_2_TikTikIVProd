@@ -279,6 +279,18 @@ func addCountLikesForPost(post *models.Post, postsRepo repository.RepositoryI) e
 	return nil
 }
 
+func addCountCommentsForPost(post *models.Post, postsRepo repository.RepositoryI) error {
+	count, err := postsRepo.GetCountCommentsPost(post.ID)
+
+	if err != nil {
+		return errors.Wrap(err, "Post repository error in func addCountCommentsForPost")
+	}
+
+	post.CountComments = count
+
+	return nil
+}
+
 func addIsLikedForPost(post *models.Post, postRepo repository.RepositoryI, userId uint64) error {
 	isLiked, err := postRepo.CheckLikePost(post.ID, userId)
 	if err != nil {
@@ -306,6 +318,12 @@ func addAdditionalFieldsToPost(post *models.Post, postsUsecase *postsUsecase, us
 
 	if err != nil {
 		return errors.Wrap(err, "error while get likes")
+	}
+
+	err = addCountCommentsForPost(post, postsUsecase.postsRepo)
+
+	if err != nil {
+		return errors.Wrap(err, "error while get count comments")
 	}
 
 	err = addIsLikedForPost(post, postsUsecase.postsRepo, userId)

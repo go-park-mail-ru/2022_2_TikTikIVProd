@@ -185,6 +185,17 @@ func (dbPost *postRepository) GetCountLikesPost(id uint64) (uint64, error) {
 	return uint64(count), nil
 }
 
+func (dbPost *postRepository) GetCountCommentsPost(id uint64) (int64, error) {
+	var count int64
+	tx := dbPost.db.Model(&models.Comment{}).Where("post_id = ?", id).Count(&count)
+
+	if tx.Error != nil {
+		return 0, errors.Wrap(tx.Error, "database error (table comments) on count")
+	}
+
+	return count, nil
+}
+
 func (dbPost *postRepository) CheckLikePost(id uint64, userID uint64) (bool, error) {
 	var count int64
 	tx := dbPost.db.Model(&models.LikePost{}).Where(&models.LikePost{UserID: userID, PostID: id}).Count(&count)
