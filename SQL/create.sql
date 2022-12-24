@@ -35,6 +35,12 @@ CREATE TABLE IF NOT EXISTS communities (
     created_at date NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS communities_users (
+	community_id INT NOT NULL REFERENCES communities(id) ON DELETE CASCADE,
+	user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	PRIMARY KEY (community_id, user_id)
+);
+
 CREATE TABLE IF NOT EXISTS user_posts (
 	id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 	user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,

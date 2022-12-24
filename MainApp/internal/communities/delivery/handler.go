@@ -134,7 +134,13 @@ func (delivery *Delivery) GetCommunity(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, models.ErrBadRequest.Error())
 	}
 
-	community, err := delivery.CommUC.GetCommunity(id)
+	userId, ok := c.Get("user_id").(uint64)
+	if !ok {
+		c.Logger().Error(models.ErrInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
+	}
+
+	community, err := delivery.CommUC.GetCommunity(id, userId)
 
 	if err != nil {
 		c.Logger().Error(err)
@@ -149,14 +155,48 @@ func (delivery *Delivery) GetCommunity(c echo.Context) error {
 // @Description  Get all communities
 // @Tags     communities
 // @Produce  application/json
-// @Success  200 {object} pkg.Response{body=models.Community} "success get community"
+// @Success  200 {object} pkg.Response{body=[]models.Community} "success get community"
 // @Failure 405 {object} echo.HTTPError "Method Not Allowed"
 // @Failure 400 {object} echo.HTTPError "bad request"
 // @Failure 500 {object} echo.HTTPError "internal server error"
 // @Failure 401 {object} echo.HTTPError "no cookie"
 // @Router   /communities [get]
 func (delivery *Delivery) GetAllCommunities(c echo.Context) error {
-	communities, err := delivery.CommUC.GetAllCommunities()
+	userId, ok := c.Get("user_id").(uint64)
+	if !ok {
+		c.Logger().Error(models.ErrInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
+	}
+
+	communities, err := delivery.CommUC.GetAllCommunities(userId)
+
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+	}
+
+	return c.JSON(http.StatusOK, pkg.Response{Body: communities})
+}
+
+// GetAllUserCommunities godoc
+// @Summary      Get user all communities
+// @Description  Get user all communities
+// @Tags     communities
+// @Produce  application/json
+// @Success  200 {object} pkg.Response{body=[]models.Community} "success get community"
+// @Failure 405 {object} echo.HTTPError "Method Not Allowed"
+// @Failure 400 {object} echo.HTTPError "bad request"
+// @Failure 500 {object} echo.HTTPError "internal server error"
+// @Failure 401 {object} echo.HTTPError "no cookie"
+// @Router   /communities/usr [get]
+func (delivery *Delivery) GetAllUserCommunities(c echo.Context) error {
+	userId, ok := c.Get("user_id").(uint64)
+	if !ok {
+		c.Logger().Error(models.ErrInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
+	}
+
+	communities, err := delivery.CommUC.GetAllUserCommunities(userId)
 
 	if err != nil {
 		c.Logger().Error(err)
@@ -227,6 +267,76 @@ func (delivery *Delivery) DeleteCommunity(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
+// JoinCommunity godoc
+// @Summary      join in community
+// @Description  join in community
+// @Tags     	 communities
+// @Param id path int  true  "Community ID"
+// @Success  204
+// @Failure 405 {object} echo.HTTPError "invalid http method"
+// @Failure 500 {object} echo.HTTPError "internal server error"
+// @Failure 401 {object} echo.HTTPError "no cookie"
+// @Failure 404 {object} echo.HTTPError "can't find community with such id"
+// @Failure 403 {object} echo.HTTPError "invalid csrf"
+// @Router   /communities/join/{id} [post]
+func (delivery *Delivery) JoinCommunity(c echo.Context) error {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusNotFound, models.ErrNotFound.Error())
+	}
+
+	userId, ok := c.Get("user_id").(uint64)
+	if !ok {
+		c.Logger().Error(models.ErrInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
+	}
+
+	err = delivery.CommUC.JoinCommunity(id, userId)
+
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
+	}
+
+	return c.NoContent(http.StatusNoContent)
+}
+
+// LeaveCommunity godoc
+// @Summary      leave from community
+// @Description  leave from community
+// @Tags     	 communities
+// @Param id path int  true  "Community ID"
+// @Success  204
+// @Failure 405 {object} echo.HTTPError "invalid http method"
+// @Failure 500 {object} echo.HTTPError "internal server error"
+// @Failure 401 {object} echo.HTTPError "no cookie"
+// @Failure 404 {object} echo.HTTPError "can't find community with such id"
+// @Failure 403 {object} echo.HTTPError "invalid csrf"
+// @Router   /communities/leave/{id} [post]
+func (delivery *Delivery) LeaveCommunity(c echo.Context) error {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusNotFound, models.ErrNotFound.Error())
+	}
+
+	userId, ok := c.Get("user_id").(uint64)
+	if !ok {
+		c.Logger().Error(models.ErrInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
+	}
+
+	err = delivery.CommUC.LeaveCommunity(id, userId)
+
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrInternalServerError.Error())
+	}
+
+	return c.NoContent(http.StatusNoContent)
+}
+
 func isRequestValid(c interface{}) (bool, error) {
 	validate := validator.New()
 	err := validate.Struct(c)
@@ -257,8 +367,11 @@ func NewDelivery(e *echo.Echo, cu communitiesUsecase.UseCaseI) {
 
 	e.POST("/communities/create", handler.CreateCommunity)
 	e.POST("/communities/edit", handler.UpdateCommunity)
+	e.POST("/communities/join/:id", handler.JoinCommunity)
+	e.POST("/communities/leave/:id", handler.LeaveCommunity)
 	e.GET("/communities/:id", handler.GetCommunity)
 	e.GET("/communities/search", handler.SearchCommunity)
 	e.GET("/communities", handler.GetAllCommunities)
+	e.GET("/communities/usr", handler.GetAllUserCommunities)
 	e.DELETE("/communities/:id", handler.DeleteCommunity)
 }
