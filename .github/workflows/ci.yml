@@ -3,57 +3,57 @@ on:
   push:
     branches: [deploy]
 jobs:
-  golangci:
-    name: linter
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/setup-go@v2
-        with:
-          go-version: 1.19
-      - uses: actions/checkout@v2
-      - name: run golangci-lint
-        run: |
-          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.50.1
-          cd MainApp && golangci-lint run ./... && cd ..
-          cd UserMicroservice && golangci-lint run ./... && cd ..
-          cd AuthMicroservice && golangci-lint run ./... && cd ..
-          cd AttachmentMicroservice && golangci-lint run ./... && cd ..
-          cd ChatMicroservice && golangci-lint run ./... && cd ..
+  # golangci:
+  #   name: linter
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/setup-go@v2
+  #       with:
+  #         go-version: 1.19
+  #     - uses: actions/checkout@v2
+  #     - name: run golangci-lint
+  #       run: |
+  #         go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.50.1
+  #         cd MainApp && golangci-lint run ./... && cd ..
+  #         cd UserMicroservice && golangci-lint run ./... && cd ..
+  #         cd AuthMicroservice && golangci-lint run ./... && cd ..
+  #         cd AttachmentMicroservice && golangci-lint run ./... && cd ..
+  #         cd ChatMicroservice && golangci-lint run ./... && cd ..
 
-  tests:
-    needs: golangci
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.19
+  # tests:
+  #   needs: golangci
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v2
+  #   - name: Set up Go
+  #     uses: actions/setup-go@v2
+  #     with:
+  #       go-version: 1.19
 
-    - name: tests
-      run: |
-        cd MainApp && go test ./... -coverpkg ./... -coverprofile=c.out
-        cat c.out | grep -v -E ".*/mocks|.*/proto|.*easyjson*"  > c_res.out
-        go tool cover -func=c_res.out
-        cd ..
-        cd UserMicroservice && go test ./... -coverpkg ./... -coverprofile=c.out
-        cat c.out | grep -v -E ".*/mocks|.*/proto|.*easyjson*"  > c_res.out
-        go tool cover -func=c_res.out
-        cd ..
-        cd AuthMicroservice && go test ./... -coverpkg ./... -coverprofile=c.out
-        cat c.out | grep -v -E ".*/mocks|.*/proto|.*easyjson*"  > c_res.out
-        go tool cover -func=c_res.out
-        cd ..
-        cd AttachmentMicroservice && go test ./... -coverpkg ./... -coverprofile=c.out
-        cat c.out | grep -v -E ".*/mocks|.*/proto|.*easyjson*"  > c_res.out
-        go tool cover -func=c_res.out
-        cd ..
-        cd ChatMicroservice && go test ./... -coverpkg ./... -coverprofile=c.out
-        cat c.out | grep -v -E ".*/mocks|.*/proto|.*easyjson*"  > c_res.out
-        go tool cover -func=c_res.out
+  #   - name: tests
+  #     run: |
+  #       cd MainApp && go test ./... -coverpkg ./... -coverprofile=c.out
+  #       cat c.out | grep -v -E ".*/mocks|.*/proto|.*easyjson*"  > c_res.out
+  #       go tool cover -func=c_res.out
+  #       cd ..
+  #       cd UserMicroservice && go test ./... -coverpkg ./... -coverprofile=c.out
+  #       cat c.out | grep -v -E ".*/mocks|.*/proto|.*easyjson*"  > c_res.out
+  #       go tool cover -func=c_res.out
+  #       cd ..
+  #       cd AuthMicroservice && go test ./... -coverpkg ./... -coverprofile=c.out
+  #       cat c.out | grep -v -E ".*/mocks|.*/proto|.*easyjson*"  > c_res.out
+  #       go tool cover -func=c_res.out
+  #       cd ..
+  #       cd AttachmentMicroservice && go test ./... -coverpkg ./... -coverprofile=c.out
+  #       cat c.out | grep -v -E ".*/mocks|.*/proto|.*easyjson*"  > c_res.out
+  #       go tool cover -func=c_res.out
+  #       cd ..
+  #       cd ChatMicroservice && go test ./... -coverpkg ./... -coverprofile=c.out
+  #       cat c.out | grep -v -E ".*/mocks|.*/proto|.*easyjson*"  > c_res.out
+  #       go tool cover -func=c_res.out
   
   build:
-    needs: tests
+    # needs: tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
