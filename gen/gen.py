@@ -182,13 +182,13 @@ if __name__ == '__main__':
     gen_attachments()
     gen_files()
     gen_stickers()
-    gen_posts()
-    gen_users()
-    gen_posts_attachments_relation()
-    gen_posts_files_relation()
-    gen_communities()
-    gen_likes()
+    # gen_posts()
+    # gen_users()
+    # gen_posts_attachments_relation()
+    # gen_posts_files_relation()
+    # gen_communities()
+    # gen_likes()
     
-    if len(sys.argv) > 1:
-        gen_messages_for_user(sys.argv[1])
+    # if len(sys.argv) > 1:
+    #     gen_messages_for_user(sys.argv[1])
 
