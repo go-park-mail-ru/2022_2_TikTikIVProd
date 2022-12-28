@@ -9,10 +9,12 @@ services:
     volumes:
       - ./SQL:/docker-entrypoint-initdb.d/
       - ./gen:/home/gen
+      - ./config_postgres.conf:/etc/postgresql.conf
     environment:
       POSTGRES_USER: postgres
       POSTGRES_DB: postgres
       POSTGRES_PASSWORD: postgres
+    command: postgres -c config_file=/etc/postgresql.conf
 
   redis:
     image: redis:latest
