@@ -9,9 +9,6 @@ build-server:
 create_tables:
 	psql postgresql://postgres:postgres@localhost:13080/postgres -f SQL/create.sql
 
-create_user:
-	psql postgresql://postgres:postgres@localhost:13080/postgres -f SQL/create_user.sql
-
 generate_data:
 	cd gen && python3 gen.py
 
@@ -25,7 +22,7 @@ fill_msg:
 	psql postgresql://postgres:postgres@localhost:13080/postgres -f gen/load_msg.sql
 
 drop_tables:
-	psql postgresql://postgres:postgres@localhost:13080/postgres -f SQL_drop/drop_all.sql
+	psql postgresql://postgres:postgres@localhost:13080/postgres -f SQL/drop_all.sql
 
 fill_attachments:
 	./attachments/download.sh
