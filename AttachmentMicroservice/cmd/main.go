@@ -13,9 +13,9 @@ import (
 	"gorm.io/gorm"
 )
 
-// var testCfgPg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
+// var testCfgPg = postgres.Config{DSN: "host=localhost user=ws password=postgres_ws database=postgres port=13080"}
 
-var prodCfgPg = postgres.Config{DSN: "host=ws_pg user=postgres password=postgres port=5432"}
+var prodCfgPg = postgres.Config{DSN: "host=ws_pg user=ws password=postgres_ws database=postgres port=5432"}
 
 func main() {
 	lis, err := net.Listen("tcp", ":8082")
@@ -28,6 +28,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	sqlDB, _ := db.DB()
+	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetMaxOpenConns(100)
 
 	server := grpc.NewServer()
 
